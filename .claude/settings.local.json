@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(pg_isready)",
+      "Bash(sc query:*)",
+      "Bash(docker --version)",
+      "Bash(docker compose:*)",
+      "Bash(docker info:*)",
+      "Bash(docker context:*)",
+      "Bash(start \"Docker Desktop\" \"C:/Program Files/Docker/Docker/Docker Desktop.exe\")"
+    ]
+  }
+}

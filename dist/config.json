@@ -1,0 +1,18 @@
+{
+  "serverUrl": "http://localhost:3001/api",
+  "deploymentMode": "on-premise",
+  "licenseType": "enterprise",
+  "licenseKey": "ACT-ENT-2026-DEMO",
+  "companyName": "Örnek Sanayi A.Ş.",
+  "sector": "manufacturing",
+  "maxUsers": 150,
+  "maxDepartments": 20,
+  "appVersion": "0.9.1",
+  "features": {
+    "geminiAI": true,
+    "mobileApp": true,
+    "advancedReports": true,
+    "customForms": true,
+    "messaging": true
+  }
+}

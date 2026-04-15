@@ -1,0 +1,442 @@
+export interface SectorTerminology {
+  department: string
+  departments: string
+  task: string
+  tasks: string
+  report: string
+  reports: string
+  worker: string
+  supervisor: string
+  manager: string
+  field: string
+  site: string
+}
+
+export interface SectorPreset {
+  id: string
+  name: string
+  shortName: string
+  icon: string
+  description: string
+  accentColor: string
+  departmentTemplates: string[]
+  taskCategories: string[]
+  terminology: SectorTerminology
+  /** Optional sector-specific KPIs (label + description) shown on the dashboard */
+  kpis?: { label: string; description: string }[]
+  /** Optional flag for sectors that should expose startup/agile-specific modules */
+  flavor?: 'standard' | 'startup'
+}
+
+export const SECTORS: SectorPreset[] = [
+  {
+    id: 'manufacturing',
+    name: 'Üretim & İmalat',
+    shortName: 'Üretim',
+    icon: '🏭',
+    description: 'Fabrika ve üretim tesisleri için optimize edilmiş yapılandırma',
+    accentColor: '#6366f1',
+    departmentTemplates: ['Üretim', 'Kalite Kontrol', 'Bakım & Onarım', 'Lojistik', 'Planlama', 'Satın Alma', 'İK', 'Bilgi İşlem'],
+    taskCategories: ['Üretim Görevi', 'Bakım', 'Kalite Kontrol', 'Güvenlik Denetimi', 'Envanter', 'Kapasite Analizi'],
+    terminology: {
+      department: 'Departman', departments: 'Departmanlar',
+      task: 'Görev', tasks: 'Görevler',
+      report: 'Saha Raporu', reports: 'Saha Raporları',
+      worker: 'Operatör', supervisor: 'Süpervizör', manager: 'Müdür',
+      field: 'Saha', site: 'Tesis',
+    },
+  },
+  {
+    id: 'healthcare',
+    name: 'Sağlık & Hastane',
+    shortName: 'Sağlık',
+    icon: '🏥',
+    description: 'Hastane ve sağlık tesisleri için klinik iş akışları',
+    accentColor: '#0ea5e9',
+    departmentTemplates: [
+      'Üst Yönetim', 'Hastane Yönetimi', 'Klinik Operasyonlar', 'Poliklinikler', 'Acil Servis',
+      'Yatan Hasta', 'Yoğun Bakım', 'Ameliyathane', 'Hemşirelik', 'Laboratuvar',
+      'Görüntüleme', 'Eczane', 'Enfeksiyon Kontrol', 'Kalite', 'Hasta Deneyimi',
+      'Randevu', 'Hasta Kayıt', 'Tıbbi Sekreterlik', 'Satın Alma', 'Tedarik Zinciri',
+      'Depo', 'Biyomedikal', 'Teknik Bakım', 'İK', 'Eğitim', 'Finans', 'Muhasebe',
+      'Sigorta', 'Hukuk', 'İç Denetim', 'IT', 'İSG', 'Güvenlik', 'Sürdürülebilirlik',
+      'Evde Sağlık', 'Çağrı Merkezi', 'Kurumsal İlişkiler', 'Araştırma',
+    ],
+    taskCategories: ['Hasta Bakımı', 'Klinik Prosedür', 'Cihaz Bakımı', 'Temizlik & Sterilizasyon', 'İlaç Yönetimi', 'Denetim', 'Randevu Yönetimi'],
+    terminology: {
+      department: 'Klinik', departments: 'Klinikler',
+      task: 'Görev', tasks: 'Görevler',
+      report: 'Klinik Rapor', reports: 'Klinik Raporlar',
+      worker: 'Sağlık Personeli', supervisor: 'Sorumlu Hemşire', manager: 'Başhekim / Klinik Müdürü',
+      field: 'Klinik', site: 'Hastane',
+    },
+  },
+  {
+    id: 'retail',
+    name: 'Perakende & Market',
+    shortName: 'Perakende',
+    icon: '🏪',
+    description: 'Market zincirleri ve perakende mağazalar için operasyon yönetimi',
+    accentColor: '#10b981',
+    departmentTemplates: [
+      'Üst Yönetim', 'Mağaza Operasyonları', 'Bölge Yönetimi', 'Satış', 'Kategori Yönetimi',
+      'Merchandising', 'Satın Alma', 'Tedarik Zinciri', 'Talep Planlama', 'Depo', 'Lojistik',
+      'E-Ticaret', 'Pazarlama', 'CRM', 'Müşteri Hizmetleri', 'Finans', 'Muhasebe', 'İK',
+      'Eğitim', 'Kalite', 'Güvenlik', 'İSG', 'IT', 'Hukuk', 'İç Denetim', 'Sürdürülebilirlik',
+      'Teknik Bakım', 'Görsel Düzenleme', 'Private Label', 'Fiyatlandırma', 'Kampanya Yönetimi',
+    ],
+    taskCategories: ['Raf Düzeni', 'Stok Sayımı', 'Müşteri Hizmetleri', 'Temizlik Denetimi', 'Güvenlik Kontrolü', 'Promosyon Yerleşimi', 'Fiyat Kontrolü', 'Mağaza Denetimi'],
+    terminology: {
+      department: 'Bölüm', departments: 'Bölümler',
+      task: 'Görev', tasks: 'Görevler',
+      report: 'Mağaza Raporu', reports: 'Mağaza Raporları',
+      worker: 'Market Personeli', supervisor: 'Bölüm Sorumlusu', manager: 'Mağaza Müdürü',
+      field: 'Mağaza', site: 'Mağaza Zinciri',
+    },
+  },
+  {
+    id: 'logistics',
+    name: 'Lojistik & Depo',
+    shortName: 'Lojistik',
+    icon: '🚛',
+    description: 'Depo, dağıtım merkezi ve lojistik operasyonlar',
+    accentColor: '#f59e0b',
+    departmentTemplates: [
+      'Üst Yönetim', 'Operasyon', 'Taşıma', 'Dağıtım', 'Filo Yönetimi', 'Saha Operasyonları',
+      'Sürücü Yönetimi', 'Rota Planlama', 'Sevk Yönetimi', 'Depo', 'Dağıtım Merkezi',
+      'Terminal/Hub', 'Yükleme-Boşaltma', 'Cross-Dock', 'Bakım', 'Teknik', 'Güvenlik Yönetimi',
+      'İSG', 'Kalite', 'Müşteri Hizmetleri', 'Çağrı Merkezi', 'Satış', 'Kurumsal Satış',
+      'Pazarlama', 'Gelir Yönetimi', 'Satın Alma', 'Tedarik Zinciri', 'Yakıt Yönetimi',
+      'Envanter', 'Finans', 'Muhasebe', 'İK', 'Eğitim', 'Uyum', 'Hukuk', 'IT',
+      'Güvenlik', 'Sürdürülebilirlik', 'Planlama', 'Network Planlama', 'Olay Yönetimi',
+      'Ters Lojistik', 'Son Teslimat', 'Gümrük',
+    ],
+    taskCategories: ['Mal Kabul', 'Stok Yerleştirme', 'Sipariş Toplama', 'Sevkiyat Hazırlık', 'Araç Bakımı', 'Güvenlik Turu', 'Teslimat', 'Rota Kontrolü'],
+    terminology: {
+      department: 'Bölüm', departments: 'Bölümler',
+      task: 'İş Emri', tasks: 'İş Emirleri',
+      report: 'Operasyon Raporu', reports: 'Operasyon Raporları',
+      worker: 'Depo Personeli', supervisor: 'Vardiya Amiri', manager: 'Operasyon Müdürü',
+      field: 'Depo', site: 'Dağıtım Merkezi',
+    },
+  },
+  {
+    id: 'construction',
+    name: 'İnşaat & Proje',
+    shortName: 'İnşaat',
+    icon: '🏗️',
+    description: 'İnşaat sahası ve proje yönetimi operasyonları',
+    accentColor: '#f97316',
+    departmentTemplates: [
+      'Üst Yönetim', 'Proje Yönetimi', 'Saha Operasyonları', 'Şantiye Yönetimi', 'Planlama',
+      'Proje Kontrol', 'Maliyet Kontrol', 'Teklif', 'İş Geliştirme', 'Sözleşme Yönetimi',
+      'Ticari İşler', 'Satın Alma', 'Tedarik Zinciri', 'Lojistik', 'Depo', 'Alt Yüklenici',
+      'Teknik Ofis', 'Tasarım', 'BIM', 'Kalite', 'İSG', 'Çevre', 'Ekipman', 'Bakım',
+      'İK', 'Eğitim', 'Finans', 'Muhasebe', 'Tahsilat', 'Hukuk', 'Uyum', 'İç Denetim',
+      'IT', 'Güvenlik', 'Müşteri İlişkileri', 'Teslim', 'FM Geçişi', 'Sürdürülebilirlik',
+      'Risk Yönetimi', 'Değişiklik Yönetimi',
+    ],
+    taskCategories: ['Yapım İşi', 'Denetim', 'Güvenlik Kontrolü', 'Malzeme Teslimi', 'Hakediş Hazırlama', 'Teknik Muayene', 'Kalite Kontrolü', 'İş Güvenliği'],
+    terminology: {
+      department: 'Ekip', departments: 'Ekipler',
+      task: 'İş Kalemi', tasks: 'İş Kalemleri',
+      report: 'Şantiye Raporu', reports: 'Şantiye Raporları',
+      worker: 'İşçi', supervisor: 'Ustabaşı', manager: 'Şantiye Şefi',
+      field: 'Şantiye', site: 'Proje Sahası',
+    },
+  },
+  {
+    id: 'energy',
+    name: 'Enerji & Altyapı',
+    shortName: 'Enerji',
+    icon: '⚡',
+    description: 'Enerji üretim ve dağıtım tesisleri, altyapı yönetimi',
+    accentColor: '#8b5cf6',
+    departmentTemplates: [
+      'Üst Yönetim', 'Operasyon', 'Üretim', 'İletim', 'Dağıtım', 'Şebeke', 'Yük Tevzi',
+      'Enerji Ticareti', 'Portföy Yönetimi', 'Satış', 'Kurumsal Müşteri', 'Perakende Enerji',
+      'Müşteri Hizmetleri', 'Çağrı Merkezi', 'Bakım', 'Varlık Yönetimi', 'Teknik',
+      'Proje Yönetimi', 'Planlama', 'Talep Tahmini', 'Yakıt Yönetimi', 'Satın Alma',
+      'Tedarik Zinciri', 'Depo', 'Finans', 'Muhasebe', 'Risk Yönetimi', 'Regülasyon',
+      'Uyum', 'Hukuk', 'İSG', 'Güvenlik', 'Kalite', 'İK', 'Eğitim', 'BT/OT',
+      'Siber Güvenlik', 'Sürdürülebilirlik', 'Çevre Yönetimi', 'Ölçüm', 'Faturalama',
+      'Tahsilat', 'Ar-Ge', 'Saha Ekipleri',
+    ],
+    taskCategories: ['Periyodik Bakım', 'Arıza Giderimi', 'Saha Denetimi', 'Enerji İzleme', 'Güvenlik Kontrolü', 'Teknik Revizyon', 'Sayaç Okuma', 'Bağlantı İşlemi'],
+    terminology: {
+      department: 'Birim', departments: 'Birimler',
+      task: 'İş Emri', tasks: 'İş Emirleri',
+      report: 'Teknik Rapor', reports: 'Teknik Raporlar',
+      worker: 'Teknisyen', supervisor: 'Vardiya Şefi', manager: 'Tesis Müdürü',
+      field: 'Saha', site: 'Tesis',
+    },
+  },
+  {
+    id: 'municipality',
+    name: 'Belediye & Kamu',
+    shortName: 'Kamu',
+    icon: '🏛️',
+    description: 'Belediye hizmetleri ve kamu kurum operasyonları',
+    accentColor: '#14b8a6',
+    departmentTemplates: [
+      'Üst Yönetim', 'Kurum Yönetimi', 'Strateji Geliştirme', 'Operasyon', 'Vatandaş Hizmetleri',
+      'Başvuru/İzin', 'Saha Operasyonları', 'Denetim', 'Çağrı Merkezi', 'Şikayet Yönetimi',
+      'Proje Yönetimi', 'Satın Alma', 'Sözleşme Yönetimi', 'Tedarik Zinciri', 'Lojistik',
+      'Depo', 'İK', 'Eğitim', 'Finans', 'Muhasebe', 'Tahsilat', 'İç Kontrol', 'İç Denetim',
+      'Hukuk', 'Uyum', 'IT', 'Siber Güvenlik', 'Veri ve Analitik', 'Kalite', 'İSG',
+      'Güvenlik', 'Tesis Yönetimi', 'Filo Yönetimi', 'Çevre', 'İletişim', 'Kurumsal Risk',
+      'Arşiv', 'Mevzuat', 'Sosyal Hizmetler', 'Afet Yönetimi', 'Yerel Hizmetler',
+      'Vergi/Gelir', 'E-Devlet',
+    ],
+    taskCategories: ['Saha Hizmeti', 'Denetim', 'Şikayet Takibi', 'Bakım & Onarım', 'Proje Kontrolü', 'Ruhsat & İzin', 'Afet Müdahale', 'Vatandaş Başvuru'],
+    terminology: {
+      department: 'Müdürlük', departments: 'Müdürlükler',
+      task: 'Hizmet Görevi', tasks: 'Hizmet Görevleri',
+      report: 'Saha Raporu', reports: 'Saha Raporları',
+      worker: 'Personel', supervisor: 'Şef', manager: 'Müdür',
+      field: 'Saha', site: 'İlçe / Hizmet Bölgesi',
+    },
+  },
+  {
+    id: 'horeca',
+    name: 'HoReCa (Otel & Restoran)',
+    shortName: 'HoReCa',
+    icon: '🍽️',
+    description: 'Otel, restoran ve catering işletmeleri için hizmet operasyonları',
+    accentColor: '#ec4899',
+    departmentTemplates: [
+      'Üst Yönetim', 'Operasyon', 'Otel Operasyonları', 'Restoran', 'Mutfak',
+      'Servis', 'Bar', 'Ziyafet', 'Ön Büro', 'Housekeeping', 'Rezervasyon',
+      'Gelir Yönetimi', 'Satış', 'Pazarlama', 'Satın Alma', 'Tedarik', 'Depo',
+      'Lojistik', 'Finans', 'Muhasebe', 'İK', 'Eğitim', 'Kalite',
+      'Misafir Deneyimi', 'Teknik Bakım', 'Güvenlik', 'İSG', 'IT',
+      'Hukuk', 'İç Denetim', 'Sürdürülebilirlik',
+    ],
+    taskCategories: ['Servis Görevi', 'Oda Hazırlığı', 'Mise en Place', 'Stok Sayımı', 'Hijyen Denetimi', 'Misafir Şikayeti', 'Etkinlik Hazırlığı', 'Bakım Görevi'],
+    terminology: {
+      department: 'Departman', departments: 'Departmanlar',
+      task: 'Servis Görevi', tasks: 'Servis Görevleri',
+      report: 'Vardiya Raporu', reports: 'Vardiya Raporları',
+      worker: 'Personel', supervisor: 'Şef', manager: 'Genel Müdür',
+      field: 'Salon', site: 'Şube',
+    },
+    kpis: [
+      { label: 'Doluluk Oranı', description: 'Aktif misafir / kapasite' },
+      { label: 'Ortalama Servis Süresi', description: 'Sipariş → masa teslim' },
+      { label: 'Memnuniyet Skoru', description: 'Misafir geri bildirim ortalaması' },
+    ],
+  },
+  {
+    id: 'finance',
+    name: 'Bankacılık & Finans',
+    shortName: 'Finans',
+    icon: '🏦',
+    description: 'Banka şubeleri ve finans kurumları için operasyon ve uyum yönetimi',
+    accentColor: '#1e40af',
+    departmentTemplates: [
+      'Üst Yönetim', 'Genel Operasyon', 'Şube Operasyonları', 'Dijital Kanallar', 'Bireysel Bankacılık',
+      'Kurumsal Bankacılık', 'Ticari Bankacılık', 'KOBİ Bankacılığı', 'Ödeme Sistemleri', 'Kart Operasyonları',
+      'Krediler', 'Tahsis', 'Risk Yönetimi', 'Hazine', 'Yatırım', 'Varlık Yönetimi', 'Sigorta',
+      'Müşteri Hizmetleri', 'Çağrı Merkezi', 'Satış', 'Ürün Yönetimi', 'Pazarlama', 'CRM',
+      'Uyum', 'Regülasyon', 'İç Kontrol', 'İç Denetim', 'Fraud/AML', 'Hukuk', 'Finans', 'Muhasebe',
+      'Tahsilat', 'İK', 'Eğitim', 'IT', 'Siber Güvenlik', 'Veri ve Analitik', 'Proje Yönetimi',
+      'Satın Alma', 'Tedarikçi Yönetimi', 'Sürdürülebilirlik', 'Back Office',
+    ],
+    taskCategories: ['Müşteri İşlemi', 'KYC/AML Kontrolü', 'Kredi Değerlendirme', 'Şube Denetimi', 'Uyum Kontrolü', 'Sistem İzleme', 'Müşteri Şikayeti', 'Tahsilat'],
+    terminology: {
+      department: 'Birim', departments: 'Birimler',
+      task: 'İşlem', tasks: 'İşlemler',
+      report: 'Operasyon Raporu', reports: 'Operasyon Raporları',
+      worker: 'Müşteri Temsilcisi', supervisor: 'Şube Servis Yöneticisi', manager: 'Şube Müdürü',
+      field: 'Şube', site: 'Bölge',
+    },
+    kpis: [
+      { label: 'Günlük İşlem Hacmi', description: 'Bugün tamamlanan işlemler' },
+      { label: 'Bekleyen Onaylar', description: 'Yöneticiye yönlendirilen' },
+      { label: 'Uyum Skoru', description: 'KYC/AML denetim sonucu' },
+    ],
+  },
+  {
+    id: 'transportation',
+    name: 'Ulaşım & Taşımacılık',
+    shortName: 'Ulaşım',
+    icon: '🚆',
+    description: 'Toplu taşıma, kargo ve filo operasyonları için saha yönetimi',
+    accentColor: '#0d9488',
+    departmentTemplates: [
+      'Üst Yönetim', 'Operasyon', 'Filo Yönetimi', 'Saha Operasyonları', 'Sürücü Yönetimi',
+      'Rota Planlama', 'Sevk Yönetimi', 'Bakım', 'Teknik', 'Güvenlik Yönetimi', 'İSG', 'Kalite',
+      'Müşteri Hizmetleri', 'Çağrı Merkezi', 'Satış', 'Kurumsal Satış', 'Pazarlama', 'Gelir Yönetimi',
+      'Satın Alma', 'Tedarik Zinciri', 'Yakıt Yönetimi', 'Depo', 'Lojistik', 'Finans', 'Muhasebe',
+      'İK', 'Eğitim', 'Uyum', 'Hukuk', 'IT', 'Güvenlik', 'Sürdürülebilirlik', 'İstasyon/Hub',
+      'Planlama', 'Ağ Planlama', 'Olay Yönetimi',
+    ],
+    taskCategories: ['Sefer Görevi', 'Araç Bakımı', 'Yol Denetimi', 'Yakıt Takibi', 'Olay Bildirimi', 'Sürücü Performans Kontrolü'],
+    terminology: {
+      department: 'Birim', departments: 'Birimler',
+      task: 'Sefer / Görev', tasks: 'Seferler',
+      report: 'Sefer Raporu', reports: 'Sefer Raporları',
+      worker: 'Sürücü', supervisor: 'Operasyon Sorumlusu', manager: 'Filo Müdürü',
+      field: 'Hat', site: 'Garaj / Terminal',
+    },
+    kpis: [
+      { label: 'Zamanında Sefer %', description: 'Programa uyan sefer oranı' },
+      { label: 'Aktif Araç', description: 'Yolda olan filo sayısı' },
+      { label: 'Yakıt Verimliliği', description: 'L / 100km ortalama' },
+    ],
+  },
+  {
+    id: 'media',
+    name: 'Medya & Yayıncılık',
+    shortName: 'Medya',
+    icon: '🎬',
+    description: 'Yayın, prodüksiyon ve dijital medya stüdyoları için içerik üretim akışı',
+    accentColor: '#a855f7',
+    departmentTemplates: [
+      'Üst Yönetim', 'Yayın Operasyonları', 'Haber Merkezi', 'Editoryal', 'İçerik Üretimi',
+      'Program Yönetimi', 'Yayın Planlama', 'Dijital Yayıncılık', 'Sosyal Medya', 'Video Prodüksiyon',
+      'Stüdyo', 'Saha Çekim', 'Kurgu', 'Grafik', 'Reklam Satış', 'Medya Planlama', 'Sponsorluk',
+      'Abonelik', 'Kitle Geliştirme', 'Pazarlama', 'CRM', 'Müşteri Hizmetleri', 'Çağrı Merkezi',
+      'Dağıtım', 'Platform', 'Hak Yönetimi', 'Hukuk', 'Uyum', 'İç Denetim', 'Finans', 'Muhasebe',
+      'Tahsilat', 'Satın Alma', 'Tedarikçi', 'İK', 'Eğitim', 'IT', 'Siber Güvenlik', 'Veri/BI',
+      'Kalite', 'Güvenlik', 'Tesis', 'Arşiv', 'Ar-Ge', 'Etkinlik', 'Kriz Yönetimi', 'Sürdürülebilirlik',
+    ],
+    taskCategories: ['Haber Çekimi', 'İçerik Editleme', 'Yayın Hazırlığı', 'Sosyal Medya Paylaşımı', 'Reklam Yerleştirme', 'Canlı Yayın Kontrolü'],
+    terminology: {
+      department: 'Stüdyo', departments: 'Stüdyolar',
+      task: 'Yapım Görevi', tasks: 'Yapım Görevleri',
+      report: 'Yayın Raporu', reports: 'Yayın Raporları',
+      worker: 'Muhabir / Editör', supervisor: 'Yapım Sorumlusu', manager: 'Yayın Yönetmeni',
+      field: 'Saha', site: 'Stüdyo',
+    },
+    kpis: [
+      { label: 'Bugün Yayınlanan İçerik', description: 'Tüm kanallar' },
+      { label: 'Aktif Prodüksiyon', description: 'Devam eden çekimler' },
+      { label: 'Sosyal Erişim', description: '24 saatlik erişim toplamı' },
+    ],
+  },
+  {
+    id: 'it',
+    name: 'Bilişim & Yazılım',
+    shortName: 'Bilişim',
+    icon: '💻',
+    description: 'IT servis sağlayıcıları, yazılım şirketleri ve teknik destek operasyonları',
+    accentColor: '#0891b2',
+    departmentTemplates: [
+      'Üst Yönetim', 'Ürün Yönetimi', 'Yazılım Geliştirme', 'Mimari', 'QA/Test', 'DevOps',
+      'SRE', 'IT Operasyonları', 'Service Desk', 'Uygulama Destek', 'Altyapı', 'Ağ Operasyonları',
+      'Bulut', 'Veri Mühendisliği', 'BI/Analytics', 'AI/ML', 'Siber Güvenlik', 'GRC',
+      'Bilgi Güvenliği', 'PMO', 'Agile Delivery', 'UI/UX', 'Müşteri Başarısı', 'Müşteri Destek',
+      'Çağrı Merkezi', 'Satış', 'Pre-Sales', 'Pazarlama', 'CRM', 'Finans', 'Muhasebe',
+      'Satın Alma', 'Tedarikçi', 'İK', 'Eğitim', 'Hukuk', 'İç Denetim', 'Sürdürülebilirlik',
+      'İş Sürekliliği', 'Bilgi Yönetimi', 'Release Mgmt', 'Change Mgmt', 'Incident Mgmt',
+      'Problem Mgmt', 'IT Varlık', 'CMDB',
+    ],
+    taskCategories: ['Geliştirme Görevi', 'Hata (Bug)', 'Müşteri Talebi (Ticket)', 'Sistem İzleme', 'Sürüm Yayınlama', 'Saha Kurulumu'],
+    terminology: {
+      department: 'Takım', departments: 'Takımlar',
+      task: 'Ticket', tasks: 'Ticketlar',
+      report: 'Servis Raporu', reports: 'Servis Raporları',
+      worker: 'Mühendis', supervisor: 'Tech Lead', manager: 'Direktör',
+      field: 'Saha / Müşteri Lokasyonu', site: 'Veri Merkezi',
+    },
+    kpis: [
+      { label: 'Açık Ticket', description: 'Çözüm bekleyen' },
+      { label: 'Ortalama Çözüm Süresi', description: 'Saat / ticket' },
+      { label: 'SLA Uyumu %', description: 'Zamanında çözülen' },
+    ],
+  },
+  {
+    id: 'fmcg',
+    name: 'FMCG & Hızlı Tüketim',
+    shortName: 'FMCG',
+    icon: '🛒',
+    description: 'Hızlı tüketim malları, dağıtım ağı ve saha satış operasyonları',
+    accentColor: '#e11d48',
+    departmentTemplates: [
+      'Üst Yönetim', 'Satış', 'Modern Trade', 'General Trade', 'Saha Satış',
+      'Key Account', 'Ticari Pazarlama', 'Pazarlama', 'Kategori Yönetimi',
+      'Demand Planning', 'Tedarik Zinciri', 'Satın Alma', 'Üretim', 'Kalite',
+      'Depo', 'Lojistik', 'Finans', 'Muhasebe', 'İnsan Kaynakları',
+      'Müşteri Geliştirme', 'Müşteri Hizmetleri', 'Ar-Ge', 'Ür-Ge',
+      'E-Ticaret', 'RGM', 'Shopper Marketing', 'Channel Development',
+      'IT', 'İSG', 'Hukuk', 'İç Denetim', 'Sürdürülebilirlik',
+    ],
+    taskCategories: [
+      'Satış Görevi', 'Dağıtım', 'Mağaza Ziyareti', 'Promosyon Uygulama',
+      'Stok Sayımı', 'Raf Düzenleme', 'Kalite Denetimi', 'Üretim Görevi',
+    ],
+    terminology: {
+      department: 'Departman', departments: 'Departmanlar',
+      task: 'Gorev', tasks: 'Gorevler',
+      report: 'Saha Raporu', reports: 'Saha Raporları',
+      worker: 'Saha Temsilcisi', supervisor: 'Bölge Müdürü', manager: 'Direktör',
+      field: 'Saha', site: 'Bölge',
+    },
+    kpis: [
+      { label: 'Net Satış Geliri', description: 'Toplam net satış hasılatı' },
+      { label: 'OTIF', description: 'Zamanında ve eksiksiz teslimat oranı' },
+      { label: 'Dağıtım Kapsama', description: 'Aktif satış noktası oranı' },
+    ],
+  },
+  {
+    id: 'commerce',
+    name: 'Ticaret',
+    shortName: 'Ticaret',
+    icon: '🏪',
+    description: 'Ticari operasyonlar, kanal yonetimi, dijital ticaret ve satis performansi',
+    accentColor: '#0891b2',
+    departmentTemplates: [
+      'Üst Yönetim', 'Ticari Operasyonlar', 'Satış', 'Bölge Satış', 'Kurumsal Satış',
+      'Kanal Yönetimi', 'Bayi/Distribütör', 'Perakende Satış', 'Dijital Ticaret', 'Omnichannel',
+      'Pazarlama', 'Performans Pazarlama', 'CRM', 'Müşteri Hizmetleri', 'Çağrı Merkezi',
+      'Kategori Yönetimi', 'Merchandising', 'Fiyatlandırma', 'Kampanya', 'RGM',
+      'Satın Alma', 'Tedarik Zinciri', 'Talep Planlama', 'Stok Yönetimi', 'Depo',
+      'Sipariş Yönetimi', 'Lojistik', 'İade Yönetimi', 'Finans', 'Muhasebe', 'Tahsilat',
+      'İK', 'Eğitim', 'IT', 'Veri ve Analitik', 'Risk/Fraud', 'İç Denetim', 'Hukuk',
+      'Siber Güvenlik', 'Sürdürülebilirlik', 'Private Label', 'Tedarikçi Yönetimi',
+    ],
+    taskCategories: ['Satış Görevi', 'Sipariş Takibi', 'Müşteri Talebi', 'Kampanya', 'Stok Kontrolü', 'Bayi Ziyareti', 'Tahsilat', 'Denetim'],
+    terminology: {
+      department: 'Departman', departments: 'Departmanlar',
+      task: 'Görev', tasks: 'Görevler',
+      report: 'Ticari Rapor', reports: 'Ticari Raporlar',
+      worker: 'Satış Temsilcisi', supervisor: 'Bölge Müdürü', manager: 'Ticari Direktör',
+      field: 'Saha', site: 'Bölge',
+    },
+  },
+  {
+    id: 'startup',
+    name: 'Startup & Girişim',
+    shortName: 'Startup',
+    icon: '🚀',
+    description: 'Erken aşama girişimler için lean / agile çerçeveye uygun çevik operasyon',
+    accentColor: '#f43f5e',
+    flavor: 'startup',
+    departmentTemplates: [
+      'Üst Yönetim', 'Strateji/BizOps', 'Ürün', 'Mühendislik', 'QA/Test', 'DevOps/SRE',
+      'Tasarım', 'Growth', 'Pazarlama', 'Performance Marketing', 'İçerik/Topluluk', 'Satış',
+      'İş Geliştirme', 'Müşteri Başarısı', 'Müşteri Destek', 'CRM', 'RevOps', 'Veri/BI',
+      'AI/Otomasyon', 'Finans', 'Muhasebe', 'Hukuk', 'İnsan', 'İşe Alım', 'Öğrenme',
+      'İç IT', 'Güvenlik', 'PMO', 'Satın Alma', 'Ofis', 'Yatırımcı İlişkileri',
+      'Operasyon', 'Trust & Safety', 'Sürdürülebilirlik', 'Bilgi Yönetimi',
+    ],
+    taskCategories: ['Sprint Görevi', 'Kullanıcı Görüşmesi', 'Deney (A/B Test)', 'OKR Aksiyonu', 'Hipotez Doğrulama', 'Yatırımcı İletişimi', 'Müşteri Destek', 'Deployment'],
+    terminology: {
+      department: 'Squad', departments: 'Squad\'lar',
+      task: 'Sprint Görevi', tasks: 'Sprint Görevleri',
+      report: 'Demo / Retrospektif', reports: 'Demolar',
+      worker: 'Takım Üyesi', supervisor: 'Squad Lead', manager: 'Kurucu / C-Level',
+      field: 'Pazar', site: 'HQ / Remote',
+    },
+    kpis: [
+      { label: 'Aktif Sprint', description: 'Devam eden sprint sayısı' },
+      { label: 'OKR İlerleme %', description: 'Çeyrek hedeflerine ulaşım' },
+      { label: 'MAU / WAU', description: 'Kullanıcı aktivitesi' },
+      { label: 'Runway (ay)', description: 'Mevcut nakit / aylık burn' },
+    ],
+  },
+]
+
+export const getSector = (id: string): SectorPreset =>
+  SECTORS.find(s => s.id === id) ?? SECTORS[0]

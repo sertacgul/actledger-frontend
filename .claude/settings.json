@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/serta/actledger-backend/src/config/**)",
+      "Read(//c/Users/serta/actledger-backend/src/modules/companies/**)",
+      "Read(//c/Users/serta/actledger-backend/src/modules/users/**)",
+      "Read(//c/Users/serta/.claude/projects/c--Users-serta-actledger-frontend/memory/**)",
+      "Read(//c/Users/serta/actledger-backend/**)"
+    ]
+  }
+}

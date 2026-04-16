@@ -311,7 +311,7 @@ export async function applySectorTemplate(body: {
 }
 
 // ── Inventory ────────────────────────────────────────────────────────────────
-export type InventoryType   = 'DEMIRBAS' | 'TUKETIM'
+export type InventoryType   = 'DEMIRBAS' | 'TUKETIM' | 'YEDEK_PARCA'
 export type InventoryStatus = 'AKTIF' | 'BAKIMDA' | 'ARIZALI' | 'HURDA' | 'STOK' | 'KRITIK' | 'TUKENMIS'
 
 export interface InventoryItem {
@@ -400,6 +400,183 @@ export function useEfficiencySummary() {
     () => api.get('/inventory/efficiency'),
   )
   return { summary: data, loading, error, refetch }
+}
+
+// ── Stock Management ─────────────────────────────────────────────────────────
+export type StockCategory = 'DEMIRBAS' | 'SARF' | 'YEDEK_PARCA'
+export type StockMovementType = 'GIRIS' | 'CIKIS' | 'TRANSFER' | 'FIRE'
+export type StockAlertStatus = 'AKTIF' | 'OKUNDU' | 'COZULDU'
+
+export interface StockItem {
+  id:            string
+  companyId:     string
+  name:          string
+  code?:         string | null
+  category:      StockCategory
+  departmentId?: string | null
+  department?:   { id: string; name: string; code: string; color: string } | null
+  unit:          string
+  locationName?: string | null
+  facilityId?:   string | null
+  quantity:      number
+  minLevel:      number
+  maxLevel?:     number | null
+  criticalLevel: number
+  supplyLeadDays?: number | null
+  vendor?:       string | null
+  unitCost?:     number | string | null
+  description?:  string | null
+  notes?:        string | null
+  barcode?:      string | null
+  createdById:   string
+  createdAt:     string
+  updatedAt:     string
+}
+
+export interface StockMovement {
+  id:           string
+  stockItemId:  string
+  type:         StockMovementType
+  quantity:     number
+  previousQty:  number
+  newQty:       number
+  taskId?:      string | null
+  userId:       string
+  fromLocation?: string | null
+  toLocation?:  string | null
+  description?: string | null
+  createdAt:    string
+}
+
+export interface StockAlert {
+  id:           string
+  stockItemId:  string
+  type:         string
+  status:       StockAlertStatus
+  message:      string
+  severity:     string
+  metadata?:    any
+  resolvedAt?:  string | null
+  createdAt:    string
+}
+
+export interface StockDashboardSummary {
+  totalItems:       number
+  totalQuantity:    number
+  totalValue:       number
+  byCategory:       Record<string, number>
+  belowMin:         number
+  critical:         number
+  overstock:        number
+  outOfStock:       number
+  activeAlerts:     number
+  recentMovements:  number
+}
+
+interface StockFilter {
+  category?:     StockCategory
+  departmentId?: string
+  search?:       string
+  belowMin?:     boolean
+  critical?:     boolean
+  pageSize?:     number
+}
+
+export function useStockItems(filter: StockFilter = {}) {
+  const params = new URLSearchParams({ pageSize: String(filter.pageSize ?? 100) })
+  if (filter.category)     params.set('category',     filter.category)
+  if (filter.departmentId) params.set('departmentId', filter.departmentId)
+  if (filter.search)       params.set('search',       filter.search)
+  if (filter.belowMin)     params.set('belowMin',     'true')
+  if (filter.critical)     params.set('critical',     'true')
+
+  const { data, loading, error, refetch } = useFetch<PaginatedResult<StockItem>>(
+    () => api.get(`/stock-management?${params}`),
+    [filter.category, filter.departmentId, filter.search, filter.belowMin, filter.critical],
+  )
+
+  return {
+    items:   (data?.data ?? []) as StockItem[],
+    total:   data?.meta?.total ?? 0,
+    loading,
+    error,
+    refetch,
+  }
+}
+
+export function useStockDashboard() {
+  return useFetch<StockDashboardSummary>(
+    () => api.get('/stock-management/dashboard/summary'),
+  )
+}
+
+export interface StockTrendsData {
+  dailyTrend:     { date: string; total: number }[]
+  topConsumed:    { name: string; total: number; unit: string; category: string }[]
+  byCategory:     Record<string, number>
+  totalMovements: number
+}
+
+export interface StockLocationDist {
+  locationName:  string
+  itemCount:     number
+  totalQuantity: number
+  totalValue:    number
+  categories:    Record<string, number>
+}
+
+export interface StockHeatmapCell {
+  location:    string
+  category:    string
+  consumption: number
+}
+
+export function useStockTrends(days: number = 30) {
+  return useFetch<StockTrendsData>(
+    () => api.get(`/stock-management/dashboard/trends?days=${days}`),
+    [days],
+  )
+}
+
+export function useStockDistribution() {
+  return useFetch<StockLocationDist[]>(
+    () => api.get('/stock-management/dashboard/distribution'),
+  )
+}
+
+export function useStockHeatmap(days: number = 30) {
+  return useFetch<StockHeatmapCell[]>(
+    () => api.get(`/stock-management/dashboard/heatmap?days=${days}`),
+    [days],
+  )
+}
+
+export async function createStockItem(body: Record<string, unknown>): Promise<StockItem> {
+  return api.post<StockItem>('/stock-management', body)
+}
+
+export async function updateStockItem(id: string, body: Record<string, unknown>): Promise<StockItem> {
+  return api.patch<StockItem>(`/stock-management/${id}`, body)
+}
+
+export async function deleteStockItem(id: string): Promise<void> {
+  await api.delete(`/stock-management/${id}`)
+}
+
+export async function createStockMovement(itemId: string, body: Record<string, unknown>): Promise<StockMovement> {
+  return api.post<StockMovement>(`/stock-management/${itemId}/movements`, body)
+}
+
+export async function fetchStockMovements(itemId: string): Promise<PaginatedResult<StockMovement>> {
+  return api.get(`/stock-management/${itemId}/movements?pageSize=50`)
+}
+
+export async function fetchStockAlerts(): Promise<PaginatedResult<StockAlert>> {
+  return api.get('/stock-management/alerts?pageSize=50')
+}
+
+export async function updateStockAlertStatus(id: string, status: StockAlertStatus): Promise<void> {
+  await api.patch(`/stock-management/alerts/${id}`, { status })
 }
 
 // ── Users ─────────────────────────────────────────────────────────────────────

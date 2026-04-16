@@ -18,6 +18,7 @@ const PAGE_META: Record<string, { title: TranslationKey; subtitle: TranslationKe
   '/analizler':     { title: 'page_insights_title',       subtitle: 'page_insights_subtitle'     },
   '/dosyalar':      { title: 'page_files_title',          subtitle: 'page_files_subtitle'        },
   '/envanter':      { title: 'page_inventory_title',      subtitle: 'page_inventory_subtitle'    },
+  '/stok':          { title: 'page_stock_title' as TranslationKey, subtitle: 'page_stock_subtitle' as TranslationKey },
   '/ayarlar':       { title: 'page_settings_title',       subtitle: 'page_settings_subtitle'     },
 }
 

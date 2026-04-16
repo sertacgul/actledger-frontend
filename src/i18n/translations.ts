@@ -51,6 +51,7 @@ export const translations = {
     nav_inventory:      'Envanter',
     nav_iot:            'IoT',
     nav_map:            'Canli Harita',
+    nav_stock:          'Stok Yonetimi',
     nav_settings:       'Ayarlar',
 
     // ── Toolbar ──────────────────────────────────────────────────────────
@@ -116,6 +117,7 @@ export const translations = {
     tooltip_inventory:       'Demirbaş, tuketim malzemesi ve verimlilik',
     tooltip_mobile:          'Gorev yayını, form şablonları ve mesajlar',
     tooltip_insights:        'Yapay zeka destekli operasyonel analiz',
+    tooltip_stock:           'Stok takibi, hareketler ve uyarilar',
     tooltip_settings:        'Sistem, dil ve sektor yapılandırması',
 
     // ── Roles ────────────────────────────────────────────────────────────
@@ -163,6 +165,8 @@ export const translations = {
     page_files_subtitle:        'Departman & rol bazlı dosya / klasör erişimi',
     page_inventory_title:       'Envanter & Verimlilik',
     page_inventory_subtitle:    'Demirbaş, tüketim malzemesi ve maliyet etkinliği',
+    page_stock_title:           'Stok Yonetimi',
+    page_stock_subtitle:        'Stok takibi, hareketler ve uyarilar',
     page_settings_title:        'Ayarlar',
     page_settings_subtitle:     'Sistem ve dağıtım yapılandırması',
 
@@ -411,6 +415,7 @@ export const translations = {
     nav_inventory:      'Inventory',
     nav_iot:            'IoT',
     nav_map:            'Live Map',
+    nav_stock:          'Stock Management',
     nav_settings:       'Settings',
 
     // ── Toolbar ──────────────────────────────────────────────────────────
@@ -476,6 +481,7 @@ export const translations = {
     tooltip_inventory:       'Assets, consumables and efficiency',
     tooltip_mobile:          'Task broadcast, form templates and messages',
     tooltip_insights:        'AI-powered operational analytics',
+    tooltip_stock:           'Stock tracking, movements and alerts',
     tooltip_settings:        'System, language and sector configuration',
 
     // ── Roles ────────────────────────────────────────────────────────────
@@ -523,6 +529,8 @@ export const translations = {
     page_files_subtitle:        'Department & role-based file / folder access',
     page_inventory_title:       'Inventory & Efficiency',
     page_inventory_subtitle:    'Assets, consumables and cost effectiveness',
+    page_stock_title:           'Stock Management',
+    page_stock_subtitle:        'Stock tracking, movements and alerts',
     page_settings_title:        'Settings',
     page_settings_subtitle:     'System and deployment configuration',
 

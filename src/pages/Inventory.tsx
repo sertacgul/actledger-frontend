@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo } from 'react'
 import {
-  Wrench, Package, Plus, Search, Trash2, Pencil, AlertTriangle,
-  Building2, FileSpreadsheet, X, Check, TrendingUp, Activity, DollarSign, Upload,
+  Wrench, Package, Plus, Search, Trash2, Pencil, AlertTriangle, ShieldAlert,
+  Building2, FileSpreadsheet, X, Check, TrendingUp, Activity, DollarSign, Upload, Cog,
 } from 'lucide-react'
 import clsx from 'clsx'
 import {
@@ -9,15 +9,19 @@ import {
   createInventoryItem, updateInventoryItem, deleteInventoryItem,
   type InventoryItem, type InventoryType, type InventoryStatus,
 } from '../lib/hooks'
-import { api } from '../lib/api'
+import { useAuth } from '../context/AuthContext'
 import DraggableModal from '../components/ui/DraggableModal'
-import BulkImportModal, { type ColumnMapping } from '../components/ui/BulkImportModal'
+import SmartImportModal from '../components/ui/SmartImportModal'
 import { exportToExcel } from '../lib/excelExport'
 import { useToolbarActions } from '../lib/useToolbarActions'
 
+// Mudur ve ustu roller
+const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
+
 const TYPE_LABELS: Record<InventoryType, string> = {
-  DEMIRBAS: 'Demirbaş',
-  TUKETIM:  'Tüketim Malzemesi',
+  DEMIRBAS:    'Demirbaş',
+  TUKETIM:     'Tüketim Malzemesi',
+  YEDEK_PARCA: 'Yedek Parça',
 }
 
 const STATUS_LABELS: Record<InventoryStatus, string> = {
@@ -48,69 +52,21 @@ const TRY = (n: number | string | undefined) => {
 }
 
 export default function Inventory() {
+  const { user } = useAuth()
+  const canManage = MANAGER_ROLES.includes(user?.role?.toUpperCase() ?? '')
   const [activeTab,  setActiveTab]  = useState<InventoryType>('DEMIRBAS')
   const [search,     setSearch]     = useState('')
   const [editing,    setEditing]    = useState<InventoryItem | null>(null)
   const [creating,   setCreating]   = useState(false)
   const [importing,  setImporting]  = useState(false)
+  const [permPopup,  setPermPopup]  = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
 
-  const INVENTORY_IMPORT_COLUMNS: ColumnMapping[] = [
-    { field: 'name',       label: 'Ad',              required: true },
-    { field: 'code',       label: 'Kod' },
-    { field: 'category',   label: 'Kategori' },
-    { field: 'location',   label: 'Konum' },
-    { field: 'vendor',     label: 'Tedarikci' },
-    { field: 'quantity',   label: 'Miktar',           required: true },
-    { field: 'unit',       label: 'Birim' },
-    { field: 'unitCost',   label: 'Birim Maliyet' },
-    { field: 'serialNumber', label: 'Seri No' },
-    { field: 'description', label: 'Aciklama' },
-    { field: 'notes',      label: 'Not' },
-  ]
-
-  const handleBulkImport = async (rows: Record<string, string>[]) => {
-    try {
-      // Step 1: OperIQ analiz - sutun eslestirme
-      const analysis = await api.post<any>('/inventory/import/analyze', { rows })
-      const mapping = analysis?.mapping ?? analysis?.data?.mapping ?? {}
-
-      // Step 2: Backend toplu import
-      const result = await api.post<any>('/inventory/import/execute', {
-        rows,
-        mapping,
-        defaultType: activeTab,
-      })
-
-      const data = result?.data ?? result
-      refetch(); refetchSummary()
-      return { success: data?.imported ?? rows.length, failed: data?.skipped ?? 0 }
-    } catch {
-      // Fallback: satir satir import
-      let success = 0, failed = 0
-      for (const row of rows) {
-        try {
-          await createInventoryItem({
-            type: activeTab,
-            name: row.name || row.Ad || row.ad || 'Isimsiz',
-            code: row.code || row.Kod || row.kod || undefined,
-            category: row.category || row.Kategori || row.kategori || undefined,
-            location: row.location || row.Konum || row.konum || undefined,
-            vendor: row.vendor || row.Tedarikci || row.tedarikci || undefined,
-            quantity: Number(row.quantity || row.Miktar || row.miktar) || 1,
-            unit: row.unit || row.Birim || row.birim || undefined,
-            unitCost: Number(row.unitCost || row.Fiyat || row.fiyat || row.Maliyet || row.maliyet) || undefined,
-            serialNumber: row.serialNumber || row.SeriNo || row.seriNo || undefined,
-            description: row.description || row.Aciklama || row.aciklama || undefined,
-            notes: row.notes || row.Not || row.not || undefined,
-          })
-          success++
-        } catch { failed++ }
-      }
-      refetch(); refetchSummary()
-      return { success, failed }
-    }
+  const requireManager = (action: () => void) => {
+    if (canManage) { action() } else { setPermPopup(true) }
   }
+
+  const handleImportSuccess = () => { refetch(); refetchSummary() }
 
   const { items,   loading,  refetch } = useInventory({ type: activeTab, search: search || undefined })
   const { summary, refetch: refetchSummary } = useEfficiencySummary()
@@ -129,7 +85,7 @@ export default function Inventory() {
 
   const handleExportExcel = () => {
     exportToExcel({
-      filename:  `${activeTab === 'DEMIRBAS' ? 'demirbas' : 'tuketim'}_${new Date().toISOString().slice(0,10)}.xlsx`,
+      filename:  `${activeTab === 'DEMIRBAS' ? 'demirbas' : activeTab === 'YEDEK_PARCA' ? 'yedek_parca' : 'tuketim'}_${new Date().toISOString().slice(0,10)}.xlsx`,
       sheetName: TYPE_LABELS[activeTab],
       columns: [
         { header: 'Ad',          accessor: i => i.name,                        width: 32 },
@@ -150,7 +106,7 @@ export default function Inventory() {
   }
 
   useToolbarActions({
-    onNew:     () => setCreating(true),
+    onNew:     () => requireManager(() => setCreating(true)),
     onSearch:  () => searchRef.current?.focus(),
     onRefresh: () => { refetch(); refetchSummary() },
     onExport:  () => handleExportExcel(),
@@ -201,15 +157,18 @@ export default function Inventory() {
           <TabButton active={activeTab === 'TUKETIM'} onClick={() => setActiveTab('TUKETIM')} icon={<Package size={14} />}>
             Tüketim Malzemesi
           </TabButton>
+          <TabButton active={activeTab === 'YEDEK_PARCA'} onClick={() => setActiveTab('YEDEK_PARCA')} icon={<Cog size={14} />}>
+            Yedek Parça
+          </TabButton>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <button onClick={() => setImporting(true)} className="btn-secondary" data-help="Excel veya SQL ile toplu aktarim">
+          <button onClick={() => requireManager(() => setImporting(true))} className="btn-secondary" data-help="Excel veya SQL ile toplu aktarim">
             <Upload size={14} /> Toplu Aktar
           </button>
           <button onClick={handleExportExcel} className="btn-secondary" data-help="Listeyi Excel olarak indir">
             <FileSpreadsheet size={14} /> Excel
           </button>
-          <button onClick={() => setCreating(true)} className="btn-primary" data-help="Yeni envanter kalemi oluştur">
+          <button onClick={() => requireManager(() => setCreating(true))} className="btn-primary" data-help="Yeni envanter kalemi oluştur">
             <Plus size={16} /> Yeni {TYPE_LABELS[activeTab]}
           </button>
         </div>
@@ -234,7 +193,7 @@ export default function Inventory() {
         </div>
       ) : items.length === 0 ? (
         <div className="surface p-12 text-center">
-          {activeTab === 'DEMIRBAS' ? <Wrench size={36} className="text-zinc-300 mx-auto mb-3" /> : <Package size={36} className="text-zinc-300 mx-auto mb-3" />}
+          {activeTab === 'DEMIRBAS' ? <Wrench size={36} className="text-zinc-300 mx-auto mb-3" /> : activeTab === 'YEDEK_PARCA' ? <Cog size={36} className="text-zinc-300 mx-auto mb-3" /> : <Package size={36} className="text-zinc-300 mx-auto mb-3" />}
           <p className="text-[14px] font-medium text-zinc-500">Henüz {TYPE_LABELS[activeTab].toLowerCase()} kaydı yok</p>
           <p className="text-[12px] text-zinc-400 mt-1">Yukarıdaki "Yeni" butonu ile oluşturmaya başlayın</p>
         </div>
@@ -274,11 +233,11 @@ export default function Inventory() {
                   </td>
                   <td className="text-right">
                     <div className="inline-flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button type="button" onClick={() => setEditing(item)}
+                      <button type="button" onClick={() => requireManager(() => setEditing(item))}
                         className="w-7 h-7 rounded flex items-center justify-center text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50">
                         <Pencil size={12} />
                       </button>
-                      <button type="button" onClick={() => handleDelete(item.id, item.name)}
+                      <button type="button" onClick={() => requireManager(() => handleDelete(item.id, item.name))}
                         className="w-7 h-7 rounded flex items-center justify-center text-zinc-400 hover:text-red-600 hover:bg-red-50">
                         <Trash2 size={12} />
                       </button>
@@ -302,14 +261,38 @@ export default function Inventory() {
         />
       )}
 
-      {/* ── Bulk import modal ──────────────────────────────── */}
+      {/* ── Smart import modal ──────────────────────────────── */}
       {importing && (
-        <BulkImportModal
-          title={`Toplu ${TYPE_LABELS[activeTab]} Aktarimi`}
-          columns={INVENTORY_IMPORT_COLUMNS}
-          onImport={handleBulkImport}
+        <SmartImportModal
+          title={`Akilli ${TYPE_LABELS[activeTab]} Yukleme`}
+          target="inventory"
+          defaultType={activeTab}
           onClose={() => setImporting(false)}
+          onSuccess={handleImportSuccess}
         />
+      )}
+
+      {/* ── Permission popup ───────────────────────────────────── */}
+      {permPopup && (
+        <DraggableModal title="Yetki Gerekli" onClose={() => setPermPopup(false)} width={420}>
+          <div className="px-5 py-6 flex flex-col items-center gap-4 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center">
+              <ShieldAlert size={28} className="text-amber-600" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-zinc-800">Yetkiniz bulunmuyor</p>
+              <p className="text-xs text-zinc-500 mt-2 leading-relaxed">
+                Yeni envanter yuklemesi yapmak veya mevcut envanterde ekleme, cikarma yapmak icin yoneticinize basvurun.
+              </p>
+            </div>
+            <button
+              onClick={() => setPermPopup(false)}
+              className="px-5 py-2 rounded-lg text-sm font-semibold bg-zinc-900 text-white hover:bg-zinc-800 transition-colors"
+            >
+              Tamam
+            </button>
+          </div>
+        </DraggableModal>
       )}
     </div>
   )
@@ -374,6 +357,9 @@ function InventoryFormModal({
   onClose:     () => void
   onSaved:     () => void
 }) {
+  const isAsset = type === 'DEMIRBAS'
+  const isConsumable = type === 'TUKETIM' || type === 'YEDEK_PARCA'
+
   const [form, setForm] = useState({
     name:          initial?.name          ?? '',
     code:          initial?.code          ?? '',
@@ -383,7 +369,7 @@ function InventoryFormModal({
     location:      initial?.location      ?? '',
     vendor:        initial?.vendor        ?? '',
     quantity:      initial?.quantity      ?? 1,
-    unit:          initial?.unit          ?? (type === 'TUKETIM' ? 'adet' : ''),
+    unit:          initial?.unit          ?? (isConsumable ? 'adet' : ''),
     reorderLevel:  initial?.reorderLevel  ?? 0,
     unitCost:      initial?.unitCost ? Number(initial.unitCost) : 0,
     serialNumber:  initial?.serialNumber  ?? '',
@@ -395,8 +381,6 @@ function InventoryFormModal({
   })
   const [saving, setSaving] = useState(false)
   const [err,    setErr]    = useState<string | null>(null)
-
-  const isAsset = type === 'DEMIRBAS'
   const canSave = form.name.trim().length > 0
 
   const handleSave = async () => {
@@ -443,7 +427,7 @@ function InventoryFormModal({
   return (
     <DraggableModal
       title={`${initial ? 'Düzenle' : 'Yeni'} - ${TYPE_LABELS[type]}`}
-      icon={isAsset ? <Wrench size={13} /> : <Package size={13} />}
+      icon={isAsset ? <Wrench size={13} /> : type === 'YEDEK_PARCA' ? <Cog size={13} /> : <Package size={13} />}
       onClose={onClose}
       width={620}
     >
@@ -492,7 +476,7 @@ function InventoryFormModal({
             <input className="input" placeholder="adet, kg, lt, m..."
               value={form.unit} onChange={e => setForm({ ...form, unit: e.target.value })} />
           </div>
-          {!isAsset && (
+          {isConsumable && (
             <div>
               <Label>Kritik Stok Eşiği</Label>
               <input type="number" className="input" min={0} value={form.reorderLevel}

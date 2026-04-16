@@ -23,6 +23,7 @@ import IoTPage from './pages/IoT'
 import LiveMap from './pages/LiveMap'
 import AdminPanel from './pages/AdminPanel'
 import KPIPanel from './pages/KPIPanel'
+import StockManagement from './pages/StockManagement'
 import SuperAdmin from './pages/SuperAdmin'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfUse from './pages/TermsOfUse'
@@ -103,6 +104,7 @@ function GlobalShortcuts() {
   useShortcut({ id: 'nav_inventory',  keys: 'g e', label: 'Envanter',           category: 'Gezinme', handler: () => navigate('/envanter') })
   useShortcut({ id: 'nav_iot',        keys: 'g o', label: 'IoT',               category: 'Gezinme', handler: () => navigate('/iot') })
   useShortcut({ id: 'nav_map',        keys: 'g h', label: 'Canli Harita',      category: 'Gezinme', handler: () => navigate('/harita') })
+  useShortcut({ id: 'nav_stock',      keys: 'g q', label: 'Stok Yonetimi',     category: 'Gezinme', handler: () => navigate('/stok') })
   useShortcut({ id: 'nav_settings',   keys: 'g s', label: 'Ayarlar',            category: 'Gezinme', handler: () => navigate('/ayarlar') })
 
   return null
@@ -140,6 +142,7 @@ function AppRoutes() {
           <Route path="iot"          element={<IoTPage />}     />
           <Route path="harita"      element={<LiveMap />}     />
           <Route path="kpi-panel"    element={<KPIPanel />}    />
+          <Route path="stok"         element={<StockManagement />} />
           <Route path="ayarlar"      element={<Settings />}    />
         </Route>
         {/* ── Mobile PWA routes ──────────────────────────────────────────── */}

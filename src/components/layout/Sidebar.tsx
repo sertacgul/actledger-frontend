@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, CheckSquare, FileText, Building2,
   Users, Smartphone, Settings, LogOut, Cpu, FolderOpen, Package, Radio, MapPin,
-  ZoomIn, ZoomOut, RotateCcw, Target,
+  ZoomIn, ZoomOut, RotateCcw, Target, Boxes,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useAuth } from '../../context/AuthContext'
@@ -49,6 +49,7 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
         { to: '/kullanicilar', icon: Users,      label: t('nav_users'),       desc: t('tooltip_users' as TranslationKey),       shortcut: 'g u' },
         { to: '/dosyalar',     icon: FolderOpen, label: t('nav_files'),       desc: t('tooltip_files' as TranslationKey),       shortcut: 'g f' },
         { to: '/envanter',     icon: Package,    label: t('nav_inventory'),   desc: t('tooltip_inventory' as TranslationKey),   shortcut: 'g e' },
+        { to: '/stok',         icon: Boxes,      label: t('nav_stock' as TranslationKey), desc: t('tooltip_stock' as TranslationKey), shortcut: 'g q' },
         { to: '/iot',          icon: Radio,      label: 'IoT',                desc: 'IoT cihaz ve sensör yönetimi',              shortcut: 'g o' },
       ],
     },

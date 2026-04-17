@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, CheckSquare, FileText, Building2,
   Users, Smartphone, Settings, LogOut, Cpu, FolderOpen, Package, Radio, MapPin,
-  ZoomIn, ZoomOut, RotateCcw, Target, Boxes,
+  ZoomIn, ZoomOut, RotateCcw, Target, Boxes, Zap, GitBranch,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useAuth } from '../../context/AuthContext'
@@ -58,6 +58,8 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
       items: [
         { to: '/mobil',     icon: Smartphone, label: t('nav_mobile'),   desc: t('tooltip_mobile' as TranslationKey),   shortcut: 'g m', badge: t('sidebar_badge_new') },
         { to: '/kpi-panel', icon: Target,     label: 'KPI',             desc: 'KPI Ajandasi ve Analizi',                shortcut: 'g k' },
+        { to: '/otomasyon',   icon: Zap,       label: t('nav_automation' as TranslationKey), desc: t('tooltip_automation' as TranslationKey), shortcut: 'g a' },
+        { to: '/is-akislari', icon: GitBranch, label: t('nav_workflows' as TranslationKey),  desc: t('tooltip_workflows' as TranslationKey),  shortcut: 'g w' },
         { to: '/analizler', icon: Cpu,        label: 'OperIQ',          desc: t('tooltip_insights' as TranslationKey), shortcut: 'g i', operiq: true },
         { to: '/ayarlar',   icon: Settings,   label: t('nav_settings'), desc: t('tooltip_settings' as TranslationKey), shortcut: 'g s' },
       ],

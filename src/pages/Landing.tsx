@@ -379,6 +379,7 @@ function ScrollGrowVideo({ src }: { src: string }) {
 function ScrollGrowIphone({ src }: { src: string }) {
   const ref = useRef<HTMLDivElement>(null)
   const [progress, setProgress] = useState(0)
+  const [iphoneScreen, setIphoneScreen] = useState(0) // 0-4 arasi ekran gecisi
 
   useEffect(() => {
     const el = ref.current
@@ -386,43 +387,211 @@ function ScrollGrowIphone({ src }: { src: string }) {
     const onScroll = () => {
       const rect = el.getBoundingClientRect()
       const vh = window.innerHeight
-      const enterProgress = Math.max(0, Math.min(1, 1 - rect.top / vh))
-      const exitProgress = Math.max(0, Math.min(1, rect.bottom / vh))
-      setProgress(Math.min(enterProgress, exitProgress))
+      const p = Math.max(0, Math.min(1, 1 - rect.top / (vh * 0.8)))
+      setProgress(p)
+      // iPhone ekran gecisi: her %20'de yeni ekran
+      setIphoneScreen(Math.min(4, Math.floor(p * 5)))
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // iPhone 17 Pro Max frame - contained, no overflow
-  const frameScale = 1 + progress * 0.6
+  // Video: scroll ile buyur, hover glow artar
+  const videoScale = 0.85 + progress * 0.15 // 0.85 -> 1.0
+  const videoOpacity = 0.6 + progress * 0.4  // 0.6 -> 1.0
+  const glowIntensity = progress * 0.35       // 0 -> 0.35
+
+  // iPhone ekran icerikleri
+  const screens = [
+    // 0: Splash
+    { bg: 'linear-gradient(160deg, #0a1628 0%, #0f2b3d 40%, #134e5e 100%)', content: 'splash' },
+    // 1: Gorevler
+    { bg: 'linear-gradient(160deg, #0f172a 0%, #1e293b 100%)', content: 'tasks' },
+    // 2: Dashboard
+    { bg: 'linear-gradient(160deg, #0f172a 0%, #1a2e3b 100%)', content: 'dashboard' },
+    // 3: Mesajlar
+    { bg: 'linear-gradient(160deg, #0f172a 0%, #1e293b 100%)', content: 'messages' },
+    // 4: Profil
+    { bg: 'linear-gradient(160deg, #0a1628 0%, #134e5e 100%)', content: 'profile' },
+  ]
+
+  const currentScreen = screens[iphoneScreen] || screens[0]
+
+  const renderIphoneContent = () => {
+    switch (currentScreen.content) {
+      case 'splash':
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '16px' }}>
+            {/* ActLedger kurumsal sembol - BrandMark SVG */}
+            <div style={{ animation: 'pulse 2.5s ease-in-out infinite', filter: 'drop-shadow(0 8px 32px rgba(6,182,212,0.5))' }}>
+              <svg viewBox="0 0 48 48" width={64} height={64} fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 7 38 L 19 8 L 24 22" stroke="#ffffff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M 19 8 L 31 38 L 41 28" stroke="#22d3ee" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M 13.5 26 L 26 26" stroke="#ffffff" strokeWidth="2.8" strokeLinecap="round" opacity="0.9" />
+                <circle cx="42" cy="14" r="3.2" fill="#22d3ee" />
+              </svg>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: '22px', fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>
+                <span>Act</span><span style={{ color: '#22d3ee' }}>Ledger</span>
+              </p>
+              <p style={{ fontSize: '12px', fontWeight: 700, color: '#22d3ee', letterSpacing: '4px', textTransform: 'uppercase', marginTop: '4px' }}>Mobile</p>
+            </div>
+            <p style={{ fontSize: '8px', color: 'rgba(148,163,184,0.5)', letterSpacing: '2px', textTransform: 'uppercase', marginTop: '8px' }}>Saha Operasyon Yonetimi</p>
+          </div>
+        )
+      case 'tasks':
+        return (
+          <div style={{ padding: '32px 14px 14px', height: '100%' }}>
+            <p style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginBottom: '10px' }}>Gorevlerim</p>
+            {['Uretim hatti kontrol', 'Bakim raporu yaz', 'Stok sayimi'].map((t, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', marginBottom: '6px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: i === 0 ? '#f59e0b' : i === 1 ? '#06b6d4' : '#10b981' }} />
+                <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>{t}</span>
+              </div>
+            ))}
+            <div style={{ marginTop: '12px', padding: '10px', borderRadius: '10px', background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(20,184,166,0.1))', border: '1px solid rgba(6,182,212,0.2)' }}>
+              <p style={{ fontSize: '8px', color: '#22d3ee', fontWeight: 700, marginBottom: '4px' }}>OperIQ Onerisi</p>
+              <p style={{ fontSize: '7px', color: 'rgba(148,163,184,0.7)', lineHeight: 1.4 }}>Bakim raporu gecikmeye yakin. Oncelik arttirilmali.</p>
+            </div>
+          </div>
+        )
+      case 'dashboard':
+        return (
+          <div style={{ padding: '32px 14px 14px', height: '100%' }}>
+            <p style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginBottom: '10px' }}>Kokpit</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '10px' }}>
+              {[{ v: '24', l: 'Aktif Gorev', c: '#06b6d4' }, { v: '%87', l: 'Verimlilik', c: '#10b981' }, { v: '3', l: 'Uyari', c: '#f59e0b' }, { v: '156', l: 'Personel', c: '#8b5cf6' }].map((d, i) => (
+                <div key={i} style={{ padding: '8px', borderRadius: '8px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
+                  <p style={{ fontSize: '14px', fontWeight: 800, color: d.c }}>{d.v}</p>
+                  <p style={{ fontSize: '6px', color: 'rgba(148,163,184,0.6)', fontWeight: 600, marginTop: '2px' }}>{d.l}</p>
+                </div>
+              ))}
+            </div>
+            <div style={{ height: '40px', borderRadius: '8px', background: 'linear-gradient(90deg, rgba(6,182,212,0.2), rgba(16,185,129,0.15))', display: 'flex', alignItems: 'flex-end', padding: '0 4px 4px', gap: '3px' }}>
+              {[40, 65, 50, 80, 70, 90, 55, 75].map((h, i) => (
+                <div key={i} style={{ flex: 1, height: `${h}%`, borderRadius: '3px 3px 0 0', background: `linear-gradient(180deg, #06b6d4, rgba(6,182,212,0.3))`, opacity: 0.7 + i * 0.03 }} />
+              ))}
+            </div>
+          </div>
+        )
+      case 'messages':
+        return (
+          <div style={{ padding: '32px 14px 14px', height: '100%' }}>
+            <p style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginBottom: '10px' }}>Mesajlar</p>
+            {['Ahmet Y. - Bakim tamamlandi', 'Sistem - Stok uyarisi', 'Elif K. - Rapor hazirlandi'].map((m, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', marginBottom: '6px', borderRadius: '10px', background: i === 0 ? 'rgba(6,182,212,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${i === 0 ? 'rgba(6,182,212,0.2)' : 'rgba(255,255,255,0.06)'}` }}>
+                <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: i === 0 ? 'linear-gradient(135deg, #06b6d4, #0891b2)' : i === 1 ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'linear-gradient(135deg, #8b5cf6, #7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ color: '#fff', fontSize: '7px', fontWeight: 800 }}>{m[0]}</span>
+                </div>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.8)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m}</p>
+                  <p style={{ fontSize: '6px', color: 'rgba(148,163,184,0.5)', marginTop: '1px' }}>{i === 0 ? '2 dk once' : i === 1 ? '15 dk once' : '1 saat once'}</p>
+                </div>
+                {i === 0 && <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#06b6d4', flexShrink: 0 }} />}
+              </div>
+            ))}
+          </div>
+        )
+      case 'profile':
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '10px', padding: '32px 14px 14px' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #06b6d4, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(6,182,212,0.3)' }}>
+              <span style={{ color: '#fff', fontSize: '16px', fontWeight: 800 }}>SG</span>
+            </div>
+            <p style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>Saha Gorevlisi</p>
+            <p style={{ fontSize: '8px', color: 'rgba(148,163,184,0.6)' }}>Uretim Departmani</p>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+              {[{ v: '12', l: 'Gorev' }, { v: '98%', l: 'Basari' }, { v: '4.8', l: 'Puan' }].map((s, i) => (
+                <div key={i} style={{ textAlign: 'center' }}>
+                  <p style={{ fontSize: '13px', fontWeight: 800, color: '#22d3ee' }}>{s.v}</p>
+                  <p style={{ fontSize: '6px', color: 'rgba(148,163,184,0.5)' }}>{s.l}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      default:
+        return null
+    }
+  }
 
   return (
-    <div ref={ref} className="flex justify-center items-center px-6" style={{ minHeight: '60vh' }}>
-      <div
-        className="iphone-frame"
-        style={{
-          transform: `scale(${frameScale})`,
-          transformOrigin: 'center center',
-        }}
-      >
-        <div className="iphone-dynamic-island" />
-        <div className="iphone-action-btn" />
-        <div className="iphone-side-btn" />
-        <div className="iphone-vol-up" />
-        <div className="iphone-vol-down" />
-        <div className="iphone-screen">
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            src={src}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-          />
+    <div ref={ref} className="w-full" style={{ minHeight: '100vh', padding: '0 24px' }}>
+      <div className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20" style={{ minHeight: '90vh' }}>
+        {/* iPhone - animated screen transitions */}
+        <div className="flex-shrink-0" style={{ transform: `translateY(${(1 - progress) * 30}px)`, opacity: 0.7 + progress * 0.3, transition: 'transform 0.3s ease-out, opacity 0.3s ease-out' }}>
+          <div className="iphone-frame" style={{ transformOrigin: 'center center' }}>
+            <div className="iphone-dynamic-island" />
+            <div className="iphone-action-btn" />
+            <div className="iphone-side-btn" />
+            <div className="iphone-vol-up" />
+            <div className="iphone-vol-down" />
+            <div className="iphone-screen" style={{ overflow: 'hidden' }}>
+              {/* Screen transition wrapper */}
+              <div style={{
+                width: '100%',
+                height: '100%',
+                background: currentScreen.bg,
+                transition: 'background 0.6s ease-in-out',
+                position: 'relative',
+              }}>
+                {/* iOS-style page transition animation */}
+                <div key={iphoneScreen} style={{
+                  position: 'absolute',
+                  inset: 0,
+                  animation: 'iphoneSlideIn 0.5s ease-out',
+                }}>
+                  {renderIphoneContent()}
+                </div>
+              </div>
+            </div>
+            <div className="iphone-home-bar" />
+          </div>
         </div>
-        <div className="iphone-home-bar" />
+
+        {/* Video - iPhone ile ayni yukseklikte, hover/scroll efektleri */}
+        <div
+          className="flex-1 w-full"
+          style={{
+            maxWidth: '860px',
+            height: '607px',
+            transform: `scale(${videoScale}) translateY(${(1 - progress) * 20}px)`,
+            opacity: videoOpacity,
+            transition: 'transform 0.3s ease-out, opacity 0.3s ease-out',
+          }}
+        >
+          <div
+            className="group relative h-full"
+            style={{
+              borderRadius: '24px',
+              overflow: 'hidden',
+              boxShadow: `0 30px 80px rgba(0,0,0,0.5), 0 0 ${60 + glowIntensity * 100}px rgba(6,182,212,${glowIntensity})`,
+              border: '1px solid rgba(6,182,212,0.25)',
+              transition: 'box-shadow 0.5s ease-out',
+            }}
+          >
+            {/* Hover glow overlay */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-10"
+              style={{ background: 'radial-gradient(circle at 50% 50%, rgba(6,182,212,0.08) 0%, transparent 70%)' }} />
+            {/* Top shine on hover */}
+            <div className="absolute top-0 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"
+              style={{ background: 'linear-gradient(90deg, transparent, rgba(34,211,238,0.5), transparent)' }} />
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              src={src}
+              className="group-hover:scale-[1.02] transition-transform duration-700 ease-out"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+            {/* Bottom gradient fade */}
+            <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
+              style={{ background: 'linear-gradient(transparent, rgba(10,22,40,0.6))' }} />
+          </div>
+        </div>
       </div>
     </div>
   )
@@ -852,7 +1021,7 @@ function OperIQChatbot({ lang }: { lang: 'tr' | 'en' }) {
         onMouseDown={onMouseDown}
       >
         <span
-          className="text-sm font-extrabold tracking-[0.2em] uppercase px-3 py-1 rounded-full"
+          className="text-sm font-extrabold tracking-[0.12em] px-3 py-1 rounded-full"
           style={{
             color: '#22d3ee',
             background: 'rgba(6,182,212,0.12)',
@@ -861,7 +1030,7 @@ function OperIQChatbot({ lang }: { lang: 'tr' | 'en' }) {
             backdropFilter: 'blur(8px)',
           }}
         >
-          OperIQ
+          OperIQ Asistan
         </span>
       </div>
 
@@ -1129,6 +1298,10 @@ export default function Landing() {
           50% { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
         }
+        @keyframes iphoneSlideIn {
+          0% { opacity: 0; transform: translateX(40px) scale(0.95); }
+          100% { opacity: 1; transform: translateX(0) scale(1); }
+        }
         @keyframes pulsingBorder {
           0%, 100% { border-color: rgba(6,182,212,0.4); box-shadow: 0 0 20px rgba(6,182,212,0.15); }
           50% { border-color: rgba(6,182,212,0.7); box-shadow: 0 0 40px rgba(6,182,212,0.25); }
@@ -1152,12 +1325,12 @@ export default function Landing() {
         .guide-card { transition: all 0.4s ease; }
         .guide-card:hover { border-color: rgba(99,102,241,0.4) !important; box-shadow: 0 12px 40px rgba(99,102,241,0.1); transform: translateY(-4px); }
 
-        /* iPhone 17 Pro Max - Cyan Titanium */
+        /* iPhone 17 Pro Max - Cyan Titanium (%20 buyuk) */
         .iphone-frame {
           position: relative;
-          width: 234px;
-          height: 506px;
-          border-radius: 46px;
+          width: 281px;
+          height: 607px;
+          border-radius: 55px;
           background: linear-gradient(160deg, #134e5e 0%, #0c6980 20%, #0e7490 40%, #0891b2 60%, #06b6d4 80%, #22d3ee 100%);
           box-shadow:
             inset 0 0 0 1px rgba(255,255,255,0.3),
@@ -1174,13 +1347,13 @@ export default function Landing() {
         /* Dynamic Island */
         .iphone-dynamic-island {
           position: absolute;
-          top: 12px;
+          top: 14px;
           left: 50%;
           transform: translateX(-50%);
-          width: 84px;
-          height: 22px;
+          width: 100px;
+          height: 26px;
           background: #000;
-          border-radius: 11px;
+          border-radius: 13px;
           z-index: 20;
           box-shadow: 0 0 0 0.5px rgba(255,255,255,0.06);
         }
@@ -1210,7 +1383,7 @@ export default function Landing() {
         .iphone-screen {
           width: 100%;
           height: 100%;
-          border-radius: 41px;
+          border-radius: 50px;
           overflow: hidden;
           position: relative;
           background: #000;
@@ -1545,7 +1718,7 @@ export default function Landing() {
               </p>
             </div>
           </Reveal>
-          <ScrollGrowVideo src="/images/ActLedger_Platform.MP4" />
+          <ScrollGrowVideo src="/images/ActLedger_Explorer_new.mp4" />
         </div>
       </section>
 
@@ -2456,7 +2629,7 @@ export default function Landing() {
                 ['Mesajla\u015fma / ileti\u015fim', 'Var (operasyonel mesajla\u015fma)', 'Yok'],
                 ['\u00c7ok departmanl\u0131 yap\u0131', '15+ sekt\u00f6r uyumlu', 'S\u0131n\u0131rl\u0131'],
                 ['Kurulum s\u00fcresi', 'G\u00fcnler i\u00e7inde kurulum', 'Aylar s\u00fcren kurulum'],
-                ['Fiyatland\u0131rma', '\u20ba5.800 / departman + \u20ba150 / kullan\u0131c\u0131 (KDV muaf)', 'Y\u00fcksek maliyetli'],
+                ['Fiyatland\u0131rma', '\u20ba5.900 / departman + \u20ba180 / mobil kullan\u0131c\u0131', 'Y\u00fcksek maliyetli'],
                 ['Kullan\u0131m kolayl\u0131\u011f\u0131', '\u00c7ok kolay', '\u00d6\u011frenmesi zor'],
                 ['Esneklik', '\u00c7ok y\u00fcksek', 'D\u00fc\u015f\u00fck veya s\u0131n\u0131rl\u0131'],
               ] : [
@@ -2477,7 +2650,7 @@ export default function Landing() {
                 ['Messaging / communication', 'Yes (operational messaging)', 'No'],
                 ['Multi-department structure', '15+ sector compatible', 'Limited'],
                 ['Setup time', 'Days to setup', 'Months-long setup'],
-                ['Pricing', '\u20ba5,800 / dept + \u20ba150 / user (VAT exempt)', 'High cost'],
+                ['Pricing', '\u20ba5,900 / dept + \u20ba180 / mobile user', 'High cost'],
                 ['Ease of use', 'Very easy', 'Hard to learn'],
                 ['Flexibility', 'Very high', 'Low or limited'],
               ]).map((row, i) => {
@@ -2554,22 +2727,22 @@ export default function Landing() {
         <div className="relative w-full py-20">
           {/* Try for Free animated text */}
           <Reveal>
-            <div className="text-center mb-6">
+            <div className="text-center mb-4">
               <button type="button" onClick={() => setContactOpen(true)} className="inline-block group cursor-pointer text-center">
                 <h2
                   className="font-black tracking-tight bg-clip-text text-transparent animate-gradient-text"
                   style={{
-                    fontSize: 'clamp(24px, 3.6vw, 48px)',
+                    fontSize: 'clamp(14px, 2vw, 24px)',
                     backgroundImage: 'linear-gradient(90deg, #06b6d4, #14b8a6, #a78bfa, #22d3ee, #06b6d4)',
                     backgroundSize: '400% 100%',
-                    lineHeight: 1.1,
+                    lineHeight: 1.2,
                   }}
                 >
                   {t.tryFree}
                 </h2>
-                <div className="h-1 w-0 group-hover:w-2/3 mx-auto rounded-full transition-all duration-1000 mt-2"
+                <div className="h-0.5 w-0 group-hover:w-2/3 mx-auto rounded-full transition-all duration-1000 mt-1.5"
                   style={{ background: 'linear-gradient(90deg, #06b6d4, #a78bfa, #14b8a6)' }} />
-                <p className="text-xs mt-3 font-medium transition-all duration-500 group-hover:tracking-wider" style={{ color: 'rgba(148,163,184,0.8)' }}>
+                <p className="text-[10px] mt-2 font-medium transition-all duration-500 group-hover:tracking-wider" style={{ color: 'rgba(148,163,184,0.8)' }}>
                   {lang === 'tr' ? '1 Ayl\u0131k \u00dccretsiz Deneme \u0130\u00e7in \u0130leti\u015fime Ge\u00e7in' : '1-Month Free Trial - Get in Touch'}
                 </p>
               </button>
@@ -2577,7 +2750,7 @@ export default function Landing() {
           </Reveal>
 
           {/* iPhone Mockup */}
-          <ScrollGrowIphone src="/images/ActLedger_Mobile.mp4" />
+          <ScrollGrowIphone src="/images/ActLedger_Mobile_new.mov" />
         </div>
       </section>
 

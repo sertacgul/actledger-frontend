@@ -52,6 +52,8 @@ export const translations = {
     nav_iot:            'IoT',
     nav_map:            'Canli Harita',
     nav_stock:          'Stok Yonetimi',
+    nav_automation:     'Otomasyon',
+    nav_workflows:      'Is Akislari',
     nav_settings:       'Ayarlar',
 
     // ── Toolbar ──────────────────────────────────────────────────────────
@@ -118,6 +120,8 @@ export const translations = {
     tooltip_mobile:          'Gorev yayını, form şablonları ve mesajlar',
     tooltip_insights:        'Yapay zeka destekli operasyonel analiz',
     tooltip_stock:           'Stok takibi, hareketler ve uyarilar',
+    tooltip_automation:      'Olay tabanli otomasyon kurallari ve motor',
+    tooltip_workflows:       'Is akisi tasarimcisi ve surecler',
     tooltip_settings:        'Sistem, dil ve sektor yapılandırması',
 
     // ── Roles ────────────────────────────────────────────────────────────
@@ -416,6 +420,8 @@ export const translations = {
     nav_iot:            'IoT',
     nav_map:            'Live Map',
     nav_stock:          'Stock Management',
+    nav_automation:     'Automation',
+    nav_workflows:      'Workflows',
     nav_settings:       'Settings',
 
     // ── Toolbar ──────────────────────────────────────────────────────────
@@ -482,6 +488,8 @@ export const translations = {
     tooltip_mobile:          'Task broadcast, form templates and messages',
     tooltip_insights:        'AI-powered operational analytics',
     tooltip_stock:           'Stock tracking, movements and alerts',
+    tooltip_automation:      'Event-driven automation rules and engine',
+    tooltip_workflows:       'Workflow designer and processes',
     tooltip_settings:        'System, language and sector configuration',
 
     // ── Roles ────────────────────────────────────────────────────────────

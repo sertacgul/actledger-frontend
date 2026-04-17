@@ -782,3 +782,99 @@ export async function addTasksToGroup(groupId: string, taskIds: string[]): Promi
 export async function removeTaskFromGroup(groupId: string, taskId: string): Promise<TaskGroup> {
   return mapTaskGroup(await api.delete<any>(`/task-groups/${groupId}/tasks/${taskId}`))
 }
+
+// ── Automation Engine ─────────────────────────────────────────────────────────
+
+export function useAutomationRules(filter: Record<string, any> = {}) {
+  const qs = new URLSearchParams(filter as any).toString()
+  return useFetch<PaginatedResult<any>>(() => api.get(`/automations?${qs}`), [qs])
+}
+
+export function useAutomationStats() {
+  return useFetch<any>(() => api.get('/automations/stats'), [])
+}
+
+export function useAutomationLogs(filter: Record<string, any> = {}) {
+  const qs = new URLSearchParams(filter as any).toString()
+  return useFetch<PaginatedResult<any>>(() => api.get(`/automations/logs?${qs}`), [qs])
+}
+
+export async function createAutomationRule(body: any) {
+  return api.post<any>('/automations', body)
+}
+
+export async function updateAutomationRule(id: string, body: any) {
+  return api.patch<any>(`/automations/${id}`, body)
+}
+
+export async function toggleAutomationRule(id: string, active: boolean) {
+  return api.patch<any>(`/automations/${id}/toggle`, { active })
+}
+
+export async function deleteAutomationRule(id: string) {
+  return api.delete(`/automations/${id}`)
+}
+
+// ── Workflow Builder ──────────────────────────────────────────────────────────
+
+export function useWorkflows(filter: Record<string, any> = {}) {
+  const qs = new URLSearchParams(filter as any).toString()
+  return useFetch<PaginatedResult<any>>(() => api.get(`/workflows?${qs}`), [qs])
+}
+
+export function useWorkflow(id: string) {
+  return useFetch<any>(() => id ? api.get(`/workflows/${id}`) : Promise.resolve(null), [id])
+}
+
+export function useWorkflowStats() {
+  return useFetch<any>(() => api.get('/workflows/stats'), [])
+}
+
+export function useWorkflowInstances(filter: Record<string, any> = {}) {
+  const qs = new URLSearchParams(filter as any).toString()
+  return useFetch<PaginatedResult<any>>(() => api.get(`/workflows/instances?${qs}`), [qs])
+}
+
+export function useWorkflowTemplates() {
+  return useFetch<any>(() => api.get('/workflows/templates'), [])
+}
+
+export async function createWorkflow(body: any) {
+  return api.post<any>('/workflows', body)
+}
+
+export async function updateWorkflow(id: string, body: any) {
+  return api.patch<any>(`/workflows/${id}`, body)
+}
+
+export async function updateWorkflowStatus(id: string, status: string) {
+  return api.patch<any>(`/workflows/${id}/status`, { status })
+}
+
+export async function deleteWorkflow(id: string) {
+  return api.delete(`/workflows/${id}`)
+}
+
+export async function addWorkflowStep(workflowId: string, body: any) {
+  return api.post<any>(`/workflows/${workflowId}/steps`, body)
+}
+
+export async function updateWorkflowStep(workflowId: string, stepId: string, body: any) {
+  return api.patch<any>(`/workflows/${workflowId}/steps/${stepId}`, body)
+}
+
+export async function deleteWorkflowStep(workflowId: string, stepId: string) {
+  return api.delete(`/workflows/${workflowId}/steps/${stepId}`)
+}
+
+export async function startWorkflowInstance(workflowId: string) {
+  return api.post<any>(`/workflows/${workflowId}/start`, {})
+}
+
+export async function cancelWorkflowInstance(instanceId: string) {
+  return api.patch<any>(`/workflows/instances/${instanceId}/cancel`, {})
+}
+
+export async function cloneWorkflowTemplate(templateId: string) {
+  return api.post<any>(`/workflows/templates/${templateId}/clone`, {})
+}

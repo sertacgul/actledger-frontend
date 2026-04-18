@@ -571,6 +571,10 @@ export async function fetchStockMovements(itemId: string): Promise<PaginatedResu
   return api.get(`/stock-management/${itemId}/movements?pageSize=50`)
 }
 
+export async function fetchAllStockMovements(): Promise<PaginatedResult<any>> {
+  return api.get('/stock-management/movements?pageSize=200')
+}
+
 export async function fetchStockAlerts(): Promise<PaginatedResult<StockAlert>> {
   return api.get('/stock-management/alerts?pageSize=50')
 }

@@ -28,19 +28,18 @@ export default function MobileLayout() {
     // Start offline sync manager
     startSyncManager()
 
-    // Task-based location: send every 60s ONLY if a task is actively tracked
+    // Location: send every 60s - mobile users always share location
     let locationInterval: ReturnType<typeof setInterval> | null = null
-    const sendLocationIfTracking = () => {
+    const sendLocation = () => {
       try {
       if (!navigator.geolocation || !navigator.onLine) return
-      const trackingTaskId = localStorage.getItem('actledger_tracking_task')
-      if (!trackingTaskId) return
       navigator.geolocation.getCurrentPosition(
         pos => {
+          const trackingTaskId = localStorage.getItem('actledger_tracking_task')
           api.post('/locations/me', {
             latitude: pos.coords.latitude,
             longitude: pos.coords.longitude,
-            taskId: trackingTaskId,
+            ...(trackingTaskId && { taskId: trackingTaskId }),
           }).catch(() => {})
         },
         () => {},
@@ -48,7 +47,8 @@ export default function MobileLayout() {
       )
       } catch { /* ignore */ }
     }
-    locationInterval = setInterval(sendLocationIfTracking, 60000)
+    sendLocation() // Send immediately on mount
+    locationInterval = setInterval(sendLocation, 60000)
 
     return () => {
       window.removeEventListener('online', on)

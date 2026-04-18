@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Bell, RefreshCw, LogOut, ChevronDown, Printer, Sun, Moon, ZoomIn, ZoomOut, RotateCcw, Menu } from 'lucide-react'
 import clsx from 'clsx'
+import { io, type Socket } from 'socket.io-client'
 import { useAuth } from '../../context/AuthContext'
 import { useCompany } from '../../context/CompanyContext'
 import { useTheme } from '../../context/ThemeContext'
 import { useLanguage } from '../../context/LanguageContext'
 import { useNotifications, markAllNotificationsRead, usePrintLog } from '../../lib/hooks'
+import { tokenStore } from '../../lib/api'
 import LiveClock from '../ui/LiveClock'
 import { FlagTR, FlagUS } from '../ui/Flags'
 
@@ -22,6 +24,53 @@ export default function Header({ title, subtitle, onMenuClick }: HeaderProps) {
   const [notifOpen, setNotifOpen] = useState(false)
   const [menuOpen,  setMenuOpen]  = useState(false)
   const [syncing,   setSyncing]   = useState(false)
+  const [bellPulse, setBellPulse] = useState(false)
+  const socketRef = useRef<Socket | null>(null)
+
+  // Notification bell sound using Web Audio API
+  const playBellSound = useCallback(() => {
+    try {
+      const ctx = new AudioContext()
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.type = 'sine'
+      // Bell-like chime: two quick tones
+      osc.frequency.setValueAtTime(880, ctx.currentTime) // A5
+      osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.1) // C#6
+      gain.gain.setValueAtTime(0.3, ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5)
+      osc.start(ctx.currentTime)
+      osc.stop(ctx.currentTime + 0.5)
+    } catch { /* audio not available */ }
+  }, [])
+
+  // Socket.io real-time notification listener
+  useEffect(() => {
+    const token = tokenStore.get()
+    if (!token || !user) return
+
+    const socket = io('http://localhost:3001', {
+      auth: { token },
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionDelay: 3000,
+    })
+
+    socket.on('notification:new', () => {
+      refetch()
+      playBellSound()
+      setBellPulse(true)
+      setTimeout(() => setBellPulse(false), 2000)
+    })
+
+    socket.on('task:updated', () => refetch())
+
+    socketRef.current = socket
+
+    return () => { socket.disconnect(); socketRef.current = null }
+  }, [user?.id])
 
   const handleSync = () => {
     setSyncing(true)
@@ -200,9 +249,9 @@ export default function Header({ title, subtitle, onMenuClick }: HeaderProps) {
               onClick={() => { setMenuOpen(false); setNotifOpen(v => !v) }}
               className="btn-ghost btn-sm relative"
             >
-              <Bell size={14} />
+              <Bell size={14} className={bellPulse ? 'animate-bounce' : ''} />
               {unreadCount > 0 && (
-                <span className="absolute top-0.5 right-0.5 min-w-[14px] h-[14px] bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5">
+                <span className={clsx('absolute top-0.5 right-0.5 min-w-[14px] h-[14px] bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5', bellPulse && 'animate-ping')}>
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}

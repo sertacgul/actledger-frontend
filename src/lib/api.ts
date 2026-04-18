@@ -69,7 +69,17 @@ async function request<T>(
   const body = await res.json().catch(() => ({}))
 
   if (!res.ok) {
-    throw new ApiError(res.status, body.message ?? 'Sunucu hatası', body.code)
+    const statusMessages: Record<number, string> = {
+      400: 'Gecersiz istek - lutfen alanlari kontrol edin',
+      403: 'Bu islem icin yetkiniz bulunmuyor veya limit asildi',
+      404: 'Aranan kayit bulunamadi',
+      409: 'Bu kayit zaten mevcut',
+      422: 'Girilen veriler uygun degil - lutfen kontrol edin',
+      429: 'Cok fazla istek gonderildi - lutfen bekleyin',
+      500: 'Beklenmeyen bir hata olustu - lutfen tekrar deneyin',
+    }
+    const fallback = statusMessages[res.status] ?? 'Islem gerceklestirilemedi'
+    throw new ApiError(res.status, body.message ?? fallback, body.code)
   }
 
   // Paginated response → return { data, meta }

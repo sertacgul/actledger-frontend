@@ -5,12 +5,14 @@ import 'leaflet/dist/leaflet.css'
 import {
   MapPin, Users, Building2, Plus, Trash2, RefreshCw, AlertTriangle,
   Navigation, Clock, X, Loader2, Target, Crosshair, Send,
+  User, Truck, Wrench,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { api } from '../lib/api'
 import { useDepartments } from '../lib/hooks'
 import { useLanguage } from '../context/LanguageContext'
 import DraggableModal from '../components/ui/DraggableModal'
+import FacilityMap from './FacilityMap'
 
 // Fix leaflet icons
 import iconUrl from 'leaflet/dist/images/marker-icon.png'
@@ -103,6 +105,7 @@ function createFacilityIcon(color: string) {
 export default function LiveMap() {
   const { lang } = useLanguage()
   const { departments } = useDepartments()
+  const [activeTab, setActiveTab] = useState<'outdoor' | 'indoor'>('outdoor')
 
   const [liveUsers, setLiveUsers] = useState<LiveUser[]>([])
   const [facilities, setFacilities] = useState<Facility[]>([])
@@ -110,6 +113,9 @@ export default function LiveMap() {
   const [filterDept, setFilterDept] = useState<string>('tumu')
   const [showFacilities, setShowFacilities] = useState(true)
   const [showCreateFacility, setShowCreateFacility] = useState(false)
+  const [showAddPersonnel, setShowAddPersonnel] = useState(false)
+  const [showAddVehicle, setShowAddVehicle] = useState(false)
+  const [showAddEquipment, setShowAddEquipment] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [dmsInput, setDmsInput] = useState('')
   const [dmsResult, setDmsResult] = useState<{ lat: number; lng: number } | null>(null)
@@ -215,11 +221,36 @@ export default function LiveMap() {
 
   return (
     <div className="space-y-4">
+      {/* Page title + Tab switcher */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 className="text-[18px] font-bold tracking-tight flex items-center gap-2" style={{ color: 'var(--text-1)' }}>
+            <MapPin size={20} className="text-cyan-600" />
+            {lang === 'tr' ? 'Canli Operasyon & Tesis Haritalari' : 'Live Operations & Facility Maps'}
+          </h2>
+        </div>
+        <div className="flex gap-2">
+          <button type="button" onClick={() => setActiveTab('outdoor')}
+            className={clsx('flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-bold transition-all', activeTab === 'outdoor' ? 'bg-cyan-50 text-cyan-700 border-2 border-cyan-200' : 'bg-white border-2 border-zinc-200 text-zinc-600 hover:border-zinc-300')}>
+            <MapPin size={16} /> {lang === 'tr' ? 'Canli Harita' : 'Live Map'}
+          </button>
+          <button type="button" onClick={() => setActiveTab('indoor')}
+            className={clsx('flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-bold transition-all', activeTab === 'indoor' ? 'bg-violet-50 text-violet-700 border-2 border-violet-200' : 'bg-white border-2 border-zinc-200 text-zinc-600 hover:border-zinc-300')}>
+            <Building2 size={16} /> {lang === 'tr' ? 'Tesis Haritasi' : 'Facility Map'}
+          </button>
+        </div>
+      </div>
+
+      {/* Indoor tab - FacilityMap */}
+      {activeTab === 'indoor' && <FacilityMap />}
+
+      {/* Outdoor tab - existing LiveMap content */}
+      {activeTab === 'outdoor' && <>
       {/* Controls */}
       <div className="flex gap-3 flex-wrap items-center">
         <div className="flex items-center gap-2">
           <MapPin size={16} className="text-indigo-500" />
-          <h2 className="text-sm font-bold text-slate-900">Canli Gorev Haritasi</h2>
+          <h2 className="text-sm font-bold text-slate-900">{lang === 'tr' ? 'Canli Konum Takibi' : 'Live Location Tracking'}</h2>
         </div>
         <select className="select w-44 text-xs" value={filterDept} onChange={e => setFilterDept(e.target.value)}>
           <option value="tumu">Tum Departmanlar</option>
@@ -237,6 +268,15 @@ export default function LiveMap() {
           </button>
           <button type="button" onClick={handleRefresh} disabled={refreshing} className="btn-secondary text-xs">
             <RefreshCw size={12} className={refreshing ? 'animate-spin' : ''} /> Yenile
+          </button>
+          <button type="button" onClick={() => setShowAddPersonnel(true)} className="btn-secondary text-xs">
+            <User size={12} /> Personel Ekle
+          </button>
+          <button type="button" onClick={() => setShowAddVehicle(true)} className="btn-secondary text-xs">
+            <Truck size={12} /> Araç Ekle
+          </button>
+          <button type="button" onClick={() => setShowAddEquipment(true)} className="btn-secondary text-xs">
+            <Wrench size={12} /> Ekipman Ekle
           </button>
           <button type="button" onClick={() => setShowCreateFacility(true)} className="btn-primary text-xs">
             <Plus size={12} /> Tesis Ekle
@@ -276,7 +316,7 @@ export default function LiveMap() {
                 <div key={u.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-slate-200">
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold text-slate-800">
-                      {task?.title ?? 'Gorevde'} <span className="text-slate-400 font-normal">- {u.name}</span>
+                      {task?.title ?? 'Gorevde'} <span className="text-slate-400 font-normal">- {u.jobTitle ?? u.title ?? u.role}</span>
                     </p>
                     <p className="text-[10px] text-slate-500">{u.departments[0]?.name ?? '-'} - {u.distanceKm.toFixed(1)} km</p>
                   </div>
@@ -467,6 +507,64 @@ export default function LiveMap() {
       {showCreateFacility && (
         <CreateFacilityModal lang={lang} onClose={() => setShowCreateFacility(false)} onCreated={() => { setShowCreateFacility(false); loadData() }} />
       )}
+
+      {showAddPersonnel && (
+        <AddMapEntityModal
+          title="Personel Ekle"
+          icon={<User size={13} />}
+          fields={[
+            { key: 'name', label: 'Ad Soyad *', placeholder: 'Ahmet Yilmaz' },
+            { key: 'role', label: 'Gorev / Pozisyon', placeholder: 'Teknisyen' },
+            { key: 'phone', label: 'Telefon', placeholder: '0532 xxx xx xx' },
+          ]}
+          onClose={() => setShowAddPersonnel(false)}
+          onSave={async (data) => {
+            const lat = parseFloat(data.latitude), lng = parseFloat(data.longitude)
+            if (!data.name || isNaN(lat) || isNaN(lng)) throw new Error('Ad ve koordinat zorunlu')
+            await api.post('/map', { type: 'personnel', name: data.name, role: data.role, phone: data.phone, latitude: lat, longitude: lng })
+            loadData()
+          }}
+        />
+      )}
+
+      {showAddVehicle && (
+        <AddMapEntityModal
+          title="Araç Ekle"
+          icon={<Truck size={13} />}
+          fields={[
+            { key: 'name', label: 'Araç Adı / Plaka *', placeholder: '34 ABC 123' },
+            { key: 'vehicleType', label: 'Araç Tipi', placeholder: 'Kamyon, Binek, Pikap...' },
+            { key: 'driver', label: 'Sofor', placeholder: 'Mehmet Demir' },
+          ]}
+          onClose={() => setShowAddVehicle(false)}
+          onSave={async (data) => {
+            const lat = parseFloat(data.latitude), lng = parseFloat(data.longitude)
+            if (!data.name || isNaN(lat) || isNaN(lng)) throw new Error('Araç adı ve koordinat zorunlu')
+            await api.post('/map', { type: 'vehicle', name: data.name, vehicleType: data.vehicleType, driver: data.driver, latitude: lat, longitude: lng })
+            loadData()
+          }}
+        />
+      )}
+
+      {showAddEquipment && (
+        <AddMapEntityModal
+          title="Ekipman Ekle"
+          icon={<Wrench size={13} />}
+          fields={[
+            { key: 'name', label: 'Ekipman Adı *', placeholder: 'Jenerator #3' },
+            { key: 'equipmentType', label: 'Tip', placeholder: 'Jenerator, Valf, Pompa...' },
+            { key: 'serial', label: 'Seri No', placeholder: 'SN-2024-001' },
+          ]}
+          onClose={() => setShowAddEquipment(false)}
+          onSave={async (data) => {
+            const lat = parseFloat(data.latitude), lng = parseFloat(data.longitude)
+            if (!data.name || isNaN(lat) || isNaN(lng)) throw new Error('Ekipman adı ve koordinat zorunlu')
+            await api.post('/map', { type: 'equipment', name: data.name, equipmentType: data.equipmentType, serial: data.serial, latitude: lat, longitude: lng })
+            loadData()
+          }}
+        />
+      )}
+      </>}
     </div>
   )
 }
@@ -541,6 +639,77 @@ function CreateFacilityModal({ lang, onClose, onCreated }: { lang: string; onClo
           <div>
             <label className="block text-[11px] font-semibold mb-1" style={{ color: 'var(--text-2)' }}>Renk</label>
             <input type="color" className="w-full h-[38px] rounded border cursor-pointer" style={{ borderColor: 'var(--border)' }} value={form.color} onChange={e => setForm({ ...form, color: e.target.value })} />
+          </div>
+        </div>
+        {err && <p className="text-[11px] text-red-500 flex items-center gap-1"><AlertTriangle size={11} /> {err}</p>}
+      </div>
+    </DraggableModal>
+  )
+}
+
+// ── Generic Add Map Entity Modal ──────────────────────────────────────────
+
+function AddMapEntityModal({
+  title, icon, fields, onClose, onSave,
+}: {
+  title: string
+  icon: React.ReactNode
+  fields: { key: string; label: string; placeholder: string }[]
+  onClose: () => void
+  onSave: (data: Record<string, string>) => Promise<void>
+}) {
+  const [form, setForm] = useState<Record<string, string>>(() => {
+    const init: Record<string, string> = { latitude: '', longitude: '' }
+    fields.forEach(f => { init[f.key] = '' })
+    return init
+  })
+  const [dmsCoord, setDmsCoord] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+
+  const handleDMSFill = () => {
+    const result = parseDMS(dmsCoord)
+    if (result) setForm(prev => ({ ...prev, latitude: result.lat.toString(), longitude: result.lng.toString() }))
+    else setErr('Gecersiz koordinat formati')
+  }
+
+  const handleSubmit = async () => {
+    setSaving(true); setErr(null)
+    try { await onSave(form); onClose() }
+    catch (e: any) { setErr(e.message ?? 'Hata') }
+    finally { setSaving(false) }
+  }
+
+  return (
+    <DraggableModal title={title} icon={icon} onClose={onClose} width={480}
+      footer={<>
+        <button type="button" onClick={onClose} className="btn-secondary">Iptal</button>
+        <button type="button" onClick={handleSubmit} disabled={saving} className="btn-primary">
+          {saving ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} Ekle
+        </button>
+      </>}>
+      <div className="p-5 space-y-3">
+        {fields.map(f => (
+          <div key={f.key}>
+            <label className="block text-[11px] font-semibold mb-1" style={{ color: 'var(--text-2)' }}>{f.label}</label>
+            <input className="input" placeholder={f.placeholder} value={form[f.key]} onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value }))} />
+          </div>
+        ))}
+        <div>
+          <label className="block text-[11px] font-semibold mb-1" style={{ color: 'var(--text-2)' }}>DMS Koordinat</label>
+          <div className="flex gap-2">
+            <input className="input flex-1 font-mono text-xs" placeholder="42N14'3 26E24'6" value={dmsCoord} onChange={e => setDmsCoord(e.target.value)} />
+            <button type="button" onClick={handleDMSFill} className="btn-secondary text-xs">Donustur</button>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[11px] font-semibold mb-1" style={{ color: 'var(--text-2)' }}>Enlem *</label>
+            <input className="input font-mono" type="number" step="any" placeholder="39.9208" value={form.latitude} onChange={e => setForm(prev => ({ ...prev, latitude: e.target.value }))} />
+          </div>
+          <div>
+            <label className="block text-[11px] font-semibold mb-1" style={{ color: 'var(--text-2)' }}>Boylam *</label>
+            <input className="input font-mono" type="number" step="any" placeholder="32.8541" value={form.longitude} onChange={e => setForm(prev => ({ ...prev, longitude: e.target.value }))} />
           </div>
         </div>
         {err && <p className="text-[11px] text-red-500 flex items-center gap-1"><AlertTriangle size={11} /> {err}</p>}

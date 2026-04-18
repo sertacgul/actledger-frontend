@@ -20,7 +20,7 @@ interface SidebarProps {
 export default function Sidebar({ open = false, onClose }: SidebarProps) {
   const { user, logout } = useAuth()
   const { config, sector } = useCompany()
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
   const { sidebarFontScale, setSidebarFontScale } = useTheme()
 
   type NavItem = {
@@ -39,7 +39,7 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
         { to: '/panel',    icon: LayoutDashboard, label: t('nav_dashboard'), desc: t('tooltip_dashboard' as TranslationKey), shortcut: 'g d' },
         { to: '/gorevler',  icon: CheckSquare,     label: t('nav_tasks'),     desc: t('tooltip_tasks' as TranslationKey),     shortcut: 'g t' },
         { to: '/raporlar',  icon: FileText,        label: t('nav_reports'),   desc: t('tooltip_reports' as TranslationKey),   shortcut: 'g r' },
-        { to: '/harita',    icon: MapPin,          label: t('nav_map' as TranslationKey), desc: 'Canli personel ve tesis haritasi',    shortcut: 'g h' },
+        { to: '/harita',    icon: MapPin,          label: lang === 'tr' ? 'Operasyon & Tesis' : 'Operations & Facility', desc: lang === 'tr' ? 'Canli harita ve tesis kat planlari' : 'Live map and facility floor plans',    shortcut: 'g h' },
       ],
     },
     {

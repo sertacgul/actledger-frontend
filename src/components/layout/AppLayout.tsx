@@ -62,7 +62,7 @@ export default function AppLayout() {
           {/* zoom is applied only to the scrollable content area, not the fixed sidebar/header */}
           <div
             className="p-6"
-            style={{ zoom: `${zoom}%` }}
+            style={{ zoom: pathname.startsWith('/harita') ? undefined : `${zoom}%` }}
             // re-mount animation on route change via key
             key={pathname}
           >

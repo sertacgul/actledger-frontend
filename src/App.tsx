@@ -27,6 +27,7 @@ import StockManagement from './pages/StockManagement'
 import SuperAdmin from './pages/SuperAdmin'
 import Automation from './pages/Automation'
 import Workflows from './pages/Workflows'
+import UserGuide from './pages/UserGuide'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfUse from './pages/TermsOfUse'
 
@@ -150,6 +151,7 @@ function AppRoutes() {
           <Route path="otomasyon"    element={<Automation />}  />
           <Route path="is-akislari"  element={<Workflows />}   />
           <Route path="ayarlar"      element={<Settings />}    />
+          <Route path="manuel"       element={<UserGuide />}   />
         </Route>
         {/* ── Mobile PWA routes ──────────────────────────────────────────── */}
         <Route path="/m/giris"           element={<MobileLogin />} />

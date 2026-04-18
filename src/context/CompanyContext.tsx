@@ -29,7 +29,7 @@ const DEFAULT_CONFIG: AppConfig = {
   serverUrl: 'http://localhost:3001/api',
   deploymentMode: 'on-premise',
   licenseType: 'enterprise',
-  licenseKey: 'ACT-ENT-2026-DEMO',
+  licenseKey: '',
   companyName: 'Örnek Sanayi A.Ş.',
   sector: 'manufacturing',
   maxUsers: 150,
@@ -70,13 +70,16 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
   }
 
   // Sync sector & company name from backend /auth/me response
-  const syncFromBackend = useCallback((company: { name?: string; sector?: string }) => {
+  const syncFromBackend = useCallback((company: { name?: string; sector?: string; licenseKey?: string; maxDepartments?: number; maxUsers?: number; maxMobileUsers?: number }) => {
     setConfig(prev => {
       if (!prev) return prev
       return {
         ...prev,
         ...(company.sector && { sector: company.sector }),
         ...(company.name && { companyName: company.name }),
+        ...(company.licenseKey && { licenseKey: company.licenseKey }),
+        ...(company.maxDepartments && { maxDepartments: company.maxDepartments }),
+        ...(company.maxUsers && { maxUsers: company.maxUsers }),
       }
     })
   }, [])

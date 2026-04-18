@@ -2,14 +2,14 @@ import { useState, useRef, useMemo } from 'react'
 import {
   Package, Plus, Search, Trash2, Pencil, AlertTriangle, X, ShieldAlert,
   ArrowDownCircle, ArrowUpCircle, ArrowRightLeft, Flame,
-  TrendingDown, Bell, BarChart3, Loader2, Check,
+  TrendingDown, Bell, BarChart3, Loader2, Check, RefreshCw,
   Boxes, AlertCircle, PackageX, PackagePlus,
 } from 'lucide-react'
 import clsx from 'clsx'
 import {
   useStockItems, useStockDashboard, useDepartments,
   createStockItem, updateStockItem, deleteStockItem,
-  createStockMovement, fetchStockMovements, fetchStockAlerts, updateStockAlertStatus,
+  createStockMovement, fetchStockMovements, fetchAllStockMovements, fetchStockAlerts, updateStockAlertStatus,
   type StockItem, type StockCategory, type StockMovement, type StockAlert, type StockAlertStatus,
 } from '../lib/hooks'
 import { useToolbarActions } from '../lib/useToolbarActions'
@@ -104,6 +104,16 @@ export default function StockManagement() {
   const [alerts, setAlerts] = useState<StockAlert[]>([])
   const [alertsLoading, setAlertsLoading] = useState(false)
   const [permPopup, setPermPopup] = useState(false)
+  const [allMovements, setAllMovements] = useState<any[]>([])
+  const [allMovementsLoading, setAllMovementsLoading] = useState(false)
+
+  const loadAllMovements = async () => {
+    setAllMovementsLoading(true)
+    try {
+      const res = await fetchAllStockMovements()
+      setAllMovements(res.data ?? [])
+    } catch {} finally { setAllMovementsLoading(false) }
+  }
 
   const requireManager = (action: () => void) => {
     if (canManage) { action() } else { setPermPopup(true) }
@@ -198,10 +208,15 @@ export default function StockManagement() {
     if (!movementItem) return
     e.preventDefault()
     const fd = new FormData(e.currentTarget)
+    const reason = fd.get('reason') as string
+    const desc = fd.get('description') as string
+    const fullDesc = [reason, desc].filter(Boolean).join(' - ')
     await createStockMovement(movementItem.id, {
-      type:        fd.get('type'),
-      quantity:    Number(fd.get('quantity')),
-      description: fd.get('description') || undefined,
+      type:         fd.get('type'),
+      quantity:     Number(fd.get('quantity')),
+      fromLocation: fd.get('fromLocation') || undefined,
+      toLocation:   fd.get('toLocation') || undefined,
+      description:  fullDesc || undefined,
     })
     setMovementItem(null)
     refetch()
@@ -427,14 +442,58 @@ export default function StockManagement() {
 
   // ── TAB: Movements (global) ────────────────────────────────────────────
 
+  const renderMovementRow = (m: any, idx: number, unit?: string, itemName?: string) => {
+    const cfg = MOVEMENT_CONFIG[m.type] ?? MOVEMENT_CONFIG.GIRIS
+    return (
+      <div key={m.id} className="rounded-lg border border-zinc-100 hover:bg-zinc-50 p-3">
+        <div className="flex items-center gap-3 mb-1.5">
+          <span className="text-[11px] font-bold text-zinc-400 w-6 text-right flex-shrink-0">#{idx + 1}</span>
+          <cfg.icon size={16} className={cfg.color} />
+          <span className={clsx('text-xs font-bold', cfg.color)}>{cfg.label}</span>
+          {itemName && <span className="text-[11px] font-semibold text-zinc-700">{itemName}</span>}
+          <span className="text-sm font-bold text-zinc-800">{m.quantity} {unit ?? ''}</span>
+          <span className="text-[11px] text-zinc-400 font-mono">{m.previousQty} &rarr; {m.newQty}</span>
+          <span className="ml-auto text-[11px] font-semibold" style={{ color: 'var(--text-2)' }}>{m.userName ?? '-'}</span>
+        </div>
+        <div className="flex items-center gap-3 text-[11px] text-zinc-500 pl-9">
+          <span>{new Date(m.createdAt).toLocaleString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+          {m.fromLocation && <span>Kaynak: <strong>{m.fromLocation}</strong></span>}
+          {m.toLocation && <span>Hedef: <strong>{m.toLocation}</strong></span>}
+        </div>
+        {m.description && (
+          <p className="text-[11px] text-zinc-600 pl-9 mt-1">{m.description}</p>
+        )}
+      </div>
+    )
+  }
+
   const renderMovements = () => (
     <div className="space-y-4">
-      <p className="text-sm text-zinc-500">Bir stok kaleminin hareketlerini gormek icin Stok Listesi sekmesinde kaleme tiklayin.</p>
+      {/* Global movement log */}
+      <div className="bg-white rounded-xl border border-zinc-200 p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-zinc-800">Tum Stok Hareketleri</h3>
+          <button onClick={loadAllMovements} className="text-xs text-cyan-600 hover:text-cyan-800 font-semibold flex items-center gap-1">
+            <RefreshCw size={12} /> Yenile
+          </button>
+        </div>
+        {allMovementsLoading ? (
+          <p className="text-sm text-zinc-400 text-center py-8">Yukleniyor...</p>
+        ) : allMovements.length === 0 ? (
+          <p className="text-sm text-zinc-400 text-center py-8">Henuz hareket kaydedilmemis</p>
+        ) : (
+          <div className="space-y-2 max-h-[500px] overflow-y-auto">
+            {allMovements.map((m: any, idx: number) => renderMovementRow(m, idx, m.stockItem?.unit, m.stockItem?.name))}
+          </div>
+        )}
+      </div>
+
+      {/* Per-item history (when clicked from items tab) */}
       {movementHistory && (
         <div className="bg-white rounded-xl border border-zinc-200 p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-zinc-800">
-              {movementHistory.item.name} - Hareket Gecmisi
+              {movementHistory.item.name} - Kalem Gecmisi
             </h3>
             <button onClick={() => setMovementHistory(null)} className="p-1 rounded hover:bg-zinc-100">
               <X size={16} />
@@ -444,19 +503,7 @@ export default function StockManagement() {
             <p className="text-sm text-zinc-400 text-center py-8">Hareket kaydedilmemis</p>
           ) : (
             <div className="space-y-2">
-              {movementHistory.movements.map(m => {
-                const cfg = MOVEMENT_CONFIG[m.type] ?? MOVEMENT_CONFIG.GIRIS
-                return (
-                  <div key={m.id} className="flex items-center gap-3 px-3 py-2 rounded-lg border border-zinc-100 hover:bg-zinc-50">
-                    <cfg.icon size={16} className={cfg.color} />
-                    <span className={clsx('text-xs font-semibold', cfg.color)}>{cfg.label}</span>
-                    <span className="text-sm font-bold text-zinc-800">{m.quantity}</span>
-                    <span className="text-xs text-zinc-400">{m.previousQty} &rarr; {m.newQty}</span>
-                    {m.description && <span className="text-xs text-zinc-500 flex-1 truncate">{m.description}</span>}
-                    <span className="text-xs text-zinc-400 ml-auto">{new Date(m.createdAt).toLocaleDateString('tr-TR')}</span>
-                  </div>
-                )
-              })}
+              {movementHistory.movements.map((m: any, idx: number) => renderMovementRow(m, idx, movementHistory.item.unit))}
             </div>
           )}
         </div>
@@ -607,7 +654,7 @@ export default function StockManagement() {
         {TABS.map(t => (
           <button
             key={t.key}
-            onClick={() => { setTab(t.key); if (t.key === 'alerts') loadAlerts() }}
+            onClick={() => { setTab(t.key); if (t.key === 'alerts') loadAlerts(); if (t.key === 'movements') loadAllMovements() }}
             className={clsx(
               'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all',
               tab === t.key
@@ -646,24 +693,48 @@ export default function StockManagement() {
 
       {/* Movement modal */}
       {movementItem && (
-        <DraggableModal title={`Hareket: ${movementItem.name}`} onClose={() => setMovementItem(null)} width={420}>
-          <form onSubmit={handleMovement} className="space-y-4 px-4 py-3">
+        <DraggableModal title={`Hareket: ${movementItem.name}`} onClose={() => setMovementItem(null)} width={500}>
+          <form onSubmit={handleMovement} className="space-y-3 px-4 py-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-zinc-600 mb-1">Hareket Tipi *</label>
+                <select name="type" required className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm">
+                  {Object.entries(MOVEMENT_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-zinc-600 mb-1">Miktar * ({movementItem.unit})</label>
+                <input name="quantity" type="number" min="1" required className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-zinc-600 mb-1">Nereden (kaynak)</label>
+                <input name="fromLocation" defaultValue={movementItem.locationName ?? ''} className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm" placeholder={movementItem.locationName ?? 'Mevcut konum'} />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-zinc-600 mb-1">Nereye (hedef)</label>
+                <input name="toLocation" className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm" placeholder="Hedef lokasyon" />
+              </div>
+            </div>
             <div>
-              <label className="block text-xs font-semibold text-zinc-600 mb-1">Hareket Tipi *</label>
-              <select name="type" required className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm">
-                {Object.entries(MOVEMENT_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">Neden / Aciklama *</label>
+              <select name="reason" className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm mb-1.5">
+                <option value="">Neden secin veya asagiya yazin...</option>
+                <option value="Uretim icin kullanim">Uretim icin kullanim</option>
+                <option value="Bakim/Onarim icin kullanim">Bakim/Onarim icin kullanim</option>
+                <option value="Yeni tedarik / satin alma">Yeni tedarik / satin alma</option>
+                <option value="Iade / geri donus">Iade / geri donus</option>
+                <option value="Sayim farki duzeltmesi">Sayim farki duzeltmesi</option>
+                <option value="Hurda / fire">Hurda / fire</option>
+                <option value="Transfer">Transfer</option>
+                <option value="Proje icin ayirma">Proje icin ayirma</option>
+                <option value="Diger">Diger</option>
               </select>
+              <input name="description" className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm" placeholder="Ek aciklama yazin..." />
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-zinc-600 mb-1">Miktar *</label>
-              <input name="quantity" type="number" min="1" required className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm" />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-zinc-600 mb-1">Aciklama</label>
-              <input name="description" className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm" />
-            </div>
-            <div className="flex items-center justify-between pt-2">
-              <span className="text-xs text-zinc-400">Mevcut: {movementItem.quantity} {movementItem.unit}</span>
+            <div className="flex items-center justify-between pt-2 border-t border-zinc-100">
+              <span className="text-xs text-zinc-400">Mevcut: <strong>{movementItem.quantity} {movementItem.unit}</strong> | Konum: {movementItem.locationName ?? '-'}</span>
               <div className="flex gap-2">
                 <button type="button" onClick={() => setMovementItem(null)} className="px-4 py-2 rounded-lg text-sm font-semibold text-zinc-600 hover:bg-zinc-100">Iptal</button>
                 <button type="submit" className="px-5 py-2 rounded-lg text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700">Kaydet</button>

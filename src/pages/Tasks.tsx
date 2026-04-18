@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { Plus, Search, CheckSquare, Calendar, Tag, AlertCircle, Layers, Sparkles, FileSpreadsheet } from 'lucide-react'
+import { Plus, Search, CheckSquare, Calendar, Tag, AlertCircle, Layers, Sparkles, FileSpreadsheet, Camera, MessageSquare, Zap, Loader2 } from 'lucide-react'
+import { api, API_BASE } from '../lib/api'
 import clsx from 'clsx'
 import { useTasks, useDepartments, useUsers, createTask, updateTaskStatus, updateChecklistItem } from '../lib/hooks'
 import type { Task, TaskStatus, TaskPriority, CustomAttribute } from '../types'
@@ -138,6 +139,34 @@ function TaskDetailModal({
   onClose: () => void; onRefetch: () => void
 }) {
   const [updatingItem, setUpdatingItem] = useState<string | null>(null)
+  const [statusUpdating, setStatusUpdating] = useState(false)
+  const [comments, setComments] = useState<any[]>([])
+  const [attachments, setAttachments] = useState<any[]>([])
+  const [operiqResult, setOperiqResult] = useState<any>(null)
+  const [operiqLoading, setOperiqLoading] = useState(false)
+
+  const handleStatusUpdate = async (newStatus: string) => {
+    setStatusUpdating(true)
+    try {
+      await updateTaskStatus(task.id, newStatus)
+      onRefetch()
+      if (newStatus === 'IPTAL' || newStatus === 'TAMAMLANDI') onClose()
+    } catch {} finally { setStatusUpdating(false) }
+  }
+
+  useEffect(() => {
+    api.get<any[]>(`/tasks/${task.id}/comments`).then(setComments).catch(() => {})
+    api.get<any[]>(`/tasks/${task.id}/attachments`).then(setAttachments).catch(() => {})
+  }, [task.id])
+
+  const handleOperIQAnalyze = async () => {
+    setOperiqLoading(true)
+    try {
+      const context = `Gorev: ${task.title}\nAciklama: ${task.description}\nDurum: ${task.status}\nOncelik: ${task.priority}\nYorumlar: ${comments.map(c => c.content).join('; ')}\nFotograf sayisi: ${attachments.length}`
+      const result = await api.post<any>('/gemini', { type: 'GENEL_OZET', prompt: context })
+      setOperiqResult(result)
+    } catch {} finally { setOperiqLoading(false) }
+  }
 
   const handleChecklistToggle = async (itemId: string, completed: boolean) => {
     setUpdatingItem(itemId)
@@ -238,6 +267,103 @@ function TaskDetailModal({
             <div className="flex flex-wrap gap-1.5">
               {task.tags.map(tag => <span key={tag} className="badge-neutral">{tag}</span>)}
             </div>
+          </div>
+        )}
+
+        {/* Task management actions */}
+        <div className="border-t pt-4" style={{ borderColor: 'var(--border)' }}>
+          <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-1)' }}>Gorev Yonetimi</h3>
+          <div className="flex flex-wrap gap-2">
+            {task.status !== 'tamamlandi' && task.status !== 'iptal' && (
+              <>
+                {task.status === 'beklemede' && (
+                  <button type="button" onClick={() => handleStatusUpdate('DEVAM_EDIYOR')} disabled={statusUpdating}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold text-white disabled:opacity-50" style={{ background: '#3b82f6' }}>
+                    Devam Ettir
+                  </button>
+                )}
+                <button type="button" onClick={() => handleStatusUpdate('TAMAMLANDI')} disabled={statusUpdating}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold text-white disabled:opacity-50" style={{ background: '#22c55e' }}>
+                  <CheckSquare size={13} /> Gorevi Kapat
+                </button>
+                <button type="button" onClick={() => handleStatusUpdate('BEKLEMEDE')} disabled={statusUpdating || task.status === 'beklemede'}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold disabled:opacity-50" style={{ background: 'var(--border-subtle)', color: 'var(--text-2)', border: '1px solid var(--border)' }}>
+                  Revize Et (Beklet)
+                </button>
+                <button type="button" onClick={() => { if (window.confirm('Bu gorevi iptal etmek istediginize emin misiniz?')) handleStatusUpdate('IPTAL') }} disabled={statusUpdating}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold text-red-600 disabled:opacity-50" style={{ background: '#fef2f2', border: '1px solid #fecaca' }}>
+                  Iptal Et
+                </button>
+              </>
+            )}
+            {(task.status === 'tamamlandi' || task.status === 'iptal') && (
+              <button type="button" onClick={() => handleStatusUpdate('BEKLEMEDE')} disabled={statusUpdating}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold disabled:opacity-50" style={{ background: '#eff6ff', color: '#3b82f6', border: '1px solid #bfdbfe' }}>
+                Yeniden Ac
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Attachments (photos from mobile) */}
+        {attachments.length > 0 && (
+          <div>
+            <h3 className="text-sm font-semibold mb-2 flex items-center gap-1.5" style={{ color: 'var(--text-1)' }}>
+              <Camera size={14} /> Fotograflar ({attachments.length})
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {attachments.map((att: any) => (
+                <div key={att.id} className="relative group">
+                  <img
+                    src={`${API_BASE.replace('/api/v1', '')}${att.url}`}
+                    alt={att.originalName}
+                    className="w-20 h-20 rounded-lg object-cover border cursor-pointer hover:shadow-lg transition-shadow"
+                    style={{ borderColor: 'var(--border)' }}
+                    onClick={() => window.open(`${API_BASE.replace('/api/v1', '')}${att.url}`, '_blank')}
+                  />
+                  <p className="text-[9px] mt-0.5 truncate max-w-[80px]" style={{ color: 'var(--text-3)' }}>
+                    {att.uploaderName} - {new Date(att.createdAt).toLocaleDateString('tr-TR')}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Comments */}
+        {comments.length > 0 && (
+          <div>
+            <h3 className="text-sm font-semibold mb-2 flex items-center gap-1.5" style={{ color: 'var(--text-1)' }}>
+              <MessageSquare size={14} /> Yorumlar ({comments.length})
+            </h3>
+            <div className="space-y-2 max-h-[200px] overflow-y-auto">
+              {comments.map((c: any) => (
+                <div key={c.id} className="p-3 rounded-lg" style={{ background: 'var(--border-subtle)', border: '1px solid var(--border)' }}>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-[11px] font-bold" style={{ color: 'var(--text-1)' }}>{c.userName}</p>
+                    <p className="text-[10px]" style={{ color: 'var(--text-3)' }}>{new Date(c.createdAt).toLocaleString('tr-TR')}</p>
+                  </div>
+                  <p className="text-[12px]" style={{ color: 'var(--text-2)' }}>{c.content}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* OperIQ Analysis button */}
+        {(comments.length > 0 || attachments.length > 0) && (
+          <button type="button" onClick={handleOperIQAnalyze} disabled={operiqLoading}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-[12px] font-bold transition-all"
+            style={{ background: '#14b8a6', color: '#fff' }}>
+            {operiqLoading ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
+            OperIQ Analiz
+          </button>
+        )}
+
+        {operiqResult && (
+          <div className="p-3 rounded-lg text-[12px]" style={{ background: 'var(--border-subtle)', border: '1px solid var(--border)' }}>
+            <p className="font-bold mb-1 flex items-center gap-1" style={{ color: '#14b8a6' }}><Zap size={12} /> OperIQ</p>
+            <p style={{ color: 'var(--text-2)' }}>{typeof operiqResult?.content === 'object' ? operiqResult.content.ozet ?? JSON.stringify(operiqResult.content) : operiqResult?.content ?? '-'}</p>
           </div>
         )}
       </div>

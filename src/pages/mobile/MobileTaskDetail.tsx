@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, CheckCircle2, Circle, Clock, Camera, Video, Send, Loader2 } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Circle, Clock, Camera, Send, Loader2, Image, X } from 'lucide-react'
+import { API_BASE, tokenStore } from '../../lib/api'
 import clsx from 'clsx'
 import { useLanguage } from '../../context/LanguageContext'
 import { api } from '../../lib/api'
@@ -14,6 +15,57 @@ export default function MobileTaskDetail() {
   const [task, setTask] = useState<Task | null>(null)
   const [loading, setLoading] = useState(true)
   const [comment, setComment] = useState('')
+  const [sending, setSending] = useState(false)
+  const [photos, setPhotos] = useState<File[]>([])
+  const [uploading, setUploading] = useState(false)
+  const [comments, setComments] = useState<any[]>([])
+  const [attachments, setAttachments] = useState<any[]>([])
+
+  // Load comments & attachments
+  useEffect(() => {
+    if (!id) return
+    api.get<any[]>(`/tasks/${id}/comments`).then(setComments).catch(() => {})
+    api.get<any[]>(`/tasks/${id}/attachments`).then(setAttachments).catch(() => {})
+  }, [id])
+
+  const handleSendComment = async () => {
+    if (!id || !comment.trim()) return
+    setSending(true)
+    try {
+      const data = await api.post<any>(`/tasks/${id}/comments`, { content: comment.trim() })
+      setComments(prev => [...prev, data])
+      setComment('')
+    } catch {} finally { setSending(false) }
+  }
+
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files) return
+    setPhotos(prev => [...prev, ...Array.from(files)])
+  }
+
+  const handleUploadPhotos = async () => {
+    if (!id || photos.length === 0) return
+    setUploading(true)
+    try {
+      for (const photo of photos) {
+        const fd = new FormData()
+        fd.append('photo', photo)
+        const token = tokenStore.get()
+        const res = await fetch(`${API_BASE}/tasks/${id}/attachments`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          credentials: 'include',
+          body: fd,
+        })
+        if (res.ok) {
+          const body = await res.json()
+          setAttachments(prev => [...prev, body.data])
+        }
+      }
+      setPhotos([])
+    } catch {} finally { setUploading(false) }
+  }
 
   useEffect(() => {
     if (!id) return
@@ -131,26 +183,34 @@ export default function MobileTaskDetail() {
           )}
         </div>
 
-        {/* Action buttons */}
-        <div className="flex gap-2">
-          {task.status === 'beklemede' && (
-            <button
-              type="button"
-              onClick={() => handleStatusChange('DEVAM_EDIYOR')}
-              className="flex-1 py-3 rounded-xl bg-blue-600 text-white font-semibold text-sm active:scale-[0.98]"
-            >
-              {t('m_task_start')}
-            </button>
-          )}
-          {task.status === 'devam_ediyor' && (
-            <button
-              type="button"
-              onClick={() => handleStatusChange('TAMAMLANDI')}
-              className="flex-1 py-3 rounded-xl bg-green-600 text-white font-semibold text-sm active:scale-[0.98]"
-            >
-              {t('m_task_complete')}
-            </button>
-          )}
+        {/* Status selection */}
+        <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <p className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">{lang === 'tr' ? 'Gorev Durumu' : 'Task Status'}</p>
+          <div className="space-y-2">
+            {([
+              { value: 'BEKLEMEDE', label: lang === 'tr' ? 'Beklemede' : 'Pending', color: '#94a3b8', bg: '#f1f5f9' },
+              { value: 'DEVAM_EDIYOR', label: lang === 'tr' ? 'Devam Ediyor' : 'In Progress', color: '#3b82f6', bg: '#eff6ff' },
+              { value: 'GECIKTI', label: lang === 'tr' ? 'Gecikti' : 'Overdue', color: '#f59e0b', bg: '#fffbeb' },
+              { value: 'TAMAMLANDI', label: lang === 'tr' ? 'Tamamlandi' : 'Completed', color: '#22c55e', bg: '#f0fdf4' },
+            ] as const).map(s => {
+              const current = task.status.toUpperCase() === s.value
+              return (
+                <button key={s.value} type="button" onClick={() => !current && handleStatusChange(s.value)}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all active:scale-[0.98]"
+                  style={{ borderColor: current ? s.color : '#e2e8f0', background: current ? s.bg : '#fff' }}>
+                  <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0"
+                    style={{ borderColor: s.color, background: current ? s.color : 'transparent' }}>
+                    {current && (
+                      <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
+                        <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                  </div>
+                  <span className="text-sm font-semibold" style={{ color: current ? s.color : '#64748b' }}>{s.label}</span>
+                </button>
+              )
+            })}
+          </div>
         </div>
 
         {/* Checklist */}
@@ -184,37 +244,82 @@ export default function MobileTaskDetail() {
           </div>
         )}
 
-        {/* Photos section */}
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <p className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">{t('m_task_photos')}</p>
-          <div className="flex gap-2">
-            <label className="w-16 h-16 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer active:bg-slate-50">
-              <Camera size={22} className="text-slate-400" />
-              <input type="file" accept="image/*" capture="environment" className="hidden" multiple />
-            </label>
-            <label className="w-16 h-16 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer active:bg-slate-50">
-              <Video size={22} className="text-slate-400" />
-              <input type="file" accept="video/*" capture="environment" className="hidden" />
-            </label>
+        {/* Existing attachments */}
+        {attachments.length > 0 && (
+          <div className="bg-white rounded-xl border border-slate-200 p-4">
+            <p className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">{lang === 'tr' ? 'Eklenen Fotograflar' : 'Attached Photos'}</p>
+            <div className="flex gap-2 flex-wrap">
+              {attachments.map((att: any) => (
+                <div key={att.id} className="relative">
+                  <img src={`${API_BASE.replace('/api/v1', '')}${att.url}`} alt={att.originalName} className="w-16 h-16 rounded-xl object-cover border border-slate-200" />
+                  <p className="text-[9px] text-slate-400 mt-0.5 truncate max-w-[64px]">{att.uploaderName}</p>
+                </div>
+              ))}
+            </div>
           </div>
-          <p className="text-[10px] text-slate-400 mt-2">{t('m_task_max_photos')} / {t('m_task_max_video')}</p>
+        )}
+
+        {/* Photo upload */}
+        <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <p className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">{lang === 'tr' ? 'Fotograf Ekle' : 'Add Photo'}</p>
+          <div className="flex gap-2 flex-wrap items-center">
+            <label className="w-16 h-16 rounded-xl border-2 border-dashed border-cyan-300 flex items-center justify-center cursor-pointer active:bg-cyan-50 bg-cyan-50/50">
+              <Camera size={22} className="text-cyan-500" />
+              <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhotoSelect} />
+            </label>
+            <label className="w-16 h-16 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer active:bg-slate-50">
+              <Image size={22} className="text-slate-400" />
+              <input type="file" accept="image/*" multiple className="hidden" onChange={handlePhotoSelect} />
+            </label>
+            {photos.map((p, i) => (
+              <div key={i} className="relative w-16 h-16 rounded-xl overflow-hidden border border-cyan-200">
+                <img src={URL.createObjectURL(p)} alt="" className="w-full h-full object-cover" />
+                <button type="button" onClick={() => setPhotos(prev => prev.filter((_, j) => j !== i))}
+                  className="absolute top-0.5 right-0.5 bg-black/50 rounded-full p-0.5"><X size={10} className="text-white" /></button>
+              </div>
+            ))}
+          </div>
+          {photos.length > 0 && (
+            <button type="button" onClick={handleUploadPhotos} disabled={uploading}
+              className="mt-3 w-full py-2 rounded-lg bg-cyan-600 text-white text-sm font-bold disabled:opacity-50 active:scale-[0.98]">
+              {uploading ? <Loader2 size={14} className="animate-spin inline mr-1" /> : null}
+              {lang === 'tr' ? `${photos.length} Fotografi Gonder` : `Send ${photos.length} Photo(s)`}
+            </button>
+          )}
         </div>
 
-        {/* Comment */}
+        {/* Comments list */}
+        {comments.length > 0 && (
+          <div className="bg-white rounded-xl border border-slate-200 p-4">
+            <p className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">{lang === 'tr' ? 'Yorumlar' : 'Comments'}</p>
+            <div className="space-y-2">
+              {comments.map((c: any) => (
+                <div key={c.id} className="p-2.5 rounded-lg bg-slate-50">
+                  <p className="text-[11px] font-semibold text-slate-700">{c.userName}</p>
+                  <p className="text-[12px] text-slate-600 mt-0.5">{c.content}</p>
+                  <p className="text-[9px] text-slate-400 mt-1">{new Date(c.createdAt).toLocaleString('tr-TR')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Comment input */}
         <div className="bg-white rounded-xl border border-slate-200 p-3 flex items-end gap-2">
           <textarea
             value={comment}
             onChange={e => setComment(e.target.value)}
-            placeholder={t('m_task_comment')}
+            placeholder={lang === 'tr' ? 'Yorum yazin...' : 'Write a comment...'}
             rows={2}
             className="flex-1 text-sm border-none resize-none focus:outline-none text-slate-700 placeholder:text-slate-400"
           />
           <button
             type="button"
-            disabled={!comment.trim()}
+            onClick={handleSendComment}
+            disabled={!comment.trim() || sending}
             className="p-2 rounded-lg bg-cyan-600 text-white disabled:opacity-30 active:scale-95"
           >
-            <Send size={16} />
+            {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
           </button>
         </div>
       </div>

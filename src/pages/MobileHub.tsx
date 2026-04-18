@@ -2,23 +2,28 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import {
   Smartphone, CheckSquare, MessageSquare, FileStack,
   Send, RefreshCw, WifiOff, Users, Plus, ChevronRight, X, Check, CheckCheck,
-  BookUser, Search, Loader2, ArrowLeft, Reply,
+  BookUser, Search, Loader2, ArrowLeft, Reply, Calendar, Flag, Tag, ClipboardList,
+  ListChecks, HelpCircle, ClipboardCheck, Hash, CircleDot, Layers, Sparkles, Copy,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useTasks, useDepartments, useUsers, createTask } from '../lib/hooks'
 import type { Task, Department, User } from '../types'
-import { TASK_STATUS_LABELS } from '../types'
+import { TASK_STATUS_LABELS, TASK_PRIORITY_LABELS, TASK_TYPE_LABELS } from '../types'
 import DraggableModal from '../components/ui/DraggableModal'
 import { useToolbarActions } from '../lib/useToolbarActions'
 import { api } from '../lib/api'
 
+/* ── Form types ── */
+type FormType = 'checklist' | 'soru_cevap' | 'denetim' | 'sayisal' | 'coktan_secmeli' | 'serbest'
+type FormTemplate = { id: string; name: string; formType: FormType; fields: number; uses: number; dept: string; required: boolean }
+
 /* ── Mock form templates (no backend endpoint yet) ── */
-const FORM_TEMPLATES = [
-  { id: 'f1', name: 'Günlük Üretim Formu',          fields: 8,  uses: 42, dept: 'Üretim',             required: true  },
-  { id: 'f2', name: 'Makine Bakım Kontrol Formu',    fields: 12, uses: 18, dept: 'Bakım & Onarım',     required: true  },
-  { id: 'f3', name: 'Kalite Kontrol Muayene Formu',  fields: 15, uses: 31, dept: 'Kalite Kontrol',     required: false },
-  { id: 'f4', name: 'Depo Sayım Formu',              fields: 6,  uses: 9,  dept: 'Lojistik',           required: false },
-  { id: 'f5', name: 'Olay / Kaza Bildirim Formu',    fields: 20, uses: 3,  dept: 'Tüm Departmanlar',  required: true  },
+const FORM_TEMPLATES: FormTemplate[] = [
+  { id: 'f1', name: 'Gunluk Uretim Formu',          formType: 'checklist',      fields: 8,  uses: 42, dept: 'Uretim',           required: true  },
+  { id: 'f2', name: 'Makine Bakim Kontrol Formu',    formType: 'denetim',        fields: 12, uses: 18, dept: 'Bakim & Onarim',   required: true  },
+  { id: 'f3', name: 'Kalite Kontrol Muayene Formu',  formType: 'denetim',        fields: 15, uses: 31, dept: 'Kalite Kontrol',   required: false },
+  { id: 'f4', name: 'Depo Sayim Formu',              formType: 'sayisal',        fields: 6,  uses: 9,  dept: 'Lojistik',         required: false },
+  { id: 'f5', name: 'Olay / Kaza Bildirim Formu',    formType: 'soru_cevap',     fields: 20, uses: 3,  dept: 'Tum Departmanlar', required: true  },
 ]
 
 /* ── Message & contact types ── */
@@ -76,6 +81,7 @@ function SyncBadge({ lastSync, isOnline }: { lastSync: string; isOnline: boolean
 function TaskBroadcast({ tasks, departments, users, onRefetch }: { tasks: Task[]; departments: Department[]; users: User[]; onRefetch: () => void }) {
   const activeTasks = tasks.filter(t => ['devam_ediyor', 'beklemede', 'gecikti'].includes(t.status))
   const [showBroadcast, setShowBroadcast] = useState(false)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
 
   return (
     <div className="space-y-4">
@@ -102,6 +108,15 @@ function TaskBroadcast({ tasks, departments, users, onRefetch }: { tasks: Task[]
         />
       )}
 
+      {selectedTask && (
+        <TaskDetailModal
+          task={selectedTask}
+          departments={departments}
+          users={users}
+          onClose={() => setSelectedTask(null)}
+        />
+      )}
+
       <div className="surface divide-y divide-zinc-100">
         {activeTasks.map(task => {
           const dept = departments.find(d => d.id === task.departmentId)
@@ -109,7 +124,11 @@ function TaskBroadcast({ tasks, departments, users, onRefetch }: { tasks: Task[]
           const total = task.checklist.length
 
           return (
-            <div key={task.id} className="flex items-center gap-4 px-4 py-3.5 hover:bg-zinc-50/60 transition-colors">
+            <div
+              key={task.id}
+              className="flex items-center gap-4 px-4 py-3.5 hover:bg-zinc-50/60 transition-colors cursor-pointer"
+              onClick={() => setSelectedTask(task)}
+            >
               <div className={clsx(
                 'w-1.5 h-10 rounded-full flex-shrink-0',
                 task.status === 'gecikti'      ? 'bg-red-500'  :
@@ -136,6 +155,119 @@ function TaskBroadcast({ tasks, departments, users, onRefetch }: { tasks: Task[]
         })}
       </div>
     </div>
+  )
+}
+
+/* ── Task Detail Modal ── */
+function TaskDetailModal({
+  task, departments, users, onClose,
+}: {
+  task:        Task
+  departments: Department[]
+  users:       User[]
+  onClose:     () => void
+}) {
+  const dept     = departments.find(d => d.id === task.departmentId)
+  const assignee = users.find(u => u.id === task.assigneeId)
+  const done     = task.checklist.filter(c => c.completed).length
+  const total    = task.checklist.length
+  const dueDate  = new Date(task.dueDate).toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' })
+
+  const priorityColors: Record<string, string> = {
+    dusuk:  'bg-zinc-100 text-zinc-600',
+    normal: 'bg-blue-50 text-blue-700',
+    yuksek: 'bg-amber-50 text-amber-700',
+    kritik: 'bg-red-50 text-red-700',
+  }
+
+  const statusColors: Record<string, string> = {
+    beklemede:    'bg-zinc-100 text-zinc-600',
+    devam_ediyor: 'bg-blue-50 text-blue-700',
+    gecikti:      'bg-red-50 text-red-700',
+    tamamlandi:   'bg-emerald-50 text-emerald-700',
+    iptal:        'bg-zinc-100 text-zinc-500',
+  }
+
+  return (
+    <DraggableModal title="Gorev Detayi" icon={<ClipboardList size={13} />} onClose={onClose} width={520}>
+      <div className="p-5 space-y-4">
+        {/* Title & Status */}
+        <div>
+          <h3 className="text-[15px] font-bold text-zinc-900">{task.title}</h3>
+          {task.description && (
+            <p className="text-[12px] text-zinc-500 mt-1 leading-relaxed">{task.description}</p>
+          )}
+        </div>
+
+        {/* Badges */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className={clsx('text-[10px] font-semibold px-2 py-0.5 rounded-full', statusColors[task.status])}>
+            {TASK_STATUS_LABELS[task.status]}
+          </span>
+          <span className={clsx('text-[10px] font-semibold px-2 py-0.5 rounded-full', priorityColors[task.priority])}>
+            <Flag size={9} className="inline mr-0.5" />
+            {TASK_PRIORITY_LABELS[task.priority]}
+          </span>
+          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700">
+            <Tag size={9} className="inline mr-0.5" />
+            {TASK_TYPE_LABELS[task.type]}
+          </span>
+        </div>
+
+        {/* Info grid */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="surface p-3 rounded-xl">
+            <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Departman</p>
+            <p className="text-[13px] font-semibold text-zinc-800 mt-1">{dept?.name ?? '-'}</p>
+          </div>
+          <div className="surface p-3 rounded-xl">
+            <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Atanan Kisi</p>
+            <p className="text-[13px] font-semibold text-zinc-800 mt-1">{assignee?.name ?? '-'}</p>
+          </div>
+          <div className="surface p-3 rounded-xl">
+            <p className="text-[10px] text-zinc-400 uppercase tracking-wider flex items-center gap-1">
+              <Calendar size={10} /> Bitis Tarihi
+            </p>
+            <p className="text-[13px] font-semibold text-zinc-800 mt-1">{dueDate}</p>
+          </div>
+          <div className="surface p-3 rounded-xl">
+            <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Kontrol Listesi</p>
+            <p className="text-[13px] font-semibold text-zinc-800 mt-1">
+              {total > 0 ? `${done}/${total} tamamlandi` : 'Kontrol yok'}
+            </p>
+          </div>
+        </div>
+
+        {/* Checklist items */}
+        {total > 0 && (
+          <div>
+            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">Kontrol Listesi</p>
+            <div className="space-y-1">
+              {task.checklist.map(item => (
+                <div key={item.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-50/60">
+                  <div className={clsx(
+                    'w-4 h-4 rounded border flex items-center justify-center flex-shrink-0',
+                    item.completed ? 'bg-emerald-500 border-emerald-500' : 'border-zinc-300'
+                  )}>
+                    {item.completed && <Check size={10} className="text-white" />}
+                  </div>
+                  <span className={clsx(
+                    'text-[12px]',
+                    item.completed ? 'text-zinc-400 line-through' : 'text-zinc-700'
+                  )}>
+                    {item.title}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-2 pt-2 border-t border-zinc-100">
+          <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center text-[12px]">Kapat</button>
+        </div>
+      </div>
+    </DraggableModal>
   )
 }
 
@@ -253,9 +385,41 @@ function BroadcastTaskModal({
   )
 }
 
+const FORM_TYPE_META: Record<FormType, { label: string; description: string; icon: typeof ListChecks; color: string; bg: string }> = {
+  checklist:      { label: 'Kontrol Listesi',   description: 'Evet/Hayir kontrol maddeleri',       icon: ListChecks,     color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-100' },
+  soru_cevap:     { label: 'Soru-Cevap',        description: 'Acik uclu veya kisa metin sorulari', icon: HelpCircle,     color: 'text-blue-600',    bg: 'bg-blue-50 border-blue-100' },
+  denetim:        { label: 'Denetim/Muayene',   description: 'Gecti/Kaldi degerlendirme maddeleri', icon: ClipboardCheck, color: 'text-amber-600',   bg: 'bg-amber-50 border-amber-100' },
+  sayisal:        { label: 'Sayisal Veri',       description: 'Olcum, sicaklik, sayac vb. degerler',icon: Hash,           color: 'text-purple-600',  bg: 'bg-purple-50 border-purple-100' },
+  coktan_secmeli: { label: 'Coktan Secmeli',    description: 'Secenekler arasindan secim yapilir', icon: CircleDot,      color: 'text-pink-600',    bg: 'bg-pink-50 border-pink-100' },
+  serbest:        { label: 'Serbest Form',       description: 'Karisik alan tiplerinden olusan form',icon: Layers,        color: 'text-zinc-600',    bg: 'bg-zinc-50 border-zinc-200' },
+}
+
 /* ── TAB: Form Templates ── */
-type FormTemplate = { id: string; name: string; fields: number; uses: number; dept: string; required: boolean }
 const LS_FORM_TEMPLATES = 'actledger:form_templates'
+
+/* ── Default preset templates (per form type) ── */
+interface FormPreset {
+  name: string
+  formType: FormType
+  fields: number
+  dept: string
+  required: boolean
+  description: string
+}
+
+const FORM_PRESETS: FormPreset[] = [
+  { name: 'Gunluk Vardiya Kontrol Listesi',     formType: 'checklist',      fields: 12, dept: 'Uretim',           required: true,  description: 'Vardiya basinda ve sonunda yapilacak kontrollerin listesi' },
+  { name: 'Arac Hareket Oncesi Kontrol',         formType: 'checklist',      fields: 8,  dept: 'Lojistik',         required: true,  description: 'Arac cikisi oncesi guvenlik ve mekanik kontroller' },
+  { name: 'ISG Saha Denetim Formu',              formType: 'denetim',        fields: 20, dept: 'ISG',              required: true,  description: 'Is guvenligi saha denetim ve degerlendirme formu' },
+  { name: 'Ekipman Muayene Formu',               formType: 'denetim',        fields: 15, dept: 'Bakim & Onarim',   required: false, description: 'Ekipman ve makine periyodik muayene degerlendirmesi' },
+  { name: 'Musteri Memnuniyet Anketi',            formType: 'soru_cevap',     fields: 10, dept: 'Tum Departmanlar', required: false, description: 'Musteri geri bildirim ve memnuniyet sorulari' },
+  { name: 'Olay/Kaza Bildirim Formu',            formType: 'soru_cevap',     fields: 18, dept: 'Tum Departmanlar', required: true,  description: 'Is kazasi veya olay sonrasi detayli bildirim' },
+  { name: 'Uretim Hatti Olcum Kaydi',            formType: 'sayisal',        fields: 10, dept: 'Uretim',           required: true,  description: 'Sicaklik, basinc, hiz gibi uretim parametreleri' },
+  { name: 'Enerji Tuketim Takip Formu',          formType: 'sayisal',        fields: 6,  dept: 'Tesis Yonetimi',   required: false, description: 'Gunluk elektrik, su, dogalgaz sayac degerleri' },
+  { name: 'Kalite Seviye Degerlendirmesi',        formType: 'coktan_secmeli', fields: 12, dept: 'Kalite Kontrol',   required: false, description: 'Urun kalite seviyesi ve siniflandirma formu' },
+  { name: 'Personel Gorev Degerlendirmesi',       formType: 'coktan_secmeli', fields: 8,  dept: 'Insan Kaynaklari', required: false, description: 'Performans ve yetkinlik degerlendirme anketi' },
+  { name: 'Genel Saha Rapor Formu',              formType: 'serbest',        fields: 10, dept: 'Tum Departmanlar', required: false, description: 'Metin, sayi ve seceneklerin bir arada oldugu rapor' },
+]
 
 function loadFormTemplates(): FormTemplate[] {
   try {
@@ -277,18 +441,19 @@ function saveFormTemplate(form: FormTemplate) {
 function FormTemplates({ departments }: { departments: Department[] }) {
   const [templates, setTemplates] = useState<FormTemplate[]>(() => loadFormTemplates())
   const [showCreate, setShowCreate] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState<FormTemplate | null>(null)
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-[12px] text-zinc-500">{templates.length} form şablonu tanımlı</p>
+        <p className="text-[12px] text-zinc-500">{templates.length} form sablonu tanimli</p>
         <button
           type="button"
           className="btn-primary btn-sm"
           onClick={() => setShowCreate(true)}
-          data-help="Yeni form şablonu oluştur"
+          data-help="Yeni form sablonu olustur"
         >
-          <Plus size={13} /> Form Oluştur
+          <Plus size={13} /> Form Olustur
         </button>
       </div>
 
@@ -305,31 +470,78 @@ function FormTemplates({ departments }: { departments: Department[] }) {
       )}
 
       <div className="surface divide-y divide-zinc-100">
-        {templates.map(f => (
-          <div key={f.id} className="flex items-center gap-4 px-4 py-3.5 hover:bg-zinc-50/60 transition-colors cursor-pointer">
-            <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center flex-shrink-0">
-              <FileStack size={16} className="text-blue-500" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <p className="text-[13px] font-semibold text-zinc-900">{f.name}</p>
-                {f.required && <span className="badge-danger text-[9px]">Zorunlu</span>}
+        {templates.map(f => {
+          const meta = FORM_TYPE_META[f.formType] ?? FORM_TYPE_META.serbest
+          const TypeIcon = meta.icon
+          return (
+            <div key={f.id}
+              onClick={() => setSelectedTemplate(f)}
+              className="flex items-center gap-4 px-4 py-3.5 hover:bg-zinc-50/60 transition-colors cursor-pointer">
+              <div className={clsx('w-9 h-9 rounded-xl border flex items-center justify-center flex-shrink-0', meta.bg)}>
+                <TypeIcon size={16} className={meta.color} />
               </div>
-              <p className="text-[11px] text-zinc-400 mt-0.5">{f.dept} · {f.fields} alan</p>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-[13px] font-semibold text-zinc-900">{f.name}</p>
+                  {f.required && <span className="badge-danger text-[9px]">Zorunlu</span>}
+                </div>
+                <p className="text-[11px] text-zinc-400 mt-0.5">{f.dept} - {meta.label} - {f.fields} alan</p>
+              </div>
+              <div className="text-right flex-shrink-0">
+                <p className="text-[12px] font-semibold text-zinc-700">{f.uses}</p>
+                <p className="text-[10px] text-zinc-400">kullanim</p>
+              </div>
+              <ChevronRight size={14} className="text-zinc-300 flex-shrink-0" />
             </div>
-            <div className="text-right flex-shrink-0">
-              <p className="text-[12px] font-semibold text-zinc-700">{f.uses}</p>
-              <p className="text-[10px] text-zinc-400">kullanım</p>
-            </div>
-            <ChevronRight size={14} className="text-zinc-300 flex-shrink-0" />
-          </div>
-        ))}
+          )
+        })}
       </div>
+
+      {/* Template detail modal */}
+      {selectedTemplate && (() => {
+        const meta = FORM_TYPE_META[selectedTemplate.formType] ?? FORM_TYPE_META.serbest
+        const TypeIcon = meta.icon
+        return (
+          <DraggableModal title={selectedTemplate.name} icon={<TypeIcon size={13} />} onClose={() => setSelectedTemplate(null)} width={480}>
+            <div className="p-5 space-y-4">
+              {/* Form type badge */}
+              <div className={clsx('inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-semibold', meta.bg, meta.color)}>
+                <TypeIcon size={12} /> {meta.label}
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="surface p-3 rounded-xl text-center">
+                  <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Departman</p>
+                  <p className="text-[13px] font-semibold text-zinc-800 mt-1">{selectedTemplate.dept}</p>
+                </div>
+                <div className="surface p-3 rounded-xl text-center">
+                  <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Alan Sayisi</p>
+                  <p className="text-[13px] font-semibold text-zinc-800 mt-1">{selectedTemplate.fields}</p>
+                </div>
+                <div className="surface p-3 rounded-xl text-center">
+                  <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Kullanim</p>
+                  <p className="text-[13px] font-semibold text-zinc-800 mt-1">{selectedTemplate.uses}</p>
+                </div>
+                <div className="surface p-3 rounded-xl text-center">
+                  <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Durum</p>
+                  <p className="text-[13px] font-semibold mt-1">
+                    {selectedTemplate.required
+                      ? <span className="text-red-600">Zorunlu</span>
+                      : <span className="text-emerald-600">Opsiyonel</span>}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-2 border-t border-zinc-100">
+                <button type="button" onClick={() => setSelectedTemplate(null)} className="btn-secondary flex-1 justify-center text-[12px]">Kapat</button>
+              </div>
+            </div>
+          </DraggableModal>
+        )
+      })()}
     </div>
   )
 }
 
-/* ── Create form template modal ── */
+/* ── Create form template modal (2-step: type selection + customize) ── */
 function CreateFormTemplateModal({
   departments, onClose, onCreated,
 }: {
@@ -337,17 +549,35 @@ function CreateFormTemplateModal({
   onClose:     () => void
   onCreated:   (form: FormTemplate) => void
 }) {
+  const [step,     setStep]     = useState<'type' | 'customize'>('type')
+  const [formType, setFormType] = useState<FormType | null>(null)
   const [name,     setName]     = useState('')
-  const [dept,     setDept]     = useState('Tüm Departmanlar')
+  const [dept,     setDept]     = useState('Tum Departmanlar')
   const [fields,   setFields]   = useState(5)
   const [required, setRequired] = useState(false)
 
-  const canSave = name.trim().length > 0
+  const canSave = name.trim().length > 0 && formType
+
+  const handleSelectType = (type: FormType) => {
+    setFormType(type)
+    setStep('customize')
+  }
+
+  const handleSelectPreset = (preset: FormPreset) => {
+    setFormType(preset.formType)
+    setName(preset.name)
+    setDept(preset.dept)
+    setFields(preset.fields)
+    setRequired(preset.required)
+    setStep('customize')
+  }
 
   const handleSave = () => {
+    if (!formType) return
     onCreated({
       id:       `f${Date.now()}`,
       name:     name.trim(),
+      formType,
       dept,
       fields,
       uses:     0,
@@ -355,38 +585,155 @@ function CreateFormTemplateModal({
     })
   }
 
+  const matchingPresets = formType ? FORM_PRESETS.filter(p => p.formType === formType) : []
+
   return (
-    <DraggableModal title="Yeni Form Şablonu" icon={<FileStack size={13} />} onClose={onClose} width={460}>
-      <div className="p-5 space-y-3">
-        <div>
-          <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">Form Adı *</label>
-          <input className="input" placeholder="ör. Günlük Vardiya Devir Formu" value={name}
-            onChange={e => setName(e.target.value)} />
-        </div>
-        <div>
-          <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">Departman</label>
-          <select className="select" value={dept} onChange={e => setDept(e.target.value)}>
-            <option value="Tüm Departmanlar">Tüm Departmanlar</option>
-            {departments.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">Alan Sayısı</label>
-          <input type="number" min={1} max={50} className="input" value={fields}
-            onChange={e => setFields(Number(e.target.value))} />
-        </div>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" checked={required} onChange={e => setRequired(e.target.checked)}
-            className="rounded border-zinc-300 text-indigo-600" />
-          <span className="text-[12px] text-zinc-700">Zorunlu form (her vardiyada doldurulur)</span>
-        </label>
-        <div className="flex gap-2 pt-2 border-t border-zinc-100">
-          <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center text-[12px]">İptal</button>
-          <button type="button" disabled={!canSave} onClick={handleSave}
-            className="btn-primary flex-1 justify-center text-[12px]">
-            <Check size={12} /> Oluştur
-          </button>
-        </div>
+    <DraggableModal title="Yeni Form Sablonu" icon={<FileStack size={13} />} onClose={onClose} width={step === 'type' ? 600 : 480}>
+      <div className="p-5 space-y-4">
+        {step === 'type' ? (
+          <>
+            {/* Step 1: Choose form type */}
+            <div>
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-3">Form Tipi Secin</p>
+              <div className="grid grid-cols-2 gap-2.5">
+                {(Object.entries(FORM_TYPE_META) as [FormType, typeof FORM_TYPE_META[FormType]][]).map(([key, meta]) => {
+                  const Icon = meta.icon
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => handleSelectType(key)}
+                      className={clsx(
+                        'flex items-start gap-3 p-3.5 rounded-xl border text-left transition-all',
+                        'hover:shadow-md hover:border-indigo-200 hover:bg-indigo-50/30',
+                        'border-zinc-200 bg-white',
+                      )}
+                    >
+                      <div className={clsx('w-8 h-8 rounded-lg border flex items-center justify-center flex-shrink-0 mt-0.5', meta.bg)}>
+                        <Icon size={15} className={meta.color} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12px] font-semibold text-zinc-900">{meta.label}</p>
+                        <p className="text-[10px] text-zinc-400 mt-0.5 leading-snug">{meta.description}</p>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Preset templates */}
+            <div>
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-1">
+                <Sparkles size={10} /> Hazir Sablonlar
+              </p>
+              <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
+                {FORM_PRESETS.map((preset, i) => {
+                  const meta = FORM_TYPE_META[preset.formType]
+                  const Icon = meta.icon
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => handleSelectPreset(preset)}
+                      className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-zinc-100 hover:border-indigo-200 hover:bg-indigo-50/30 transition-all text-left"
+                    >
+                      <div className={clsx('w-7 h-7 rounded-lg border flex items-center justify-center flex-shrink-0', meta.bg)}>
+                        <Icon size={13} className={meta.color} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12px] font-semibold text-zinc-800 truncate">{preset.name}</p>
+                        <p className="text-[10px] text-zinc-400 truncate">{preset.dept} - {meta.label} - {preset.fields} alan</p>
+                      </div>
+                      <Copy size={12} className="text-zinc-300 flex-shrink-0" />
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-zinc-100">
+              <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center text-[12px]">Iptal</button>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Step 2: Customize form details */}
+            {formType && (() => {
+              const meta = FORM_TYPE_META[formType]
+              const Icon = meta.icon
+              return (
+                <div className={clsx('flex items-center gap-2 px-3 py-2 rounded-lg border', meta.bg)}>
+                  <Icon size={14} className={meta.color} />
+                  <span className={clsx('text-[12px] font-semibold', meta.color)}>{meta.label}</span>
+                  <button
+                    type="button"
+                    onClick={() => { setStep('type'); setFormType(null); setName(''); setDept('Tum Departmanlar'); setFields(5); setRequired(false) }}
+                    className="ml-auto text-zinc-400 hover:text-zinc-600"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              )
+            })()}
+
+            {/* Matching presets for selected type */}
+            {matchingPresets.length > 0 && !name && (
+              <div>
+                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+                  <Sparkles size={10} /> Bu tipe uygun hazir sablonlar
+                </p>
+                <div className="space-y-1">
+                  {matchingPresets.map((preset, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => handleSelectPreset(preset)}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg border border-zinc-100 hover:border-indigo-200 hover:bg-indigo-50/30 transition-all text-left"
+                    >
+                      <Copy size={11} className="text-zinc-400 flex-shrink-0" />
+                      <span className="text-[11px] font-medium text-zinc-700 truncate">{preset.name}</span>
+                      <span className="text-[10px] text-zinc-400 ml-auto flex-shrink-0">{preset.fields} alan</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">Form Adi *</label>
+              <input className="input" placeholder="or. Gunluk Vardiya Devir Formu" value={name}
+                onChange={e => setName(e.target.value)} />
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">Departman</label>
+              <select className="select" value={dept} onChange={e => setDept(e.target.value)}>
+                <option value="Tum Departmanlar">Tum Departmanlar</option>
+                {departments.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">Alan Sayisi</label>
+              <input type="number" min={1} max={50} className="input" value={fields}
+                onChange={e => setFields(Number(e.target.value))} />
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={required} onChange={e => setRequired(e.target.checked)}
+                className="rounded border-zinc-300 text-indigo-600" />
+              <span className="text-[12px] text-zinc-700">Zorunlu form (her vardiyada doldurulur)</span>
+            </label>
+            <div className="flex gap-2 pt-2 border-t border-zinc-100">
+              <button type="button" onClick={() => { setStep('type'); setFormType(null); setName(''); setDept('Tum Departmanlar'); setFields(5); setRequired(false) }}
+                className="btn-secondary flex-1 justify-center text-[12px]">
+                <ArrowLeft size={12} /> Geri
+              </button>
+              <button type="button" disabled={!canSave} onClick={handleSave}
+                className="btn-primary flex-1 justify-center text-[12px]">
+                <Check size={12} /> Olustur
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </DraggableModal>
   )

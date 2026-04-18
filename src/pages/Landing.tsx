@@ -6,6 +6,7 @@ import {
   Cookie, Smartphone, Monitor, ClipboardList, Camera, MessageSquare,
   Upload, Building2, Lock, Languages, FileSpreadsheet, Eye, EyeOff, X, Loader2,
   Map, Flame, Cpu, Package, Send, MinusCircle,
+  Workflow, FolderOpen, Radio, ListChecks, Boxes, GitBranch,
 } from 'lucide-react'
 import BrandMark from '../components/ui/BrandMark'
 import { SECTORS } from '../data/sectors'
@@ -24,7 +25,7 @@ const T = {
     navContact: '\u0130leti\u015fim',
     signIn: 'Giri\u015f Yap',
     mobileLogin: 'Mobil Giri\u015f',
-    heroTitle: 'Operasyonel M\u00fckemmellik \u0130\u00e7in Tasarland\u0131',
+    heroTitle: 'Operasyonel M\u00fckemmellik \u0130\u00e7in D\u00fcnyada Bir \u0130lk Olarak Tasarland\u0131',
     heroSubtitle: 'Kurumsal operasyon y\u00f6netim platformu. Sekt\u00f6r\u00fcn\u00fcze \u00f6zel KPI \u015fablonlar\u0131, yapay zeka destekli analitik ve ger\u00e7ek zamanl\u0131 saha takibi.',
     heroDemo: 'Demo Talep Et',
     heroSignIn: 'Giri\u015f Yap',
@@ -99,14 +100,14 @@ const T = {
     pf3Title: 'G\u00f6rev Atama & Takip',
     pf3Body: 'G\u00f6rev olu\u015fturun, ekip \u00fcyelerine atay\u0131n, ilerlemeyi takip edin. Otomatik hat\u0131rlatmalar ve eskalasyon kurallar\u0131 sa\u011flar.',
     pf3Benefit: 'G\u00f6rev tamamlanma oran\u0131n\u0131 %45 art\u0131r\u0131n',
-    pf4Title: 'Foto\u011fraf/Video ile Saha Raporlar\u0131',
+    pf4Title: 'Foto\u011fraf ile Saha Raporlar\u0131',
     pf4Body: 'Saha g\u00f6rselleri ile zenginle\u015ftirilmi\u015f raporlar. Konum ve zaman damgas\u0131 ile do\u011frulanm\u0131\u015f veriler.',
     pf4Benefit: 'Raporlama s\u00fcresini %70 k\u0131salt\u0131n',
     pf5Title: 'OperIQ AI Analitik & \u0130\u00e7g\u00f6r\u00fcler',
     pf5Body: 'Yapay zeka motorumuz t\u00fcm saha verilerini analiz eder, anomalileri tespit eder, risk skorlar\u0131 \u00fcretir ve aksiyon \u00f6nerir.',
     pf5Benefit: 'Proaktif karar alma ile maliyetleri %30 d\u00fc\u015f\u00fcr\u00fcn',
     pf6Title: 'Mesajla\u015fma & \u0130leti\u015fim',
-    pf6Body: 'Platform i\u00e7i mesajla\u015fma, bildirimler ve duyurular. Ekipler aras\u0131 koordinasyonu g\u00fc\u00e7lendirin.',
+    pf6Body: 'Platform i\u00e7i, mobil-mobil ve platform-mobil aras\u0131 mesajla\u015fma, bildirimler ve duyurular. Ekipler aras\u0131 koordinasyonu g\u00fc\u00e7lendirin.',
     pf6Benefit: '\u0130leti\u015fim s\u00fcresini %50 azalt\u0131n',
     pf7Title: 'KPI Y\u00f6netimi (5 Katmanl\u0131)',
     pf7Body: '7800+ haz\u0131r KPI \u015fablonu. Stratejik, taktik, operasyonel, bireysel ve AI katmanlar\u0131 ile kapsaml\u0131 \u00f6l\u00e7\u00fcm.',
@@ -127,18 +128,33 @@ const T = {
     pf12Body: '\u00dcretimden sa\u011fl\u0131\u011fa, in\u015faattan perakendeye 15+ sekt\u00f6r i\u00e7in haz\u0131r yap\u0131land\u0131rma, terminoloji ve KPI setleri.',
     pf12Benefit: 'Hemen ba\u015flay\u0131n, s\u0131f\u0131rdan kurmay\u0131n',
     // New features
-    nf1Title: 'Canl\u0131 Saha Haritas\u0131',
-    nf1Body: 'G\u00f6rev bazl\u0131 personel takibi, tesis ve ofis konumlar\u0131, DMS koordinat deste\u011fi. Acil durumlarda en yak\u0131n personele an\u0131nda g\u00f6rev atay\u0131n.',
-    nf1Benefit: 'Acil m\u00fcdahale s\u00fcresini %80 k\u0131salt\u0131n',
+    nf1Title: 'Canl\u0131 Operasyon & Tesis Haritas\u0131',
+    nf1Body: 'D\u0131\u015f mekan GPS takibi ve i\u00e7 mekan tesis kat planlar\u0131 tek panelde. Personel konumunu canl\u0131 izleyin, tesis planlar\u0131n\u0131z\u0131 y\u00fckleyin, departman alanlar\u0131 ve IoT cihazlar\u0131 plan \u00fczerine yerle\u015ftirin. Acil durumlarda en yak\u0131n personele an\u0131nda g\u00f6rev atay\u0131n.',
+    nf1Benefit: 'Operasyonunuzu d\u0131\u015far\u0131dan de\u011fil, i\u00e7eriden y\u00f6netin',
     nf2Title: 'Is\u0131 Haritas\u0131 Analiti\u011fi',
-    nf2Body: 'Personel yo\u011funlu\u011fu, IoT ar\u0131za korelasyonu ve darbo\u011faz tespiti. \u00dc\u00e7 katmanl\u0131 \u0131s\u0131l analiz ile operasyonel k\u00f6rleri ortadan kald\u0131r\u0131n.',
+    nf2Body: 'Personel yo\u011funlu\u011fu, IoT ar\u0131za korelasyonu ve darbo\u011faz tespiti. \u00dc\u00e7 katmanl\u0131 \u0131s\u0131l analiz ile operasyonunuzdaki k\u00f6r alanlar\u0131 ortadan kald\u0131r\u0131n.',
     nf2Benefit: 'Darbo\u011faz tespiti ile verimlili\u011fi %35 art\u0131r\u0131n',
     nf3Title: 'OperIQ Mobil Asistan',
     nf3Body: 'Saha personeline g\u00f6rev bazl\u0131 rehberlik, foto\u011fraf analizi, ad\u0131m ad\u0131m checklist ve teknik dok\u00fcman referans\u0131. Guided AI ile her ad\u0131mda y\u00f6nlendirme.',
     nf3Benefit: 'Saha hatalar\u0131n\u0131 %60 azalt\u0131n',
-    nf4Title: 'Ak\u0131ll\u0131 Envanter ve Veri Y\u00fckleme',
-    nf4Body: 'Excel, CSV veya SQL dosyan\u0131z\u0131 y\u00fckleyin - OperIQ s\u00fctunlar\u0131 otomatik e\u015fle\u015ftirir, format sorunlar\u0131n\u0131 \u00e7\u00f6zer. Manuel i\u015f y\u00fck\u00fc ve karma\u015f\u0131kl\u0131k ortadan kalkar.',
-    nf4Benefit: 'Veri aktar\u0131m s\u00fcresini %90 k\u0131salt\u0131n',
+    nf4Title: 'Stok ve Envanter Y\u00f6netimi',
+    nf4Body: 'Depo, raf ve lokasyon bazl\u0131 envanter takibi. Minimum stok uyar\u0131lar\u0131, otomatik sipari\u015f \u00f6nerileri ve yedek par\u00e7a y\u00f6netimi ile operasyonlar\u0131n\u0131z hi\u00e7 durmas\u0131n. Excel, CSV veya SQL ile toplu veri y\u00fckleme deste\u011fi.',
+    nf4Benefit: 'Stok maliyetlerini %40 d\u00fc\u015f\u00fcr\u00fcn, duraklamalar\u0131 s\u0131f\u0131rlay\u0131n',
+    nf5Title: 'Otomasyon Motoru',
+    nf5Body: 'Tekrarl\u0131 s\u00fcre\u00e7lerinizi otomatikle\u015ftirin. Tetikleyici-ko\u015ful-aksiyon yap\u0131s\u0131 ile g\u00f6rev atama, bildirim g\u00f6nderme, KPI g\u00fcncelleme ve e-posta tetikleme gibi i\u015flemleri insan m\u00fcdahalesi olmadan \u00e7al\u0131\u015ft\u0131r\u0131n.',
+    nf5Benefit: 'Manuel i\u015f y\u00fck\u00fcn\u00fc %75 azalt\u0131n',
+    nf6Title: '\u0130\u015f Ak\u0131\u015f\u0131 Olu\u015fturucu',
+    nf6Body: 'G\u00f6rsel s\u00fcr\u00fckle-b\u0131rak tasar\u0131mc\u0131 ile \u00e7ok ad\u0131ml\u0131 i\u015f ak\u0131\u015flar\u0131 olu\u015fturun. Onay, bildirim, dallanma ve paralel g\u00f6rev zincirleri tan\u0131mlay\u0131n. S\u00fcre\u00e7lerinizi kodlamadan dijitalle\u015ftirin.',
+    nf6Benefit: 'S\u00fcre\u00e7 onay s\u00fcrelerini %65 k\u0131salt\u0131n',
+    nf7Title: 'Dosya Y\u00f6netimi',
+    nf7Body: 'Departman ve rol bazl\u0131 eri\u015fim kontroll\u00fc dosya deposu. Word, Excel, PDF ve g\u00f6rselleri do\u011frudan platform i\u00e7inde salt okunur a\u00e7\u0131n. Klas\u00f6r hiyerar\u015fisi ve yetki y\u00f6netimi ile kurumsal dok\u00fcmanlar\u0131n\u0131z g\u00fcvende.',
+    nf7Benefit: 'Dok\u00fcman eri\u015fim s\u00fcresini %80 k\u0131salt\u0131n',
+    nf8Title: 'Mobil Merkez & G\u00f6rev Yay\u0131n\u0131',
+    nf8Body: 'Saha ekiplerine anl\u0131k g\u00f6rev yay\u0131nlay\u0131n, cihaz senkronizasyonunu izleyin ve mobil mesajla\u015fma ile koordinasyonu sa\u011flay\u0131n. Tek ekrandan t\u00fcm mobil operasyonlar\u0131 y\u00f6netin.',
+    nf8Benefit: 'Saha koordinasyon s\u00fcresini %55 k\u0131salt\u0131n',
+    nf9Title: '\u00c7ok Tipli Form \u015eablonlar\u0131',
+    nf9Body: 'Kontrol listesi, soru-cevap, denetim/muayene, say\u0131sal veri giri\u015fi ve \u00e7oktan se\u00e7meli form tipleri. 11+ haz\u0131r \u015fablon ile an\u0131nda ba\u015flay\u0131n veya s\u0131f\u0131rdan \u00f6zelle\u015ftirin.',
+    nf9Benefit: 'Form olu\u015fturma s\u00fcresini %90 k\u0131salt\u0131n',
     tryFree: 'ActLedger Platformu ve ActLedger Mobil\'i \u00dccretsiz Deneyin',
     platformVideoTitle: 'Platformu Ke\u015ffedin',
     platformVideoSubtitle: 'ActLedger\'in g\u00fcc\u00fcn\u00fc tek bir ekranda deneyimleyin.',
@@ -172,7 +188,7 @@ const T = {
     navContact: 'Contact',
     signIn: 'Sign In',
     mobileLogin: 'Mobile Login',
-    heroTitle: 'Engineered for Operational Excellence',
+    heroTitle: 'A World First, Engineered for Operational Excellence',
     heroSubtitle: 'Enterprise operations management platform. Sector-specific KPI templates, AI-powered analytics, and real-time field tracking.',
     heroDemo: 'Request Demo',
     heroSignIn: 'Sign In',
@@ -248,7 +264,7 @@ const T = {
     pf3Title: 'Task Assignment & Tracking',
     pf3Body: 'Create tasks, assign to team members, track progress. Automatic reminders and escalation rules.',
     pf3Benefit: 'Increase task completion rate by 45%',
-    pf4Title: 'Field Reports with Photo/Video',
+    pf4Title: 'Field Reports with Photo',
     pf4Body: 'Reports enriched with field visuals. Verified data with location and time stamps.',
     pf4Benefit: 'Cut reporting time by 70%',
     pf5Title: 'OperIQ AI Analytics & Insights',
@@ -278,18 +294,33 @@ const T = {
     // New features
     newFeaturesTitle: 'Next-Gen Operational Capabilities',
     newFeaturesSubtitle: 'Transform your operations with live maps, heatmaps, mobile AI, and smart inventory.',
-    nf1Title: 'Live Field Map',
-    nf1Body: 'Task-based personnel tracking, facility locations, DMS coordinate support. Instantly assign tasks to the nearest personnel in emergencies.',
-    nf1Benefit: 'Cut emergency response time by 80%',
+    nf1Title: 'Live Operations & Facility Map',
+    nf1Body: 'Outdoor GPS tracking and indoor facility floor plans in one panel. Monitor personnel live, upload floor plans, place department zones and IoT devices on plans. Instantly assign tasks to nearest personnel in emergencies.',
+    nf1Benefit: 'Manage operations from inside, not outside',
     nf2Title: 'Heatmap Analytics',
     nf2Body: 'Personnel density, IoT fault correlation, and bottleneck detection. Three-layer thermal analysis eliminates operational blind spots.',
     nf2Benefit: 'Improve efficiency by 35% with bottleneck detection',
     nf3Title: 'OperIQ Mobile Assistant',
     nf3Body: 'Task-based guidance for field personnel, photo analysis, step-by-step checklists, and technical document references. Guided AI at every step.',
     nf3Benefit: 'Reduce field errors by 60%',
-    nf4Title: 'Smart Inventory & Data Import',
-    nf4Body: 'Upload your Excel, CSV, or SQL file - OperIQ auto-maps columns, resolves format issues. No more manual work or complexity.',
-    nf4Benefit: 'Cut data migration time by 90%',
+    nf4Title: 'Stock & Inventory Management',
+    nf4Body: 'Warehouse, shelf, and location-based inventory tracking. Minimum stock alerts, automatic order suggestions, and spare parts management keep your operations running. Bulk data import via Excel, CSV, or SQL.',
+    nf4Benefit: 'Cut stock costs by 40%, eliminate downtime',
+    nf5Title: 'Automation Engine',
+    nf5Body: 'Automate your repetitive processes. Trigger-condition-action structure runs task assignments, notifications, KPI updates, and email triggers without human intervention.',
+    nf5Benefit: 'Reduce manual workload by 75%',
+    nf6Title: 'Workflow Builder',
+    nf6Body: 'Create multi-step workflows with a visual drag-and-drop designer. Define approvals, notifications, branching, and parallel task chains. Digitize your processes without coding.',
+    nf6Benefit: 'Cut process approval times by 65%',
+    nf7Title: 'File Management',
+    nf7Body: 'File repository with department and role-based access control. Open Word, Excel, PDF, and images directly in the platform in read-only mode. Folder hierarchy and permission management keeps your documents secure.',
+    nf7Benefit: 'Cut document access time by 80%',
+    nf8Title: 'Mobile Hub & Task Broadcast',
+    nf8Body: 'Broadcast tasks to field teams instantly, monitor device synchronization, and coordinate via mobile messaging. Manage all mobile operations from a single screen.',
+    nf8Benefit: 'Cut field coordination time by 55%',
+    nf9Title: 'Multi-type Form Templates',
+    nf9Body: 'Checklist, Q&A, inspection, numeric data entry, and multiple-choice form types. Start instantly with 11+ ready templates or customize from scratch.',
+    nf9Benefit: 'Cut form creation time by 90%',
     tryFree: 'Try ActLedger Platform & ActLedger Mobile for Free',
     platformVideoTitle: 'Explore the Platform',
     platformVideoSubtitle: 'Experience the power of ActLedger on a single screen.',
@@ -361,9 +392,7 @@ function ScrollGrowVideo({ src }: { src: string }) {
           border: progress > 0.9 ? 'none' : '1px solid rgba(6,182,212,0.15)',
         }}
       >
-        <video autoPlay muted loop playsInline className="w-full block">
-          <source src={src} type="video/mp4" />
-        </video>
+        <video autoPlay muted loop playsInline src={src} className="w-full block" />
         <div className="absolute inset-0 pointer-events-none"
           style={{
             background: `linear-gradient(to top, rgba(15,23,42,${0.15 * (1 - progress)}) 0%, transparent 20%, transparent 80%, rgba(15,23,42,${0.08 * (1 - progress)}) 100%)`,
@@ -1634,43 +1663,45 @@ export default function Landing() {
             <Reveal delay={300}>
               <div className="relative">
                 <DashboardMockup />
-                {/* Floating Gantt chart - top right */}
+                {/* Floating Gantt + Donut stacked - top right */}
                 <div
-                  className="absolute rounded-2xl overflow-hidden shadow-2xl animate-float"
+                  className="absolute flex flex-col gap-3"
                   style={{
                     top: '-60px',
                     right: '-40px',
-                    width: '220px',
-                    height: '180px',
-                    animationDelay: '0.5s',
-                    background: 'rgba(255,255,255,0.95)',
-                    border: '2px solid rgba(99,102,241,0.25)',
-                    backdropFilter: 'blur(12px)',
-                    padding: '12px',
                     zIndex: 10,
                   }}
                 >
-                  <p className="text-[10px] font-bold tracking-wider mb-1" style={{ color: '#6366f1' }}>Timeline</p>
-                  <AnimatedGantt />
-                </div>
-                {/* Floating Donut chart - bottom left */}
-                <div
-                  className="absolute rounded-2xl overflow-hidden shadow-2xl animate-float"
-                  style={{
-                    bottom: '-60px',
-                    left: '-40px',
-                    width: '200px',
-                    height: '210px',
-                    animationDelay: '1.5s',
-                    background: 'rgba(255,255,255,0.95)',
-                    border: '2px solid rgba(13,148,136,0.25)',
-                    backdropFilter: 'blur(12px)',
-                    padding: '12px',
-                    zIndex: 10,
-                  }}
-                >
-                  <p className="text-[10px] font-bold tracking-wider mb-1" style={{ color: '#0d9488' }}>Task Status</p>
-                  <AnimatedDonut />
+                  <div
+                    className="rounded-2xl overflow-hidden shadow-2xl animate-float"
+                    style={{
+                      width: '220px',
+                      height: '180px',
+                      animationDelay: '0.5s',
+                      background: 'rgba(255,255,255,0.95)',
+                      border: '2px solid rgba(99,102,241,0.25)',
+                      backdropFilter: 'blur(12px)',
+                      padding: '12px',
+                    }}
+                  >
+                    <p className="text-[10px] font-bold tracking-wider mb-1" style={{ color: '#6366f1' }}>Timeline</p>
+                    <AnimatedGantt />
+                  </div>
+                  <div
+                    className="rounded-2xl overflow-hidden shadow-2xl animate-float"
+                    style={{
+                      width: '220px',
+                      height: '180px',
+                      animationDelay: '1.5s',
+                      background: 'rgba(255,255,255,0.95)',
+                      border: '2px solid rgba(13,148,136,0.25)',
+                      backdropFilter: 'blur(12px)',
+                      padding: '12px',
+                    }}
+                  >
+                    <p className="text-[10px] font-bold tracking-wider mb-1" style={{ color: '#0d9488' }}>Task Status</p>
+                    <AnimatedDonut />
+                  </div>
                 </div>
               </div>
             </Reveal>
@@ -1718,7 +1749,7 @@ export default function Landing() {
               </p>
             </div>
           </Reveal>
-          <ScrollGrowVideo src="/images/ActLedger_Explorer_new.mp4" />
+          <ScrollGrowVideo src="/images/Platformu_kesfedin.mov" />
         </div>
       </section>
 
@@ -1872,22 +1903,34 @@ export default function Landing() {
 
           {/* Alternating feature blocks */}
           {[
-            { title: t.pf1Title, body: t.pf1Body, benefit: t.pf1Benefit, img: '/images/team.PNG', icon: Smartphone, color: '#6366f1' },
-            { title: t.pf2Title, body: t.pf2Body, benefit: t.pf2Benefit, img: '/images/factory.PNG', icon: Monitor, color: '#0d9488' },
-            { title: t.pf3Title, body: t.pf3Body, benefit: t.pf3Benefit, img: '/images/construction.PNG', icon: ClipboardList, color: '#8b5cf6' },
-            { title: t.pf4Title, body: t.pf4Body, benefit: t.pf4Benefit, img: '/images/warehouse.PNG', icon: Camera, color: '#06b6d4' },
-            { title: t.pf5Title, body: t.pf5Body, benefit: t.pf5Benefit, img: '/images/hospital.PNG', icon: Zap, color: '#14b8a6' },
-            { title: t.pf6Title, body: t.pf6Body, benefit: t.pf6Benefit, img: '/images/HoReCa.PNG', icon: MessageSquare, color: '#0891b2' },
-            { title: t.pf7Title, body: t.pf7Body, benefit: t.pf7Benefit, img: '/images/fmcg.PNG', icon: BarChart3, color: '#6366f1' },
-            { title: t.nf4Title, body: t.nf4Body, benefit: t.nf4Benefit, img: '/images/warehouse.PNG', icon: Package, color: '#7c3aed' },
-            { title: t.pf9Title, body: t.pf9Body, benefit: t.pf9Benefit, img: '/images/public_sector.PNG', icon: Building2, color: '#8b5cf6' },
-            { title: t.pf10Title, body: t.pf10Body, benefit: t.pf10Benefit, img: '/images/energy.PNG', icon: Lock, color: '#06b6d4' },
-            { title: t.pf11Title, body: t.pf11Body, benefit: t.pf11Benefit, img: '/images/finance.PNG', icon: Languages, color: '#14b8a6' },
-            { title: t.pf12Title, body: t.pf12Body, benefit: t.pf12Benefit, img: '/images/transportation.PNG', icon: FileSpreadsheet, color: '#0891b2' },
-            { title: t.nf1Title, body: t.nf1Body, benefit: t.nf1Benefit, img: '/images/construction.PNG', icon: Map, color: '#2563eb' },
-            { title: t.nf2Title, body: t.nf2Body, benefit: t.nf2Benefit, img: '/images/energy.PNG', icon: Flame, color: '#dc2626' },
-            { title: t.nf3Title, body: t.nf3Body, benefit: t.nf3Benefit, img: '/images/team.PNG', icon: Cpu, color: '#0d9488' },
-            { title: t.pf8Title, body: t.pf8Body, benefit: t.pf8Benefit, img: '/images/retail.PNG', icon: Shield, color: '#0d9488' },
+            /* Temel operasyonel ozellikler */
+            { title: t.pf2Title, body: t.pf2Body, benefit: t.pf2Benefit, img: '/images/Dashboard.jpg',      icon: Monitor,       color: '#0d9488' },
+            { title: t.pf5Title, body: t.pf5Body, benefit: t.pf5Benefit, img: '/images/OperIQ.jpg',         icon: Zap,           color: '#14b8a6' },
+            { title: t.pf7Title, body: t.pf7Body, benefit: t.pf7Benefit, img: '/images/KPI.jpg',            icon: BarChart3,     color: '#6366f1' },
+            { title: t.pf3Title, body: t.pf3Body, benefit: t.pf3Benefit, img: '/images/Gorev.jpg',          icon: ClipboardList, color: '#8b5cf6' },
+            /* Otomasyon & is akisi */
+            { title: t.nf5Title, body: t.nf5Body, benefit: t.nf5Benefit, img: '/images/Automation.jpg',     icon: GitBranch,     color: '#ea580c' },
+            { title: t.nf6Title, body: t.nf6Body, benefit: t.nf6Benefit, img: '/images/Workflow.jpg',       icon: Workflow,      color: '#9333ea' },
+            /* Saha & mobil */
+            { title: t.pf1Title, body: t.pf1Body, benefit: t.pf1Benefit, img: '/images/Mobil_saha.jpg',     icon: Smartphone,    color: '#6366f1' },
+            { title: t.nf8Title, body: t.nf8Body, benefit: t.nf8Benefit, img: '/images/Mobil.jpg',          icon: Radio,         color: '#0891b2' },
+            { title: t.nf1Title, body: t.nf1Body, benefit: t.nf1Benefit, img: '/images/Canliharita.jpg',    icon: Map,           color: '#2563eb' },
+            { title: t.pf4Title, body: t.pf4Body, benefit: t.pf4Benefit, img: '/images/Fotograf.jpg',       icon: Camera,        color: '#06b6d4' },
+            { title: t.nf3Title, body: t.nf3Body, benefit: t.nf3Benefit, img: '/images/OperIQ_mobil.jpg',   icon: Cpu,           color: '#0d9488' },
+            /* Stok, dosya, form */
+            { title: t.nf4Title, body: t.nf4Body, benefit: t.nf4Benefit, img: '/images/Envanter.jpg',       icon: Boxes,         color: '#7c3aed' },
+            { title: t.nf7Title, body: t.nf7Body, benefit: t.nf7Benefit, img: '/images/File_management.jpg', icon: FolderOpen,   color: '#0369a1' },
+            { title: t.nf9Title, body: t.nf9Body, benefit: t.nf9Benefit, img: '/images/Form.PNG',           icon: ListChecks,    color: '#c026d3' },
+            /* Iletisim & analitik */
+            { title: t.pf6Title, body: t.pf6Body, benefit: t.pf6Benefit, img: '/images/Mesajlasma.jpg',     icon: MessageSquare, color: '#0891b2' },
+            { title: t.nf2Title, body: t.nf2Body, benefit: t.nf2Benefit, img: '/images/Heatmap.jpg',        icon: Flame,         color: '#dc2626' },
+            /* Guvenlik & yonetim */
+            { title: t.pf8Title, body: t.pf8Body, benefit: t.pf8Benefit, img: '/images/Emniyet.jpg',        icon: Shield,        color: '#0d9488' },
+            { title: t.pf9Title, body: t.pf9Body, benefit: t.pf9Benefit, img: '/images/Departman.jpg',      icon: Building2,     color: '#8b5cf6' },
+            { title: t.pf10Title, body: t.pf10Body, benefit: t.pf10Benefit, img: '/images/Rol.jpg',         icon: Lock,          color: '#06b6d4' },
+            /* Sektorel & dil */
+            { title: t.pf12Title, body: t.pf12Body, benefit: t.pf12Benefit, img: '/images/Sector.jpg',      icon: FileSpreadsheet, color: '#0891b2' },
+            { title: t.pf11Title, body: t.pf11Body, benefit: t.pf11Benefit, img: '/images/Language.jpg',    icon: Languages,     color: '#14b8a6' },
           ].map((feat, i) => {
             const imgLeft = i % 2 === 0
             return (
@@ -2621,9 +2664,14 @@ export default function Landing() {
                 ['Canl\u0131 harita', 'Var (operasyon haritas\u0131)', 'Yok'],
                 ['Is\u0131 haritas\u0131 (Heatmap)', 'Var', 'Yok'],
                 ['IoT entegrasyonu', 'Native', 'Ek mod\u00fcl veya s\u0131n\u0131rl\u0131'],
-                ['Envanter y\u00f6netimi', 'Ak\u0131ll\u0131 envanter y\u00f6netimi', 'S\u0131n\u0131rl\u0131'],
+                ['Stok ve envanter y\u00f6netimi', 'Var (depo/raf/lokasyon bazl\u0131, yedek par\u00e7a takibi)', 'S\u0131n\u0131rl\u0131'],
                 ['AI ile veri y\u00fckleme (Excel/CSV/SQL)', 'Var (AI veri anlama ve otomatik y\u00fckleme)', 'Yok'],
-                ['KPI y\u00f6netimi', 'Core feature', 'Ayr\u0131 mod\u00fcller'],
+                ['KPI y\u00f6netimi', 'Core feature (5 katmanl\u0131, 7800+ \u015fablon)', 'Ayr\u0131 mod\u00fcller'],
+                ['Otomasyon motoru', 'Var (tetikleyici-ko\u015ful-aksiyon ile tam otomasyon)', 'S\u0131n\u0131rl\u0131 veya ek yaz\u0131l\u0131m gerektirir'],
+                ['\u0130\u015f ak\u0131\u015f\u0131 olu\u015fturucu', 'Var (g\u00f6rsel s\u00fcr\u00fckle-b\u0131rak tasar\u0131mc\u0131)', 'Yok veya \u00e7ok karma\u015f\u0131k'],
+                ['Dosya y\u00f6netimi', 'Var (rol bazl\u0131, platform i\u00e7i salt okunur g\u00f6r\u00fcnt\u00fcleme)', 'S\u0131n\u0131rl\u0131 (sadece y\u00fckleme/indirme)'],
+                ['Mobil merkez & g\u00f6rev yay\u0131n\u0131', 'Var (anl\u0131k yay\u0131n, cihaz y\u00f6netimi)', 'Yok'],
+                ['\u00c7ok tipli form \u015fablonlar\u0131', 'Var (6 tip, 11+ haz\u0131r \u015fablon)', 'S\u0131n\u0131rl\u0131 (tek tip)'],
                 ['Acil durum eylem planlar\u0131', 'Var', 'Genellikle yok'],
                 ['Teknik dok\u00fcman analizi', 'Var (AI destekli analiz)', 'Yok'],
                 ['Mesajla\u015fma / ileti\u015fim', 'Var (operasyonel mesajla\u015fma)', 'Yok'],
@@ -2642,9 +2690,14 @@ export default function Landing() {
                 ['Live map', 'Yes (operations map)', 'No'],
                 ['Heatmap', 'Yes', 'No'],
                 ['IoT integration', 'Native', 'Add-on module or limited'],
-                ['Inventory management', 'Smart inventory management', 'Limited'],
+                ['Stock & inventory management', 'Yes (warehouse/shelf/location-based, spare parts)', 'Limited'],
                 ['AI data import (Excel/CSV/SQL)', 'Yes (AI data understanding & auto-import)', 'No'],
-                ['KPI management', 'Core feature', 'Separate modules'],
+                ['KPI management', 'Core feature (5-layer, 7800+ templates)', 'Separate modules'],
+                ['Automation engine', 'Yes (full trigger-condition-action automation)', 'Limited or requires extra software'],
+                ['Workflow builder', 'Yes (visual drag-and-drop designer)', 'No or very complex'],
+                ['File management', 'Yes (role-based, in-platform read-only viewing)', 'Limited (upload/download only)'],
+                ['Mobile hub & task broadcast', 'Yes (instant broadcast, device management)', 'No'],
+                ['Multi-type form templates', 'Yes (6 types, 11+ ready templates)', 'Limited (single type)'],
                 ['Emergency action plans', 'Yes', 'Usually none'],
                 ['Technical document analysis', 'Yes (AI-powered analysis)', 'No'],
                 ['Messaging / communication', 'Yes (operational messaging)', 'No'],
@@ -2654,7 +2707,7 @@ export default function Landing() {
                 ['Ease of use', 'Very easy', 'Hard to learn'],
                 ['Flexibility', 'Very high', 'Low or limited'],
               ]).map((row, i) => {
-                const isPrice = i === 17
+                const isPrice = i === 22
                 const actHas = !['Sinirli', 'Yok', 'Limited', 'No', 'None'].some(w => row[1].startsWith(w))
                 const tradBad = ['Yok', 'Sinirli', 'No', 'Limited', 'Low', 'Dusuk', 'Kisitli', 'Parcali', 'Fragmented', 'Hard', 'Ogrenmesi', 'Aylar', 'Months', 'High', 'Yuksek', 'Usually', 'Genellikle', 'Ek modul', 'Add-on', 'Separate', 'Ayri'].some(w => row[2].includes(w))
                 return (
@@ -2775,7 +2828,7 @@ export default function Landing() {
               <h2 className="font-extrabold tracking-tight" style={{ fontSize: 'clamp(42px, 5vw, 60px)', color: '#0f2b3d' }}>
                 {t.ctaTitle}
               </h2>
-              <p className="text-xl mt-4 max-w-xl mx-auto" style={{ color: 'rgba(15,43,61,0.55)' }}>
+              <p className="text-xl mt-4 mx-auto whitespace-nowrap" style={{ color: 'rgba(15,43,61,0.55)' }}>
                 {t.ctaSubtitle}
               </p>
               <div className="flex flex-wrap items-center justify-center gap-4 mt-10">

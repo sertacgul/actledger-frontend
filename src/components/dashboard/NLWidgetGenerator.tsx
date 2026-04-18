@@ -36,12 +36,14 @@ export default function NLWidgetGenerator({ onClose, onCreated }: Props) {
     if (BLOCKED_KEYWORDS.some(kw => lower.includes(kw))) return true
     // Must contain at least one data/chart/platform related term
     const DATA_TERMS = [
-      'gorev', 'task', 'departman', 'department', 'rapor', 'report',
-      'grafik', 'chart', 'tablo', 'table', 'goster', 'show', 'listele', 'list',
-      'dagılım', 'distribution', 'oran', 'rate', 'sayı', 'count', 'toplam', 'total',
+      'gorev', 'görev', 'task', 'departman', 'department', 'rapor', 'report',
+      'grafik', 'chart', 'tablo', 'table', 'goster', 'göster', 'show', 'listele', 'list',
+      'dagilim', 'dagılım', 'dağılım', 'distribution', 'oran', 'rate', 'sayi', 'sayı', 'count', 'toplam', 'total',
       'kpi', 'performans', 'performance', 'trend', 'analiz', 'analysis',
-      'kullanıcı', 'user', 'personel', 'staff', 'envanter', 'inventory',
-      'bar', 'pie', 'line', 'pasta', 'cizgi',
+      'kullanici', 'kullanıcı', 'user', 'personel', 'staff', 'envanter', 'inventory',
+      'bar', 'pie', 'line', 'pasta', 'cizgi', 'çizgi',
+      'stok', 'stock', 'gecik', 'overdue', 'tamamla', 'complete', 'bekle', 'pending',
+      'oncelik', 'öncelik', 'priority', 'durum', 'status', 'hafta', 'week', 'ay', 'month', 'gun', 'gün', 'day',
     ]
     return !DATA_TERMS.some(term => lower.includes(term))
   }

@@ -204,19 +204,48 @@ export default function IoT() {
             {devices.length === 0 ? 'Henüz IoT cihaz eklenmemiş' : 'Filtreye uygun cihaz bulunamadı'}
           </p>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.map(device => {
-            const sc = STATUS_CONFIG[device.status] ?? STATUS_CONFIG.OFFLINE
-            const dept = departments.find(d => d.id === device.departmentId)
-            return (
-              <div key={device.id} className="card p-4 hover:shadow-md transition-all">
-                {/* Header */}
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className={clsx('w-9 h-9 rounded-lg flex items-center justify-center', sc.bg)}>
-                      <sc.icon size={16} className={sc.color} />
-                    </div>
+      ) : (() => {
+        // Departman bazli gruplama
+        const grouped = new Map<string, IoTDevice[]>()
+        for (const d of filtered) {
+          const deptId = d.departmentId ?? '__none__'
+          if (!grouped.has(deptId)) grouped.set(deptId, [])
+          grouped.get(deptId)!.push(d)
+        }
+        // Sirayla: departmanli olanlar once, departmansiz en sonda
+        const sortedKeys = [...grouped.keys()].sort((a, b) => {
+          if (a === '__none__') return 1
+          if (b === '__none__') return -1
+          const dn = (id: string) => departments.find(d => d.id === id)?.name ?? ''
+          return dn(a).localeCompare(dn(b))
+        })
+        return (
+          <div className="space-y-6">
+            {sortedKeys.map(deptId => {
+              const deptDevices = grouped.get(deptId) ?? []
+              const dept = departments.find(d => d.id === deptId)
+              return (
+                <div key={deptId}>
+                  <div className="flex items-center gap-2 mb-3">
+                    {dept && <span className="w-3 h-3 rounded" style={{ background: dept.color }} />}
+                    <p className="text-[13px] font-bold" style={{ color: 'var(--text-1)' }}>
+                      {dept?.name ?? (lang === 'tr' ? 'Departmansiz Cihazlar' : 'Unassigned Devices')}
+                    </p>
+                    <span className="text-[11px] px-1.5 py-0.5 rounded-full" style={{ background: 'var(--border-subtle)', color: 'var(--text-3)' }}>
+                      {deptDevices.length}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {deptDevices.map(device => {
+                      const sc = STATUS_CONFIG[device.status] ?? STATUS_CONFIG.OFFLINE
+                      return (
+                        <div key={device.id} className="card p-4 hover:shadow-md transition-all">
+                          {/* Header */}
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-2.5">
+                              <div className={clsx('w-9 h-9 rounded-lg flex items-center justify-center', sc.bg)}>
+                                <sc.icon size={16} className={sc.color} />
+                              </div>
                     <div>
                       <p className="text-sm font-semibold text-slate-900 leading-tight">{device.name}</p>
                       <p className="text-[10px] text-slate-400 font-mono">{device.deviceId}</p>
@@ -281,8 +310,13 @@ export default function IoT() {
               </div>
             )
           })}
-        </div>
-      )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )
+      })()}
 
       {/* Create Modal */}
       {showCreate && (

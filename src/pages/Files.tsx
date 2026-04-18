@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import {
   FolderPlus, Folder, FileText, Trash2, Download, Upload, ChevronRight,
-  Home, Lock, Building2, Loader2, AlertCircle, X, Check,
+  Home, Lock, Building2, Loader2, AlertCircle, X, Check, Eye,
+  FileSpreadsheet, FileType,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { api, API_BASE, tokenStore } from '../lib/api'
@@ -10,6 +11,8 @@ import { useAuth } from '../context/AuthContext'
 import DraggableModal from '../components/ui/DraggableModal'
 import { ROLE_HIERARCHY, ROLE_LABELS, type UserRole } from '../types'
 import { useToolbarActions } from '../lib/useToolbarActions'
+import { renderAsync } from 'docx-preview'
+import * as XLSX from 'xlsx'
 
 // ── API types ───────────────────────────────────────────────────────────────
 interface FolderRow {
@@ -47,6 +50,7 @@ export default function Files() {
   const [error,      setError]      = useState<string | null>(null)
   const [showCreate, setShowCreate] = useState(false)
   const [uploading,  setUploading]  = useState(false)
+  const [previewFile, setPreviewFile] = useState<StoredFileRow | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Determine if current user can manage folders (MUDUR+ → role level >= 5)
@@ -303,7 +307,11 @@ export default function Files() {
           ) : (
             <div className="surface divide-y divide-zinc-100">
               {files.map(f => (
-                <div key={f.id} className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-50 transition-colors group">
+                <div
+                  key={f.id}
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-50 transition-colors group cursor-pointer"
+                  onClick={() => setPreviewFile(f)}
+                >
                   <FileText size={18} className="text-zinc-400 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-semibold text-zinc-800 truncate">{f.originalName}</p>
@@ -314,7 +322,15 @@ export default function Files() {
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       type="button"
-                      onClick={() => handleDownload(f.id, f.originalName)}
+                      onClick={(e) => { e.stopPropagation(); setPreviewFile(f) }}
+                      className="w-7 h-7 rounded flex items-center justify-center text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                      data-help="Dosyayi goruntule"
+                    >
+                      <Eye size={12} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); handleDownload(f.id, f.originalName) }}
                       className="w-7 h-7 rounded flex items-center justify-center text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
                       data-help="Dosyayı indir"
                     >
@@ -322,7 +338,7 @@ export default function Files() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleDeleteFile(f.id, f.originalName)}
+                      onClick={(e) => { e.stopPropagation(); handleDeleteFile(f.id, f.originalName) }}
                       className="w-7 h-7 rounded flex items-center justify-center text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                       data-help="Dosyayı kalıcı olarak sil"
                     >
@@ -336,6 +352,15 @@ export default function Files() {
         </div>
       )}
 
+      {/* File preview modal */}
+      {previewFile && (
+        <FilePreviewModal
+          file={previewFile}
+          onClose={() => setPreviewFile(null)}
+          onDownload={() => handleDownload(previewFile.id, previewFile.originalName)}
+        />
+      )}
+
       {/* Create folder modal */}
       {showCreate && (
         <CreateFolderModal
@@ -346,6 +371,267 @@ export default function Files() {
         />
       )}
     </div>
+  )
+}
+
+// ── File preview modal (read-only) ──────────────────────────────────────────
+const DOCX_MIMES = [
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/msword',
+]
+const XLSX_MIMES = [
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-excel',
+  'application/octet-stream',
+]
+const PPTX_MIMES = [
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'application/vnd.ms-powerpoint',
+]
+
+function FilePreviewModal({
+  file, onClose, onDownload,
+}: {
+  file:       StoredFileRow
+  onClose:    () => void
+  onDownload: () => void
+}) {
+  const [blobUrl, setBlobUrl]       = useState<string | null>(null)
+  const [loading, setLoading]       = useState(true)
+  const [error, setError]           = useState<string | null>(null)
+  const [textContent, setTextContent] = useState<string | null>(null)
+  const [xlsxHtml, setXlsxHtml]     = useState<string | null>(null)
+  const docxRef = useRef<HTMLDivElement>(null)
+  const blobRef = useRef<string | null>(null)
+
+  const ext = file.originalName.split('.').pop()?.toLowerCase() ?? ''
+  const isImage = file.mimeType.startsWith('image/')
+  const isPdf   = file.mimeType === 'application/pdf' || ext === 'pdf'
+  const isText  = file.mimeType.startsWith('text/') || file.mimeType === 'application/json' || file.mimeType === 'application/xml' || ['txt','csv','json','xml','log','md'].includes(ext)
+  const isDocx  = DOCX_MIMES.includes(file.mimeType) || ['doc','docx'].includes(ext)
+  const isXlsx  = XLSX_MIMES.includes(file.mimeType) || ['xls','xlsx'].includes(ext)
+  const isPptx  = PPTX_MIMES.includes(file.mimeType) || ['ppt','pptx'].includes(ext)
+  const canPreview = isImage || isPdf || isText || isDocx || isXlsx
+
+  // Fetch the file blob
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setError(null)
+
+    const token = tokenStore.get()
+    fetch(`${API_BASE}/files/${file.id}/download?inline=1`, {
+      headers: { Authorization: `Bearer ${token}` },
+      credentials: 'include',
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Dosya yuklenemedi')
+        return res.blob()
+      })
+      .then(async (blob) => {
+        if (cancelled) return
+
+        // Text files
+        if (isText) {
+          const text = await blob.text()
+          setTextContent(text)
+          setLoading(false)
+          return
+        }
+
+        // DOCX - render via docx-preview
+        if (isDocx) {
+          const arrayBuffer = await blob.arrayBuffer()
+          // Wait for the container to be mounted
+          setTimeout(() => {
+            if (cancelled || !docxRef.current) return
+            docxRef.current.innerHTML = ''
+            renderAsync(arrayBuffer, docxRef.current, undefined, {
+              className: 'docx-preview-content',
+              inWrapper: true,
+              ignoreWidth: false,
+              ignoreHeight: true,
+              ignoreFonts: false,
+              breakPages: true,
+              experimental: false,
+            })
+              .then(() => { if (!cancelled) setLoading(false) })
+              .catch((e) => { if (!cancelled) { setError(e.message); setLoading(false) } })
+          }, 50)
+          return
+        }
+
+        // XLSX - parse and render as HTML table
+        if (isXlsx) {
+          const arrayBuffer = await blob.arrayBuffer()
+          const workbook = XLSX.read(arrayBuffer, { type: 'array' })
+          const firstSheet = workbook.SheetNames[0]
+          if (firstSheet) {
+            const html = XLSX.utils.sheet_to_html(workbook.Sheets[firstSheet], { editable: false })
+            setXlsxHtml(html)
+          }
+          setLoading(false)
+          return
+        }
+
+        // Image / PDF - use blob URL
+        const url = URL.createObjectURL(blob)
+        blobRef.current = url
+        setBlobUrl(url)
+        setLoading(false)
+      })
+      .catch(e => {
+        if (!cancelled) { setError(e.message); setLoading(false) }
+      })
+
+    return () => {
+      cancelled = true
+      if (blobRef.current) {
+        URL.revokeObjectURL(blobRef.current)
+        blobRef.current = null
+      }
+    }
+  }, [file.id])
+
+  const fileSizeText = (b: number) => {
+    if (b < 1024)            return `${b} B`
+    if (b < 1024 * 1024)     return `${(b / 1024).toFixed(1)} KB`
+    if (b < 1024 ** 3)       return `${(b / 1024 / 1024).toFixed(1)} MB`
+    return `${(b / 1024 / 1024 / 1024).toFixed(2)} GB`
+  }
+
+  const previewWidth = canPreview ? 800 : 460
+
+  return (
+    <DraggableModal
+      title={file.originalName}
+      icon={<Eye size={13} />}
+      onClose={onClose}
+      width={previewWidth}
+    >
+      <div className="p-5 space-y-4">
+        {/* File info bar */}
+        <div className="flex items-center gap-3 text-[11px] text-zinc-400 flex-wrap">
+          <span>{fileSizeText(file.size)}</span>
+          <span>-</span>
+          <span>{file.mimeType}</span>
+          <span>-</span>
+          <span>{new Date(file.createdAt).toLocaleString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+          <span className="ml-auto text-[9px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-200">
+            Salt Okunur
+          </span>
+        </div>
+
+        {/* Preview area */}
+        <div className="min-h-[200px]">
+          {loading && !isDocx ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 size={24} className="animate-spin text-zinc-400" />
+            </div>
+          ) : error ? (
+            <div className="flex items-center gap-2 px-3 py-2 rounded border border-red-200 bg-red-50 text-[12px] text-red-700">
+              <AlertCircle size={14} /> {error}
+            </div>
+          ) : null}
+
+          {/* Image preview */}
+          {isImage && blobUrl && (
+            <div className="flex items-center justify-center bg-zinc-50 rounded-xl p-4 max-h-[550px] overflow-auto">
+              <img
+                src={blobUrl}
+                alt={file.originalName}
+                className="max-w-full max-h-[500px] object-contain rounded"
+                onContextMenu={e => e.preventDefault()}
+                draggable={false}
+              />
+            </div>
+          )}
+
+          {/* PDF preview */}
+          {isPdf && blobUrl && (
+            <iframe
+              src={`${blobUrl}#toolbar=1&navpanes=0&scrollbar=1&view=FitH`}
+              title={file.originalName}
+              className="w-full h-[550px] rounded-xl border border-zinc-200"
+            />
+          )}
+
+          {/* Text / JSON / XML preview */}
+          {isText && textContent !== null && (
+            <pre className="bg-zinc-50 rounded-xl p-4 text-[12px] text-zinc-700 font-mono max-h-[550px] overflow-auto whitespace-pre-wrap break-words border border-zinc-200 select-text">
+              {textContent}
+            </pre>
+          )}
+
+          {/* DOCX preview container */}
+          {isDocx && (
+            <>
+              {loading && (
+                <div className="flex items-center justify-center py-16">
+                  <Loader2 size={24} className="animate-spin text-zinc-400" />
+                </div>
+              )}
+              <div
+                ref={docxRef}
+                className="bg-white rounded-xl border border-zinc-200 max-h-[550px] overflow-auto"
+                style={{ pointerEvents: 'auto', userSelect: 'text' }}
+              />
+              <style>{`
+                .docx-preview-content { padding: 20px; }
+                .docx-preview-content table { border-collapse: collapse; width: 100%; }
+                .docx-preview-content td, .docx-preview-content th { border: 1px solid #e4e4e7; padding: 4px 8px; }
+                .docx-preview-content img { max-width: 100%; }
+              `}</style>
+            </>
+          )}
+
+          {/* XLSX preview */}
+          {isXlsx && xlsxHtml && (
+            <div
+              className="bg-white rounded-xl border border-zinc-200 max-h-[550px] overflow-auto text-[12px]"
+              style={{ pointerEvents: 'auto', userSelect: 'text' }}
+            >
+              <style>{`
+                .xlsx-preview table { border-collapse: collapse; width: 100%; min-width: 600px; }
+                .xlsx-preview td, .xlsx-preview th {
+                  border: 1px solid #e4e4e7; padding: 6px 10px; text-align: left;
+                  font-size: 12px; color: #3f3f46; white-space: nowrap;
+                }
+                .xlsx-preview th { background: #f4f4f5; font-weight: 600; color: #52525b; }
+                .xlsx-preview tr:hover td { background: #fafafa; }
+              `}</style>
+              <div className="xlsx-preview" dangerouslySetInnerHTML={{ __html: xlsxHtml }} />
+            </div>
+          )}
+
+          {/* Unsupported types */}
+          {!canPreview && !loading && !error && (
+            <div className="flex flex-col items-center justify-center py-12 text-zinc-400">
+              {isPptx ? (
+                <>
+                  <FileType size={40} className="mb-3 opacity-40" />
+                  <p className="text-[13px] font-medium text-zinc-600">PowerPoint dosyalari icin onizleme destegi henuz mevcut degil</p>
+                </>
+              ) : (
+                <>
+                  <FileText size={40} className="mb-3 opacity-40" />
+                  <p className="text-[13px] font-medium text-zinc-600">Bu dosya turunun onizlemesi desteklenmiyor</p>
+                </>
+              )}
+              <p className="text-[11px] mt-1">Dosyayi indirerek goruntuleyebilirsiniz</p>
+            </div>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-2 pt-2 border-t border-zinc-100">
+          <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center text-[12px]">Kapat</button>
+          <button type="button" onClick={onDownload} className="btn-primary flex-1 justify-center text-[12px]">
+            <Download size={12} /> Indir
+          </button>
+        </div>
+      </div>
+    </DraggableModal>
   )
 }
 
@@ -412,6 +698,7 @@ function CreateFolderModal({
           </label>
           <select className="select" value={minRoleLevel} onChange={e => setMinRoleLevel(Number(e.target.value))}>
             {(Object.entries(ROLE_HIERARCHY) as [UserRole, number][])
+              .filter(([role]) => role !== 'super_admin')
               .sort(([,a],[,b]) => a - b)
               .map(([role, level]) => (
                 <option key={role} value={level}>

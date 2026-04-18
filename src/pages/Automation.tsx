@@ -6,7 +6,7 @@ import {
   ArrowUpRight, Bell, MessageSquare, Cpu, RefreshCw, Flag,
   Loader2, ChevronRight, ChevronLeft, ToggleLeft, ToggleRight,
   Activity, Hash, Percent, ListChecks,
-  Copy,
+  Copy, Mail,
 } from 'lucide-react'
 import clsx from 'clsx'
 import {
@@ -29,7 +29,7 @@ type TriggerType =
 
 type ActionType =
   | 'CREATE_TASK' | 'ESCALATE_TASK'
-  | 'SEND_NOTIFICATION' | 'SEND_MESSAGE'
+  | 'SEND_NOTIFICATION' | 'SEND_MESSAGE' | 'SEND_EMAIL'
   | 'TRIGGER_OPERIQ'
   | 'UPDATE_TASK_STATUS' | 'UPDATE_TASK_PRIORITY'
 
@@ -83,6 +83,7 @@ const ACTIONS: Record<ActionType, { icon: typeof Plus; label: string; color: str
   TRIGGER_OPERIQ:        { icon: Cpu,           label: 'OperIQ Tetikle',           color: 'text-indigo-600',  bg: 'bg-indigo-50',  desc: 'OperIQ AI asistanini tetikleyerek analiz baslatir' },
   UPDATE_TASK_STATUS:    { icon: RefreshCw,     label: 'Gorev Durumu Guncelle',    color: 'text-cyan-600',    bg: 'bg-cyan-50',    desc: 'Gorev durumunu otomatik olarak gunceller' },
   UPDATE_TASK_PRIORITY:  { icon: Flag,          label: 'Gorev Onceligi Guncelle',  color: 'text-red-600',     bg: 'bg-red-50',     desc: 'Gorev onceligini otomatik olarak degistirir' },
+  SEND_EMAIL:            { icon: Mail,          label: 'E-posta Gonder',           color: 'text-orange-600',  bg: 'bg-orange-50',  desc: 'Otomatik e-posta bildirimi gonder' },
 }
 
 // ── Priority config ──────────────────────────────────────────────────────────
@@ -229,8 +230,11 @@ export default function Automation() {
       })
       closeWizard()
       refetchRules()
-    } catch (err) {
-      console.error('Automation rule create error:', err)
+    } catch (err: any) {
+      const msg = err?.message ?? ''
+      alert(lang === 'tr'
+        ? `Kural olusturulamadi: ${msg || 'Bilinmeyen hata. Lutfen tum alanlari kontrol edin.'}`
+        : `Failed to create rule: ${msg || 'Unknown error. Please check all fields.'}`)
     }
     setSaving(false)
   }
@@ -321,12 +325,6 @@ export default function Automation() {
             <option key={k} value={k}>{v.label}</option>
           ))}
         </select>
-        <button
-          onClick={openWizard}
-          className="ml-auto flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
-        >
-          <Plus size={16} /> Yeni Kural
-        </button>
       </div>
 
       {/* Rules list */}
@@ -565,7 +563,7 @@ export default function Automation() {
     <div className="space-y-4 px-5 py-4">
       <div>
         <h3 className="text-sm font-semibold text-zinc-800 mb-1">Tetikleyici Sec</h3>
-        <p className="text-xs text-zinc-500">Kuralun ne zaman calisacagini belirleyin</p>
+        <p className="text-xs text-zinc-500">Kuralın ne zaman çalışacağını belirleyin</p>
       </div>
       <div className="grid grid-cols-3 gap-3">
         {(Object.entries(TRIGGERS) as [TriggerType, typeof TRIGGERS[TriggerType]][]).map(([key, cfg]) => {
@@ -1003,6 +1001,111 @@ export default function Automation() {
             </div>
           </div>
         )}
+
+        {actionType === 'SEND_EMAIL' && (
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">Alici Kaynagi</label>
+              <select
+                value={wizard.actionConfig.recipientSource ?? 'assigned_user'}
+                onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, recipientSource: e.target.value } }))}
+                className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              >
+                <option value="assigned_user">Goreve Atanan Kisi</option>
+                <option value="task_creator">Gorevi Olusturan Kisi</option>
+                <option value="department_manager">Departman Muduru</option>
+                <option value="role_based">Role Gore</option>
+                <option value="specific_email">Belirli E-posta</option>
+                <option value="escalation_chain">Ust Yonetim Zinciri</option>
+              </select>
+            </div>
+
+            {wizard.actionConfig.recipientSource === 'specific_email' && (
+              <div>
+                <label className="block text-xs font-semibold text-zinc-600 mb-1">Belirli E-posta</label>
+                <input
+                  value={wizard.actionConfig.specificEmail ?? ''}
+                  onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, specificEmail: e.target.value } }))}
+                  placeholder="ornek@sirket.com"
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                />
+              </div>
+            )}
+
+            {wizard.actionConfig.recipientSource === 'role_based' && (
+              <div>
+                <label className="block text-xs font-semibold text-zinc-600 mb-1">Rol Secimi</label>
+                <select
+                  value={wizard.actionConfig.roleTarget ?? 'MUHENDIS'}
+                  onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, roleTarget: e.target.value } }))}
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                >
+                  <option value="MUHENDIS">Muhendis</option>
+                  <option value="SEF">Sef</option>
+                  <option value="SUPERVIZOR">Supervizor</option>
+                  <option value="MUDUR">Mudur</option>
+                  <option value="DIREKTOR">Direktor</option>
+                </select>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">CC E-posta (opsiyonel)</label>
+              <input
+                value={wizard.actionConfig.ccEmails ?? ''}
+                onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, ccEmails: e.target.value } }))}
+                placeholder="cc1@sirket.com, cc2@sirket.com"
+                className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">Email Sablonu</label>
+              <select
+                value={wizard.actionConfig.templateKey ?? 'general_notification'}
+                onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, templateKey: e.target.value } }))}
+                className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              >
+                <option value="kpi_alert">KPI Sapma Uyarisi</option>
+                <option value="task_delayed">Gorev Gecikme Bildirimi</option>
+                <option value="iot_alert">IoT Alarm Bildirimi</option>
+                <option value="stock_alert">Stok Uyarisi</option>
+                <option value="general_notification">Genel Bildirim</option>
+                <option value="custom">Ozel Sablon</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">Email Konusu</label>
+              <input
+                value={wizard.actionConfig.subjectTemplate ?? ''}
+                onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, subjectTemplate: e.target.value } }))}
+                placeholder="or. [ActLedger] {{department}} departmaninda kritik durum"
+                className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              />
+            </div>
+
+            {wizard.actionConfig.templateKey === 'custom' && (
+              <div>
+                <label className="block text-xs font-semibold text-zinc-600 mb-1">Email Icerigi</label>
+                <textarea
+                  rows={4}
+                  value={wizard.actionConfig.bodyTemplate ?? ''}
+                  onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, bodyTemplate: e.target.value } }))}
+                  placeholder="Kullanilabilir degiskenler: {{recipient_name}}, {{department}}, {{task_name}}, {{kpi_name}}, {{kpi_value}}, {{threshold}}, {{date}}"
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
+                />
+              </div>
+            )}
+
+            <div className="px-4 py-3 rounded-lg bg-zinc-50 border border-zinc-200">
+              <p className="text-[10px] font-semibold text-zinc-500 mb-1">Kullanilabilir Sablon Degiskenleri</p>
+              <p className="text-[10px] text-zinc-400">
+                {'{{recipient_name}}'}, {'{{department}}'}, {'{{task_name}}'}, {'{{kpi_name}}'}, {'{{kpi_value}}'}, {'{{threshold}}'}, {'{{date}}'}, {'{{sensor_name}}'}, {'{{stock_item}}'}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
@@ -1128,12 +1231,6 @@ export default function Automation() {
           </h1>
           <p className="text-xs text-zinc-500 mt-1">Otomatik kurallar ile is sureclerinizi hizlandirin</p>
         </div>
-        <button
-          onClick={openWizard}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
-        >
-          <Plus size={16} /> Yeni Kural
-        </button>
       </div>
 
       {/* Stats */}

@@ -3,8 +3,9 @@ import {
   Building2, Shield, Layers, Users, Settings as SettingsIcon,
   Save, CheckCircle, Languages, LogOut, ChevronRight, ZoomIn, ZoomOut,
   Plus, Trash2, Eye, EyeOff, ChevronDown, Smartphone, Copy, RefreshCw,
-  KeyRound, X,
+  KeyRound, X, Download,
 } from 'lucide-react'
+import * as XLSX from 'xlsx'
 import clsx from 'clsx'
 import { useAuth } from '../context/AuthContext'
 import { useCompany } from '../context/CompanyContext'
@@ -17,6 +18,7 @@ import { ROLE_LABELS, type UserRole } from '../types'
 import { getPositionTemplate, savePositionTemplate } from '../data/positionTemplates'
 import SectorApplyModal from '../components/settings/SectorApplyModal'
 import BrandMark from '../components/ui/BrandMark'
+import { FlagTR, FlagUS } from '../components/ui/Flags'
 
 type AdminTab = 'company' | 'sector' | 'template' | 'departments' | 'positions' | 'users' | 'mobile' | 'system'
 
@@ -62,43 +64,43 @@ export default function AdminPanel() {
 
   const TABS: { key: AdminTab; icon: typeof Building2; label: string }[] = [
     { key: 'company',  icon: Building2,     label: lang === 'tr' ? 'Firma Kurulumu' : 'Company Setup' },
-    { key: 'sector',   icon: Layers,        label: lang === 'tr' ? 'Sektor Secimi' : 'Sector Selection' },
+    { key: 'sector',   icon: Layers,        label: lang === 'tr' ? 'Sektor Bilgisi' : 'Sector Info' },
     { key: 'template', icon: SettingsIcon,   label: lang === 'tr' ? 'Sablon Uygulama' : 'Apply Template' },
     { key: 'departments', icon: Building2,  label: lang === 'tr' ? 'Departman Yonetimi' : 'Department Management' },
     { key: 'positions', icon: Shield,       label: lang === 'tr' ? 'Kadro & Gorev' : 'Positions & Titles' },
     { key: 'users',    icon: Users,         label: lang === 'tr' ? 'Kullanici Yonetimi' : 'User Management' },
-    { key: 'mobile',   icon: Smartphone,    label: lang === 'tr' ? 'Mobil Kullanicilar' : 'Mobile Users' },
+    { key: 'mobile',   icon: Smartphone,    label: lang === 'tr' ? 'Mobil Kullanici Yonetimi' : 'Mobile User Management' },
     { key: 'system',   icon: Shield,        label: lang === 'tr' ? 'Sistem Bilgileri' : 'System Info' },
   ]
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       {/* Header */}
-      <header className="border-b px-6 py-3 flex items-center justify-between" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+      <header className="border-b px-6 py-3 flex items-center justify-between" style={{ background: '#0f172a', borderColor: 'rgba(6,182,212,0.2)' }}>
         <div className="flex items-center gap-4">
           <BrandMark />
-          <div className="h-6 w-px" style={{ background: 'var(--border)' }} />
+          <div className="h-6 w-px" style={{ background: 'rgba(255,255,255,0.15)' }} />
           <div>
-            <h1 className="text-[14px] font-bold" style={{ color: 'var(--text-1)' }}>Admin Panel</h1>
-            <p className="text-[10px]" style={{ color: 'var(--text-3)' }}>
+            <h1 className="text-[14px] font-bold text-white">Admin Panel</h1>
+            <p className="text-[10px]" style={{ color: 'rgba(148,163,184,0.7)' }}>
               {lang === 'tr' ? 'Key Account Manager - Kurulum ve Yapilandirma' : 'Key Account Manager - Setup & Configuration'}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-[9px] font-medium px-2 py-0.5 rounded-full border" style={{ color: 'var(--text-3)', borderColor: 'var(--border)' }}>
+          <span className="text-[9px] font-medium px-2 py-0.5 rounded-full border" style={{ color: 'rgba(148,163,184,0.6)', borderColor: 'rgba(255,255,255,0.15)' }}>
             ATAOL AI Techs tarafindan gelistirildi.
           </span>
 
           {/* Zoom controls */}
-          <div className="flex items-center rounded border" style={{ borderColor: 'var(--border)' }}>
-            <button type="button" onClick={zoomOut} disabled={zoom <= 70} className="px-1.5 py-1 hover:bg-zinc-100 disabled:opacity-30 transition-colors" style={{ color: 'var(--text-2)' }}>
+          <div className="flex items-center rounded border" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
+            <button type="button" onClick={zoomOut} disabled={zoom <= 70} className="px-1.5 py-1 hover:bg-white/10 disabled:opacity-30 transition-colors" style={{ color: '#94a3b8' }}>
               <ZoomOut size={13} />
             </button>
-            <button type="button" onClick={resetZoom} className="px-2 text-[10px] font-mono font-medium tabular-nums" style={{ color: 'var(--text-2)', minWidth: '2.5rem', textAlign: 'center' }}>
+            <button type="button" onClick={resetZoom} className="px-2 text-[10px] font-mono font-medium tabular-nums" style={{ color: '#94a3b8', minWidth: '2.5rem', textAlign: 'center' }}>
               {zoom}%
             </button>
-            <button type="button" onClick={zoomIn} disabled={zoom >= 200} className="px-1.5 py-1 hover:bg-zinc-100 disabled:opacity-30 transition-colors" style={{ color: 'var(--text-2)' }}>
+            <button type="button" onClick={zoomIn} disabled={zoom >= 200} className="px-1.5 py-1 hover:bg-white/10 disabled:opacity-30 transition-colors" style={{ color: '#94a3b8' }}>
               <ZoomIn size={13} />
             </button>
           </div>
@@ -106,24 +108,24 @@ export default function AdminPanel() {
           <button
             type="button"
             onClick={() => setLang(lang === 'tr' ? 'en' : 'tr')}
-            className="flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-bold transition-colors hover:bg-zinc-100"
-            style={{ color: 'var(--text-2)' }}
+            className="flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-bold transition-colors hover:bg-white/10"
+            style={{ color: '#94a3b8' }}
           >
-            <span className="text-[14px]">{lang === 'tr' ? '\u{1F1F9}\u{1F1F7}' : '\u{1F1FA}\u{1F1F8}'}</span>
+            {lang === 'tr' ? <FlagTR size={18} /> : <FlagUS size={18} />}
             {lang.toUpperCase()}
           </button>
           {user && (
-            <div className="flex items-center gap-2 pl-3 border-l" style={{ borderColor: 'var(--border)' }}>
-              <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center">
+            <div className="flex items-center gap-2 pl-3 border-l" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #06b6d4, #0891b2)' }}>
                 <span className="text-white text-[10px] font-bold">
                   {user.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
                 </span>
               </div>
               <div>
-                <p className="text-[11px] font-semibold" style={{ color: 'var(--text-1)' }}>{user.name}</p>
-                <p className="text-[9px]" style={{ color: 'var(--text-3)' }}>Platform Admin</p>
+                <p className="text-[11px] font-semibold text-white">{user.name}</p>
+                <p className="text-[9px]" style={{ color: '#22d3ee' }}>Platform Admin</p>
               </div>
-              <button type="button" onClick={logout} className="ml-2 text-zinc-400 hover:text-red-500 transition-colors">
+              <button type="button" onClick={logout} className="ml-2 transition-colors" style={{ color: '#94a3b8' }} onMouseEnter={e => (e.currentTarget.style.color = '#ef4444')} onMouseLeave={e => (e.currentTarget.style.color = '#94a3b8')}>
                 <LogOut size={14} />
               </button>
             </div>
@@ -155,7 +157,7 @@ export default function AdminPanel() {
         </aside>
 
         {/* Content */}
-        <main className="flex-1 p-6 space-y-5 max-w-3xl" style={{ zoom: `${zoom}%` }}>
+        <main className="flex-1 p-8 space-y-6 max-w-5xl" style={{ zoom: `${zoom}%`, fontSize: '175%' }}>
           {tab === 'company' && (
             <>
               <Section title={lang === 'tr' ? 'Firma Bilgileri' : 'Company Information'} desc={lang === 'tr' ? 'Platforma kayitli firma adi ve temel bilgiler' : 'Registered company name and basic information'}>
@@ -197,51 +199,40 @@ export default function AdminPanel() {
           )}
 
           {tab === 'sector' && (
-            <Section title={lang === 'tr' ? 'Sektor Yapilandirmasi' : 'Sector Configuration'} desc={lang === 'tr' ? 'Firmanin faaliyet alani. Bu secim departman sablonlarini, KPI setlerini ve platform terminolojisini belirler.' : 'Company industry. This selection determines department templates, KPI sets and platform terminology.'}>
-              <p className="text-[12px] p-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 font-medium">
-                {lang === 'tr'
-                  ? 'Sektor secimi firma kurulumunda bir kez yapilir. Degistirilmesi mevcut departman ve KPI yapisini etkileyebilir.'
-                  : 'Sector is selected once during company setup. Changing it may affect existing department and KPI structure.'}
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
-                {SECTORS.map(s => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => updateSector(s.id)}
-                    className={clsx(
-                      'flex items-start gap-2.5 p-3 rounded-xl border text-left transition-all',
-                      sector?.id === s.id
-                        ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
-                        : 'border-zinc-200 bg-white hover:border-zinc-300'
-                    )}
-                  >
-                    <span className="text-lg flex-shrink-0 mt-0.5">{s.icon}</span>
-                    <div>
-                      <p className={clsx('text-[12px] font-semibold', sector?.id === s.id ? 'text-indigo-700' : 'text-zinc-800')}>
-                        {s.shortName}
-                      </p>
-                      <p className="text-[10px] text-zinc-400 mt-0.5 leading-snug">{s.name}</p>
+            <Section title={lang === 'tr' ? 'Sektor Bilgisi' : 'Sector Information'} desc="">
+              {sector ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 p-5 rounded-xl border-2 border-indigo-200 bg-indigo-50">
+                    <span className="text-3xl">{sector.icon}</span>
+                    <div className="flex-1">
+                      <p className="text-[14px] font-bold text-indigo-700">{sector.name}</p>
+                      <p className="text-[11px] text-indigo-500 mt-0.5">{sector.description}</p>
                     </div>
-                  </button>
-                ))}
-              </div>
-
-              {sector && (
-                <div className="p-4 rounded-lg border" style={{ borderColor: 'var(--border)', background: 'var(--border-subtle)' }}>
-                  <p className="text-[11px] font-bold mb-2" style={{ color: 'var(--text-2)' }}>{lang === 'tr' ? 'Secili Sektor' : 'Selected Sector'}: {sector.name}</p>
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-1">
-                    {Object.entries(sector.terminology).map(([k, v]) => (
-                      <div key={k} className="flex items-center gap-2 text-[11px]">
-                        <span className="text-zinc-400 capitalize">{k}:</span>
-                        <span className="font-medium" style={{ color: 'var(--text-1)' }}>{v}</span>
-                      </div>
-                    ))}
                   </div>
-                  <p className="text-[10px] mt-3" style={{ color: 'var(--text-3)' }}>
-                    {sector.departmentTemplates.length} {lang === 'tr' ? 'departman sablonu hazir' : 'department templates ready'}
+                  <div className="p-4 rounded-lg border" style={{ borderColor: 'var(--border)', background: 'var(--border-subtle)' }}>
+                    <p className="text-[11px] font-bold mb-2" style={{ color: 'var(--text-2)' }}>{lang === 'tr' ? 'Sektor Terminolojisi' : 'Sector Terminology'}</p>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+                      {Object.entries(sector.terminology).map(([k, v]) => (
+                        <div key={k} className="flex items-center gap-2 text-[11px]">
+                          <span className="text-zinc-400 capitalize">{k}:</span>
+                          <span className="font-medium" style={{ color: 'var(--text-1)' }}>{v}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[10px] mt-3" style={{ color: 'var(--text-3)' }}>
+                      {sector.departmentTemplates.length} {lang === 'tr' ? 'departman sablonu hazir' : 'department templates ready'}
+                    </p>
+                  </div>
+                  <p className="text-[11px] p-3 rounded-lg border border-blue-200 bg-blue-50 text-blue-700 font-medium">
+                    {lang === 'tr'
+                      ? 'Sektor degisikligi icin Super Admin ile iletisime gecin.'
+                      : 'Contact Super Admin for sector changes.'}
                   </p>
                 </div>
+              ) : (
+                <p className="text-[12px] text-red-600 font-medium">
+                  {lang === 'tr' ? 'Henuz bir sektor atanmamis. Super Admin ile iletisime gecin.' : 'No sector assigned yet. Contact Super Admin.'}
+                </p>
               )}
             </Section>
           )}
@@ -350,6 +341,77 @@ function AdminUserManagement({ lang, sectorId }: { lang: 'tr' | 'en'; sectorId: 
   // Password reset inline state
   const [resetState, setResetState] = useState<{ userId: string; newPassword: string; status?: 'ok' | 'err'; msg?: string } | null>(null)
 
+  // Excel export - tum kullanicilar (platform + mobil) sifreler dahil
+  const [exporting, setExporting] = useState(false)
+  const handleExportExcel = async () => {
+    setExporting(true)
+    try {
+      // Platform kullanicilari - sifrelerini al
+      const platformUsers = users.filter(u => u.role !== 'super_admin' && u.role !== 'platform_admin')
+      const platformRows: any[] = []
+      for (const u of platformUsers) {
+        let lastPw = '-'
+        try {
+          const res = await api.get<any>(`/users/${u.id}/last-password`)
+          lastPw = res.lastPassword ?? '-'
+        } catch {}
+        const dept = departments.find(d => d.id === u.departmentId)
+        platformRows.push({
+          'Tip': 'Platform',
+          'Ad Soyad': u.name,
+          'E-posta': u.email,
+          'Sifre': lastPw,
+          'Rol': ROLE_LABELS[u.role as UserRole] ?? u.role,
+          'Departman': dept?.name ?? '-',
+          'Telefon': u.phone ?? '-',
+          'Durum': u.active ? 'Aktif' : 'Pasif',
+          'Olusturma Tarihi': u.createdAt ? new Date(u.createdAt).toLocaleDateString('tr-TR') : '-',
+        })
+      }
+
+      // Mobil kullanicilar
+      let mobileUsers: any[] = []
+      try {
+        const res = await api.get<any>('/users/mobile?pageSize=500')
+        mobileUsers = Array.isArray(res) ? res : res?.data ?? []
+      } catch {}
+      const mobileRows: any[] = []
+      for (const mu of mobileUsers) {
+        const dept = mu.departments?.[0]?.name ?? departments.find(d => mu.departmentId === d.id)?.name ?? '-'
+        mobileRows.push({
+          'Tip': 'Mobil',
+          'Ad Soyad': mu.name,
+          'E-posta': mu.email && !mu.email.endsWith('@mobile.actledger.local') ? mu.email : '',
+          'Sifre': mu.lastPassword ?? mu.tempPassword ?? '-',
+          'Giris Kodu': mu.loginCode ?? '-',
+          'Rol': 'Mobil Kullanici',
+          'Departman': dept,
+          'Telefon': mu.phone ?? '-',
+          'Alt Birim': mu.subUnit ?? '-',
+          'Gorev Tanimi': mu.jobTitle ?? '-',
+          'Durum': mu.active ? 'Aktif' : 'Pasif',
+        })
+      }
+
+      // Excel olustur
+      const wb = XLSX.utils.book_new()
+      if (platformRows.length > 0) {
+        const ws1 = XLSX.utils.json_to_sheet(platformRows)
+        ws1['!cols'] = [{ wch: 10 }, { wch: 22 }, { wch: 28 }, { wch: 16 }, { wch: 18 }, { wch: 20 }, { wch: 16 }, { wch: 8 }, { wch: 14 }]
+        XLSX.utils.book_append_sheet(wb, ws1, 'Platform Kullanicilari')
+      }
+      if (mobileRows.length > 0) {
+        const ws2 = XLSX.utils.json_to_sheet(mobileRows)
+        ws2['!cols'] = [{ wch: 10 }, { wch: 22 }, { wch: 28 }, { wch: 16 }, { wch: 14 }, { wch: 16 }, { wch: 20 }, { wch: 16 }, { wch: 14 }, { wch: 18 }, { wch: 8 }]
+        XLSX.utils.book_append_sheet(wb, ws2, 'Mobil Kullanicilari')
+      }
+
+      XLSX.writeFile(wb, `ActLedger_Kullanicilar_${new Date().toISOString().slice(0, 10)}.xlsx`)
+    } catch {
+      alert(lang === 'tr' ? 'Excel indirme hatasi' : 'Excel export error')
+    } finally { setExporting(false) }
+  }
+
   const handleDeleteUser = async (id: string, name: string) => {
     const confirmed = window.confirm(
       lang === 'tr'
@@ -412,17 +474,23 @@ function AdminUserManagement({ lang, sectorId }: { lang: 'tr' | 'en'; sectorId: 
   return (
     <div className="space-y-5">
       <Section
-        title={lang === 'tr' ? 'Kullanici Yonetimi' : 'User Management'}
+        title={lang === 'tr' ? 'Platform Kullanici Yonetimi' : 'Platform User Management'}
         desc={lang === 'tr' ? 'Sisteme yeni kullanici ekleyin, mevcut kullanicilari goruntuleyin veya cikartin' : 'Add new users, view or remove existing users'}
       >
         <div className="p-4">
           <div className="flex items-center justify-between mb-4">
             <p className="text-[13px] font-semibold" style={{ color: 'var(--text-1)' }}>
-              {loading ? '...' : `${users.length} ${lang === 'tr' ? 'kullanici' : 'users'}`}
+              {loading ? '...' : `${users.filter(u => u.role !== 'super_admin' && u.role !== 'platform_admin').length} ${lang === 'tr' ? 'kullanici' : 'users'}`}
             </p>
-            <button type="button" className="btn-dark btn-sm" onClick={() => setShowForm(!showForm)}>
-              <Plus size={13} /> {lang === 'tr' ? 'Yeni Kullanici' : 'New User'}
-            </button>
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={handleExportExcel} disabled={exporting}
+                className="btn-sm flex items-center gap-1.5 font-bold text-white disabled:opacity-40" style={{ background: '#059669' }}>
+                <Download size={13} /> {exporting ? '...' : (lang === 'tr' ? 'Excel Indir' : 'Export Excel')}
+              </button>
+              <button type="button" className="btn-dark btn-sm" onClick={() => setShowForm(!showForm)}>
+                <Plus size={13} /> {lang === 'tr' ? 'Yeni Kullanici' : 'New User'}
+              </button>
+            </div>
           </div>
 
           {showForm && (
@@ -435,10 +503,10 @@ function AdminUserManagement({ lang, sectorId }: { lang: 'tr' | 'en'; sectorId: 
             />
           )}
 
-          {/* Existing users list */}
-          {!loading && users.length > 0 && (
+          {/* Existing users list - Super Admin kullanicilari gizle */}
+          {!loading && users.filter(u => u.role !== 'super_admin' && u.role !== 'platform_admin').length > 0 && (
             <div className="space-y-2 mt-4">
-              {users.map((u, idx) => {
+              {users.filter(u => u.role !== 'super_admin' && u.role !== 'platform_admin').map((u, idx) => {
                 const isExpanded = expandedUserId === u.id
                 const detail = detailData[u.id]
                 const dept = departments.find(d => d.id === u.departmentId)
@@ -606,8 +674,16 @@ function AdminUserForm({ lang, departments, sectorId, onCreated, onCancel }: {
     role: 'teknisyen' as UserRole, email: '', phone: '',
     departmentId: '', notes: '',
   })
-  const [password, setPassword] = useState('')
-  const [showPass, setShowPass] = useState(false)
+  const generatePassword = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
+    const special = '!@#$%'
+    let pw = ''
+    for (let i = 0; i < 10; i++) pw += chars[Math.floor(Math.random() * chars.length)]
+    pw += special[Math.floor(Math.random() * special.length)]
+    return pw
+  }
+  const [password, setPassword] = useState(generatePassword())
+  const [showPass, setShowPass] = useState(true)
   const [deptOpen, setDeptOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState<string | null>(null)
@@ -617,7 +693,8 @@ function AdminUserForm({ lang, departments, sectorId, onCreated, onCancel }: {
 
   const handleSubmit = async () => {
     const fullName = `${form.name} ${form.surname}`.trim()
-    if (!form.name || !form.surname || !form.email || !password || !form.departmentId) {
+    const deptRequired = form.role !== 'genel_mudur'
+    if (!form.name || !form.surname || !form.email || !password || (deptRequired && !form.departmentId)) {
       setErr(lang === 'tr' ? 'Tum zorunlu alanlari doldurun' : 'Fill all required fields')
       return
     }
@@ -632,7 +709,7 @@ function AdminUserForm({ lang, departments, sectorId, onCreated, onCancel }: {
         email: form.email,
         password,
         role: form.role,
-        departmentId: form.departmentId,
+        departmentId: form.departmentId || undefined,
         phone: form.phone || undefined,
       })
       setSuccess(true)
@@ -701,7 +778,7 @@ function AdminUserForm({ lang, departments, sectorId, onCreated, onCancel }: {
       {/* Departman agaci */}
       <div>
         <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text-3)' }}>
-          {lang === 'tr' ? 'Departman' : 'Department'} *
+          {lang === 'tr' ? 'Departman' : 'Department'} {form.role !== 'genel_mudur' ? '*' : <span className="normal-case font-normal">(opsiyonel)</span>}
         </label>
         <div className="relative">
           <button
@@ -758,12 +835,15 @@ function AdminUserForm({ lang, departments, sectorId, onCreated, onCancel }: {
       {/* Sifre */}
       <div>
         <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text-3)' }}>
-          {lang === 'tr' ? 'Baslangic Sifresi' : 'Initial Password'} * <span className="normal-case font-normal" style={{ color: 'var(--text-3)' }}>(min 8 karakter)</span>
+          {lang === 'tr' ? 'Baslangic Sifresi' : 'Initial Password'} * <span className="normal-case font-normal" style={{ color: 'var(--text-3)' }}>(otomatik uretilir, degistirilebilir)</span>
         </label>
-        <div className="relative">
-          <input className="input text-[13px] pr-10" type={showPass ? 'text' : 'password'} placeholder="En az 8 karakter" value={password} onChange={e => setPassword(e.target.value)} />
-          <button type="button" onClick={() => setShowPass(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-3)' }}>
+        <div className="relative flex gap-2">
+          <input className="input text-[13px] pr-10 flex-1" type={showPass ? 'text' : 'password'} placeholder="En az 8 karakter" value={password} onChange={e => setPassword(e.target.value)} />
+          <button type="button" onClick={() => setShowPass(v => !v)} className="absolute right-14 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-3)' }}>
             {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
+          </button>
+          <button type="button" onClick={() => setPassword(generatePassword())} className="px-3 rounded-lg text-[11px] font-bold whitespace-nowrap" style={{ background: 'var(--border)', color: 'var(--text-2)' }} title={lang === 'tr' ? 'Yeni sifre uret' : 'Generate new password'}>
+            {lang === 'tr' ? 'Yenile' : 'New'}
           </button>
         </div>
       </div>
@@ -794,8 +874,8 @@ function AdminUserForm({ lang, departments, sectorId, onCreated, onCancel }: {
 
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" className="btn-default btn-sm" onClick={onCancel}>{lang === 'tr' ? 'Iptal' : 'Cancel'}</button>
-        <button type="button" className="btn-dark btn-sm" onClick={handleSubmit} disabled={saving}>
-          {saving ? '...' : <><Plus size={12} /> {lang === 'tr' ? 'Kullanici Olustur' : 'Create User'}</>}
+        <button type="button" className="btn-sm font-bold text-white disabled:opacity-40 whitespace-nowrap" style={{ background: '#06b6d4' }} onClick={handleSubmit} disabled={saving}>
+          {saving ? '...' : (lang === 'tr' ? 'Kullanici Olustur' : 'Create User')}
         </button>
       </div>
     </div>
@@ -907,6 +987,7 @@ function AdminPositionManager({ lang, sectorId }: { lang: 'tr' | 'en'; sectorId:
 function AdminMobileUsers({ lang }: { lang: string }) {
   const { departments } = useDepartments()
   const [users, setUsers] = useState<any[]>([])
+  const [mobileExpanded, setMobileExpanded] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
   const [createdUser, setCreatedUser] = useState<{ loginCode: string; tempPassword: string; name: string } | null>(null)
@@ -915,7 +996,10 @@ function AdminMobileUsers({ lang }: { lang: string }) {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
+  const [phoneCountry, setPhoneCountry] = useState('+90')
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [countryOpen, setCountryOpen] = useState(false)
+  const phone = `${phoneCountry} ${phoneNumber}`.trim()
   const [deptId, setDeptId] = useState('')
   const [subUnit, setSubUnit] = useState('')
   const [title, setTitle] = useState('')
@@ -934,7 +1018,7 @@ function AdminMobileUsers({ lang }: { lang: string }) {
   useEffect(() => { fetchUsers() }, [])
 
   const handleCreate = async () => {
-    if (!firstName || !lastName || !phone || !deptId) return
+    if (!firstName || !lastName || !phoneNumber || !deptId) return
     setCreating(true)
     setError(null)
     try {
@@ -948,11 +1032,16 @@ function AdminMobileUsers({ lang }: { lang: string }) {
       setCreatedUser({ loginCode: data.loginCode, tempPassword: data.tempPassword, name: data.name })
       setShowCreate(false)
       // Reset form
-      setFirstName(''); setLastName(''); setEmail(''); setPhone('')
+      setFirstName(''); setLastName(''); setEmail(''); setPhoneNumber('')
       setDeptId(''); setSubUnit(''); setTitle(''); setJobTitle('')
       fetchUsers()
     } catch (e: any) {
-      setError(e.message ?? 'Hata olustu')
+      const msg = e.message ?? ''
+      if (msg.includes('limit') || msg.includes('Limit') || msg.includes('maksimum') || msg.includes('maximum') || e.status === 403) {
+        setError(lang === 'tr' ? 'Yeni mobil kullanici eklemek icin lutfen ActLedger yetkilisi ile temasa geciniz.' : 'Please contact ActLedger support to add mobile users.')
+      } else {
+        setError(msg || (lang === 'tr' ? 'Kullanici olusturulamadi' : 'Failed to create user'))
+      }
     } finally { setCreating(false) }
   }
 
@@ -1035,7 +1124,7 @@ function AdminMobileUsers({ lang }: { lang: string }) {
       )}
 
       <Section
-        title={lang === 'tr' ? 'Mobil Kullanicilar' : 'Mobile Users'}
+        title={lang === 'tr' ? 'Mobil Kullanici Yonetimi' : 'Mobile User Management'}
         desc={lang === 'tr' ? 'Saha personeli icin mobil giris kodlu kullanici yonetimi' : 'Mobile login code user management for field personnel'}
       >
         <button type="button" onClick={() => setShowCreate(!showCreate)}
@@ -1058,11 +1147,56 @@ function AdminMobileUsers({ lang }: { lang: string }) {
                   className="input w-full" placeholder="Yilmaz" />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-3">
               <div>
                 <label className="block text-[10px] font-semibold mb-1" style={{ color: 'var(--text-3)' }}>{lang === 'tr' ? 'Telefon' : 'Phone'} *</label>
-                <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
-                  className="input w-full" placeholder="0555 123 4567" />
+                {(() => {
+                  const COUNTRIES: [string, string, string][] = [
+                    ['ABD','USA','+1'],['Almanya','Germany','+49'],['Arjantin','Argentina','+54'],['Avustralya','Australia','+61'],['Avusturya','Austria','+43'],
+                    ['Azerbaycan','Azerbaijan','+994'],['BAE','UAE','+971'],['Bahreyn','Bahrain','+973'],['Banglades','Bangladesh','+880'],['Belcika','Belgium','+32'],
+                    ['Brezilya','Brazil','+55'],['Bulgaristan','Bulgaria','+359'],['Cekya','Czechia','+420'],['Cezayir','Algeria','+213'],['Cin','China','+86'],
+                    ['Danimarka','Denmark','+45'],['Fas','Morocco','+212'],['Finlandiya','Finland','+358'],['Fransa','France','+33'],['G. Afrika','South Africa','+27'],
+                    ['G. Kore','South Korea','+82'],['Gurcistan','Georgia','+995'],['Hindistan','India','+91'],['Hirvatistan','Croatia','+385'],['Hollanda','Netherlands','+31'],
+                    ['Ingiltere','UK','+44'],['Ispanya','Spain','+34'],['Israil','Israel','+972'],['Isvec','Sweden','+46'],['Isvicre','Switzerland','+41'],
+                    ['Italya','Italy','+39'],['Japonya','Japan','+81'],['Kanada','Canada','+1'],['Katar','Qatar','+974'],['Kazakistan','Kazakhstan','+7'],
+                    ['Kenya','Kenya','+254'],['Kuveyt','Kuwait','+965'],['Lubnan','Lebanon','+961'],['Macaristan','Hungary','+36'],['Meksika','Mexico','+52'],
+                    ['Misir','Egypt','+20'],['Nijerya','Nigeria','+234'],['Norvec','Norway','+47'],['Pakistan','Pakistan','+92'],['Polonya','Poland','+48'],
+                    ['Romanya','Romania','+40'],['Rusya','Russia','+7'],['S. Arabistan','Saudi Arabia','+966'],['Sirbistan','Serbia','+381'],['Slovakya','Slovakia','+421'],
+                    ['Slovenya','Slovenia','+386'],['Tunus','Tunisia','+216'],['Turkiye','Turkey','+90'],['Ukrayna','Ukraine','+380'],['Umman','Oman','+968'],
+                    ['Urdun','Jordan','+962'],['Yeni Zelanda','New Zealand','+64'],['Yunanistan','Greece','+30'],
+                  ].sort((a, b) => (lang === 'tr' ? a[0] : a[1]).localeCompare(lang === 'tr' ? b[0] : b[1])) as [string, string, string][]
+                  const sel = COUNTRIES.find(c => c[2] === phoneCountry)
+                  const getName = (c: [string, string, string]) => lang === 'tr' ? c[0] : c[1]
+                  return (
+                    <div className="flex gap-1.5">
+                      <div className="relative flex-shrink-0" style={{ width: '160px' }}>
+                        <button type="button" onClick={() => setCountryOpen(!countryOpen)}
+                          className="input w-full text-left flex items-center gap-1.5 text-[12px] px-2">
+                          <span className="truncate">{sel ? getName(sel) : (lang === 'tr' ? 'Sec...' : 'Select...')}</span>
+                          <span className="font-mono font-bold ml-auto" style={{ color: 'var(--accent)' }}>{phoneCountry}</span>
+                          <ChevronDown size={10} className="flex-shrink-0" style={{ color: 'var(--text-3)' }} />
+                        </button>
+                        {countryOpen && (
+                          <div className="absolute top-full left-0 mt-1 rounded-lg shadow-xl overflow-y-auto z-30" style={{ background: 'var(--surface)', border: '1px solid var(--border)', maxHeight: '220px', width: '240px' }}>
+                            {COUNTRIES.map((c) => (
+                              <button key={c[0] + c[2]} type="button"
+                                onClick={() => { setPhoneCountry(c[2]); setCountryOpen(false) }}
+                                className="w-full flex items-center gap-2 px-3 py-2 text-[11px] text-left transition-colors"
+                                style={{ color: phoneCountry === c[2] ? 'var(--accent)' : 'var(--text-1)', fontWeight: phoneCountry === c[2] ? 700 : 400 }}
+                                onMouseEnter={e => (e.currentTarget.style.background = 'var(--border-subtle)')}
+                                onMouseLeave={e => (e.currentTarget.style.background = '')}>
+                                <span className="flex-1">{getName(c)}</span>
+                                <span className="font-mono text-[10px]" style={{ color: 'var(--text-3)' }}>{c[2]}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <input type="tel" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value.replace(/[^0-9 ]/g, ''))}
+                        className="input flex-1" placeholder="532 201 3416" />
+                    </div>
+                  )
+                })()}
               </div>
               <div>
                 <label className="block text-[10px] font-semibold mb-1" style={{ color: 'var(--text-3)' }}>E-posta</label>
@@ -1098,7 +1232,7 @@ function AdminMobileUsers({ lang }: { lang: string }) {
             <div className="flex gap-2">
               <button type="button" onClick={() => setShowCreate(false)}
                 className="btn-default flex-1 justify-center">{lang === 'tr' ? 'Iptal' : 'Cancel'}</button>
-              <button type="button" onClick={handleCreate} disabled={creating || !firstName || !lastName || !phone || !deptId}
+              <button type="button" onClick={handleCreate} disabled={creating || !firstName || !lastName || !phoneNumber || !deptId}
                 className="btn-primary flex-1 justify-center disabled:opacity-40">
                 {creating ? <RefreshCw size={12} className="animate-spin" /> : <Smartphone size={12} />}
                 {lang === 'tr' ? ' Olustur' : ' Create'}
@@ -1107,55 +1241,68 @@ function AdminMobileUsers({ lang }: { lang: string }) {
           </div>
         )}
 
-        {/* User list */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-[12px]">
-            <thead>
-              <tr className="border-b" style={{ borderColor: 'var(--border)' }}>
-                <th className="text-left py-2 px-2 font-semibold w-10" style={{ color: 'var(--text-3)' }}>No</th>
-                <th className="text-left py-2 px-2 font-semibold" style={{ color: 'var(--text-3)' }}>{lang === 'tr' ? 'Kod' : 'Code'}</th>
-                <th className="text-left py-2 px-2 font-semibold" style={{ color: 'var(--text-3)' }}>{lang === 'tr' ? 'Ad Soyad' : 'Name'}</th>
-                <th className="text-left py-2 px-2 font-semibold" style={{ color: 'var(--text-3)' }}>{lang === 'tr' ? 'Telefon' : 'Phone'}</th>
-                <th className="text-left py-2 px-2 font-semibold" style={{ color: 'var(--text-3)' }}>{lang === 'tr' ? 'Departman' : 'Department'}</th>
-                <th className="text-left py-2 px-2 font-semibold" style={{ color: 'var(--text-3)' }}>{lang === 'tr' ? 'Durum' : 'Status'}</th>
-                <th className="text-right py-2 px-2 font-semibold" style={{ color: 'var(--text-3)' }}>{lang === 'tr' ? 'Islemler' : 'Actions'}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td colSpan={7} className="text-center py-8" style={{ color: 'var(--text-3)' }}>{lang === 'tr' ? 'Yukleniyor...' : 'Loading...'}</td></tr>
-              ) : users.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-8" style={{ color: 'var(--text-3)' }}>{lang === 'tr' ? 'Henuz mobil kullanici yok' : 'No mobile users yet'}</td></tr>
-              ) : (
-                users.map((u: any, idx: number) => (
-                  <tr key={u.id} className="border-b" style={{ borderColor: 'var(--border)' }}>
-                    <td className="py-2 px-2 font-bold text-[11px]" style={{ color: 'var(--text-3)' }}>#{idx + 1}</td>
-                    <td className="py-2 px-2 font-mono font-bold text-[11px]" style={{ color: 'var(--accent)' }}>{u.loginCode}</td>
-                    <td className="py-2 px-2" style={{ color: 'var(--text-1)' }}>{u.name}</td>
-                    <td className="py-2 px-2" style={{ color: 'var(--text-2)' }}>{u.phone ?? '-'}</td>
-                    <td className="py-2 px-2" style={{ color: 'var(--text-2)' }}>{u.departments?.[0]?.name ?? '-'}</td>
-                    <td className="py-2 px-2">
-                      <span className={clsx('text-[10px] font-bold px-1.5 py-0.5 rounded-full',
-                        u.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700')}>
-                        {u.active ? (lang === 'tr' ? 'Aktif' : 'Active') : (lang === 'tr' ? 'Pasif' : 'Inactive')}
-                      </span>
-                    </td>
-                    <td className="py-2 px-2 text-right flex items-center justify-end gap-1">
-                      <button type="button" onClick={() => handleResetPassword(u.id)}
-                        className="text-[10px] font-semibold px-2 py-1 rounded hover:bg-amber-50 text-amber-600">
-                        {lang === 'tr' ? 'Sifre Sifirla' : 'Reset Pass'}
-                      </button>
-                      <button type="button" onClick={() => handleDeleteMobileUser(u.id, u.name)}
-                        className="p-1 rounded hover:bg-red-50 text-zinc-400 hover:text-red-500 transition-colors">
-                        <Trash2 size={12} />
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        {/* User list - card view */}
+        {loading ? (
+          <p className="text-center py-8 text-[12px]" style={{ color: 'var(--text-3)' }}>{lang === 'tr' ? 'Yukleniyor...' : 'Loading...'}</p>
+        ) : users.length === 0 ? (
+          <p className="text-center py-8 text-[12px]" style={{ color: 'var(--text-3)' }}>{lang === 'tr' ? 'Henuz mobil kullanici yok' : 'No mobile users yet'}</p>
+        ) : (
+          <div className="space-y-2">
+            {users.map((u: any, idx: number) => {
+              const isExp = mobileExpanded === u.id
+              const dept = u.departments?.[0]?.name ?? '-'
+              return (
+                <div key={u.id} className="rounded-lg overflow-hidden" style={{ background: 'var(--border-subtle)', border: '1px solid var(--border)' }}>
+                  <div className="flex items-center gap-3 p-3">
+                    <span className="text-[11px] font-bold flex-shrink-0 w-5 text-right" style={{ color: 'var(--text-3)' }}>#{idx + 1}</span>
+                    {/* Avatar - clickable to expand */}
+                    <button type="button" onClick={() => setMobileExpanded(isExp ? null : u.id)} className="flex items-center gap-3 flex-1 min-w-0 text-left">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }}>
+                        <span className="text-white text-[10px] font-bold">{u.name?.split(' ').map((n: string) => n[0]).slice(0, 2).join('')}</span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[12px] font-semibold truncate" style={{ color: 'var(--text-1)' }}>{u.name}</p>
+                        <p className="text-[10px] truncate" style={{ color: 'var(--text-3)' }}>{u.loginCode} - {dept}</p>
+                      </div>
+                      <ChevronDown size={14} className={clsx('flex-shrink-0 transition-transform', isExp && 'rotate-180')} style={{ color: 'var(--text-3)' }} />
+                    </button>
+                    {/* Status */}
+                    <span className={clsx('w-2 h-2 rounded-full flex-shrink-0', u.active ? 'bg-emerald-500' : 'bg-zinc-400')} />
+                    {/* Actions */}
+                    <button type="button" onClick={() => handleResetPassword(u.id)}
+                      className="p-1.5 rounded hover:bg-amber-50 text-zinc-400 hover:text-amber-500 transition-colors"
+                      title={lang === 'tr' ? 'Sifre Sifirla' : 'Reset Password'}>
+                      <KeyRound size={13} />
+                    </button>
+                    <button type="button" onClick={() => handleDeleteMobileUser(u.id, u.name)}
+                      className="p-1.5 rounded hover:bg-red-50 text-zinc-400 hover:text-red-500 transition-colors">
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                  {/* Expanded detail */}
+                  {isExp && (
+                    <div className="px-3 pb-3">
+                      <div className="rounded-lg p-3 space-y-2" style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}>
+                        <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
+                          <DetailRow label={lang === 'tr' ? 'Ad Soyad' : 'Name'} value={u.name} />
+                          <DetailRow label={lang === 'tr' ? 'Giris Kodu' : 'Login Code'} value={u.loginCode ?? '-'} mono />
+                          <DetailRow label={lang === 'tr' ? 'Telefon' : 'Phone'} value={u.phone ?? '-'} />
+                          <DetailRow label="E-posta" value={u.email && !u.email.endsWith('@mobile.actledger.local') ? u.email : '-'} />
+                          <DetailRow label={lang === 'tr' ? 'Departman' : 'Department'} value={dept} />
+                          <DetailRow label={lang === 'tr' ? 'Alt Birim' : 'Sub-unit'} value={u.subUnit ?? '-'} />
+                          <DetailRow label={lang === 'tr' ? 'Kadro' : 'Position'} value={u.title ?? '-'} />
+                          <DetailRow label={lang === 'tr' ? 'Gorev' : 'Job Title'} value={u.jobTitle ?? '-'} />
+                          <DetailRow label={lang === 'tr' ? 'Durum' : 'Status'} value={u.active ? (lang === 'tr' ? 'Aktif' : 'Active') : (lang === 'tr' ? 'Pasif' : 'Inactive')} />
+                          <DetailRow label={lang === 'tr' ? 'Olusturma' : 'Created'} value={u.createdAt ? new Date(u.createdAt).toLocaleDateString('tr-TR') : '-'} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
       </Section>
     </div>
   )
@@ -1188,7 +1335,12 @@ function AdminDepartmentManager({ lang }: { lang: string }) {
       setNewCode('')
       refetch()
     } catch (e: any) {
-      setErr(e.message ?? (lang === 'tr' ? 'Departman olusturulamadi' : 'Failed to create department'))
+      const msg = e.message ?? ''
+      if (msg.includes('limit') || msg.includes('Limit') || msg.includes('maximum') || msg.includes('maksimum') || e.status === 403) {
+        setErr(lang === 'tr' ? 'Yeni departman eklemek icin lutfen ActLedger yetkilisi ile temasa geciniz.' : 'Please contact ActLedger support to add new departments.')
+      } else {
+        setErr(msg || (lang === 'tr' ? 'Departman olusturulamadi' : 'Failed to create department'))
+      }
     } finally { setCreating(false) }
   }
 

@@ -222,15 +222,19 @@ export default function Workflows() {
   const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const fd = new FormData(e.currentTarget)
-    await createWorkflow({
-      name: fd.get('name'),
-      description: fd.get('description') || undefined,
-      category: fd.get('category') || undefined,
-      triggerConfig: { type: fd.get('triggerType') || 'MANUAL' },
-    })
-    setCreating(false)
-    refetchWf()
-    refetchStats()
+    try {
+      await createWorkflow({
+        name: fd.get('name'),
+        description: fd.get('description') || undefined,
+        category: fd.get('category') || undefined,
+        triggerConfig: { type: fd.get('triggerType') || 'MANUAL' },
+      })
+      setCreating(false)
+      refetchWf()
+      refetchStats()
+    } catch (err: any) {
+      alert(err?.message || 'Is akisi olusturulamadi')
+    }
   }
 
   const handleStatusChange = async (id: string, status: WorkflowStatus) => {

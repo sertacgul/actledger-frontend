@@ -1,7 +1,8 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   FilePlus2, Search, Printer, RefreshCw, FileSpreadsheet,
-  ChevronLeft, ChevronRight, Home, Filter, HelpCircle, FolderOpen, MapPin, Package,
+  ChevronLeft, ChevronRight, Home, HelpCircle, FolderOpen, MapPin, BookOpen,
+  BarChart3, Settings,
 } from 'lucide-react'
 import { useShortcutsContext } from '../../context/ShortcutsContext'
 import { useLanguage } from '../../context/LanguageContext'
@@ -68,7 +69,7 @@ export default function ToolsBar() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { setHelpOpen } = useShortcutsContext()
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
 
   const handlePrint   = () => window.print()
   const handleHome    = () => navigate('/panel')
@@ -111,16 +112,8 @@ export default function ToolsBar() {
 
       <Divider />
 
-      {/* CRUD cluster */}
-      <ToolButton icon={<FilePlus2    size={24} />} label={newLabel} shortLabel={t('toolbar_new_short')} onClick={() => dispatch(TOOLBAR_EVENTS.newRecord)}  variant="primary" />
-      <ToolButton icon={<Search       size={24} />} label={t('toolbar_search')} shortLabel={t('toolbar_search_short')} onClick={() => dispatch(TOOLBAR_EVENTS.search)} />
-
-      <Divider />
-
       {/* Data ops */}
-      {isFilterable && (
-        <ToolButton icon={<Filter       size={24} />} label={t('toolbar_filter')} shortLabel={t('toolbar_filter_short')} onClick={() => dispatch(TOOLBAR_EVENTS.toggleFilter)} />
-      )}
+      <ToolButton icon={<Search       size={24} />} label={t('toolbar_search')} shortLabel={t('toolbar_search_short')} onClick={() => dispatch(TOOLBAR_EVENTS.search)} />
       <ToolButton icon={<RefreshCw      size={24} />} label={t('toolbar_refresh')}                                        onClick={() => dispatch(TOOLBAR_EVENTS.refresh)} />
       <ToolButton icon={<FileSpreadsheet size={24}/>} label={t('toolbar_export')} shortLabel={t('toolbar_export_short')}   onClick={() => dispatch(TOOLBAR_EVENTS.exportExcel)} />
       <ToolButton icon={<Printer        size={24} />} label={t('toolbar_print')}                                           onClick={handlePrint} />
@@ -129,7 +122,7 @@ export default function ToolsBar() {
 
       {/* Utility */}
       <ToolButton icon={<FolderOpen     size={24} />} label={t('toolbar_files')}                                           onClick={() => navigate('/dosyalar')} />
-      <ToolButton icon={<Package        size={24} />} label={t('toolbar_inventory')}                                       onClick={() => navigate('/envanter')} />
+      <ToolButton icon={<BookOpen       size={24} />} label={lang === 'tr' ? 'Kullanim Kilavuzu' : 'User Guide'}          onClick={() => navigate('/manuel')} />
       <ToolButton icon={<HelpCircle     size={24} />} label={t('toolbar_shortcuts')} shortLabel={t('toolbar_help')}        onClick={() => setHelpOpen(true)} />
 
       {/* Right side - current path breadcrumb */}

@@ -109,9 +109,13 @@ export default function LiveMap() {
 
   const [liveUsers, setLiveUsers] = useState<LiveUser[]>([])
   const [facilities, setFacilities] = useState<Facility[]>([])
+  const [mapEntities, setMapEntities] = useState<{ personnel: any[]; vehicle: any[]; equipment: any[] }>({ personnel: [], vehicle: [], equipment: [] })
   const [loading, setLoading] = useState(true)
   const [filterDept, setFilterDept] = useState<string>('tumu')
   const [showFacilities, setShowFacilities] = useState(true)
+  const [showPersonnel, setShowPersonnel] = useState(true)
+  const [showVehicles, setShowVehicles] = useState(true)
+  const [showEquipment, setShowEquipment] = useState(true)
   const [showCreateFacility, setShowCreateFacility] = useState(false)
   const [showAddPersonnel, setShowAddPersonnel] = useState(false)
   const [showAddVehicle, setShowAddVehicle] = useState(false)
@@ -136,12 +140,17 @@ export default function LiveMap() {
   const loadData = useCallback(async () => {
     try {
       const deptParam = filterDept !== 'tumu' ? `?departmentId=${filterDept}` : ''
-      const [usersRes, facsRes] = await Promise.all([
+      const [usersRes, facsRes, persRes, vehRes, eqRes] = await Promise.all([
         api.get<any>(`/locations/live${deptParam}`),
         api.get<any>('/locations/facilities'),
+        api.get<any>('/map?type=personnel').catch(() => ({ data: [] })),
+        api.get<any>('/map?type=vehicle').catch(() => ({ data: [] })),
+        api.get<any>('/map?type=equipment').catch(() => ({ data: [] })),
       ])
       setLiveUsers(Array.isArray(usersRes) ? usersRes : usersRes?.data ?? [])
       setFacilities(Array.isArray(facsRes) ? facsRes : facsRes?.data ?? [])
+      const toArr = (r: any) => Array.isArray(r) ? r : r?.data ?? []
+      setMapEntities({ personnel: toArr(persRes), vehicle: toArr(vehRes), equipment: toArr(eqRes) })
     } catch {}
     setLoading(false)
   }, [filterDept])
@@ -260,6 +269,18 @@ export default function LiveMap() {
           <input type="checkbox" checked={showFacilities} onChange={e => setShowFacilities(e.target.checked)} className="accent-indigo-600" />
           <Building2 size={12} /> Tesisler ({facilities.length})
         </label>
+        <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+          <input type="checkbox" checked={showPersonnel} onChange={e => setShowPersonnel(e.target.checked)} className="accent-blue-600" />
+          <User size={12} /> Personel ({mapEntities.personnel.length + liveUsers.length})
+        </label>
+        <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+          <input type="checkbox" checked={showVehicles} onChange={e => setShowVehicles(e.target.checked)} className="accent-green-600" />
+          <Truck size={12} /> Araclar ({mapEntities.vehicle.length})
+        </label>
+        <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+          <input type="checkbox" checked={showEquipment} onChange={e => setShowEquipment(e.target.checked)} className="accent-amber-600" />
+          <Wrench size={12} /> Ekipmanlar ({mapEntities.equipment.length})
+        </label>
 
         <div className="ml-auto flex items-center gap-2">
           <button type="button" onClick={activateNearbyMode}
@@ -316,7 +337,7 @@ export default function LiveMap() {
                 <div key={u.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-slate-200">
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold text-slate-800">
-                      {task?.title ?? 'Gorevde'} <span className="text-slate-400 font-normal">- {u.jobTitle ?? u.title ?? u.role}</span>
+                      {task?.title ?? 'Gorevde'} <span className="text-slate-400 font-normal">- {u.jobTitle ?? u.role}</span>
                     </p>
                     <p className="text-[10px] text-slate-500">{u.departments[0]?.name ?? '-'} - {u.distanceKm.toFixed(1)} km</p>
                   </div>
@@ -345,8 +366,8 @@ export default function LiveMap() {
             <MapController center={mapCenter} zoom={mapZoom} />
             <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-            {/* Personnel: task-based markers */}
-            {liveUsers.map(u => {
+            {/* Personnel: live task-based markers */}
+            {showPersonnel && liveUsers.map(u => {
               const task = u.assignedTasks[0]
               const pColor = task ? (PRIORITY_COLORS[task.priority] ?? '#2563eb') : '#64748b'
               return (
@@ -375,6 +396,63 @@ export default function LiveMap() {
                 </CircleMarker>
               )
             })}
+
+            {/* Personnel: static map entities */}
+            {showPersonnel && mapEntities.personnel.map(e => (
+              <CircleMarker key={`p-${e.id}`} center={[e.latitude, e.longitude]} radius={7}
+                pathOptions={{ fillColor: '#3b82f6', fillOpacity: 0.75, color: '#ffffff', weight: 2 }}>
+                <Popup>
+                  <div className="text-xs min-w-[160px]">
+                    <p className="font-bold text-sm text-slate-800">{e.name}</p>
+                    {e.metadata?.role && <p className="text-slate-500">{e.metadata.role}</p>}
+                    {e.metadata?.phone && <p className="text-slate-400">{e.metadata.phone}</p>}
+                    <p className="text-[10px] text-slate-400 font-mono mt-1">{e.latitude.toFixed(4)}, {e.longitude.toFixed(4)}</p>
+                  </div>
+                </Popup>
+              </CircleMarker>
+            ))}
+
+            {/* Vehicle markers */}
+            {showVehicles && mapEntities.vehicle.map(e => (
+              <Marker key={`v-${e.id}`} position={[e.latitude, e.longitude]}
+                icon={L.divIcon({
+                  className: '',
+                  html: `<div style="width:30px;height:30px;border-radius:8px;background:#16a34a;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                  </div>`,
+                  iconSize: [30, 30], iconAnchor: [15, 15],
+                })}>
+                <Popup>
+                  <div className="text-xs min-w-[160px]">
+                    <p className="font-bold text-sm text-slate-800">{e.name}</p>
+                    {e.metadata?.vehicleType && <p className="text-slate-500">{e.metadata.vehicleType}</p>}
+                    {e.metadata?.driver && <p className="text-slate-400">Sofor: {e.metadata.driver}</p>}
+                    <p className="text-[10px] text-slate-400 font-mono mt-1">{e.latitude.toFixed(4)}, {e.longitude.toFixed(4)}</p>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+
+            {/* Equipment markers */}
+            {showEquipment && mapEntities.equipment.map(e => (
+              <Marker key={`e-${e.id}`} position={[e.latitude, e.longitude]}
+                icon={L.divIcon({
+                  className: '',
+                  html: `<div style="width:26px;height:26px;border-radius:6px;background:#d97706;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+                  </div>`,
+                  iconSize: [26, 26], iconAnchor: [13, 13],
+                })}>
+                <Popup>
+                  <div className="text-xs min-w-[160px]">
+                    <p className="font-bold text-sm text-slate-800">{e.name}</p>
+                    {e.metadata?.equipmentType && <p className="text-slate-500">{e.metadata.equipmentType}</p>}
+                    {e.metadata?.serial && <p className="text-slate-400">SN: {e.metadata.serial}</p>}
+                    <p className="text-[10px] text-slate-400 font-mono mt-1">{e.latitude.toFixed(4)}, {e.longitude.toFixed(4)}</p>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
 
             {/* Facility markers */}
             {showFacilities && facilities.map(f => (

@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import {
   Building2, Upload, Plus, Trash2, Eye, EyeOff, Layers, AlertTriangle,
   ChevronDown, X, Loader2, Zap, Activity, Package, ClipboardList,
   Shield, MapPin, Radio, Cpu, Settings2, Maximize2, Minimize2,
-  CheckCircle2, XCircle, RefreshCw,
+  CheckCircle2, XCircle, RefreshCw, Box, User, Wrench, Move,
+  ZoomIn, ZoomOut, RotateCcw, GripVertical, Scan,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useLanguage } from '../context/LanguageContext'
@@ -57,6 +58,24 @@ interface Template {
   zoneCount: number
 }
 
+interface LiveEntity {
+  id: string
+  name: string
+  type: 'personnel' | 'equipment'
+  x: number
+  y: number
+  z?: number
+  status?: string
+  department?: string
+  lastSeen?: string
+}
+
+interface FacilityDimensions3D {
+  xWidth: number   // meters
+  yDepth: number   // meters
+  zHeight: number  // meters
+}
+
 // ── Constants ──────────────────────────────────────────────────────────────
 
 const LAYER_CONFIG: Record<string, { label: string; labelEn: string; icon: typeof Building2; color: string }> = {
@@ -96,6 +115,9 @@ export default function FacilityMap() {
   const [loading, setLoading] = useState(true)
   const [liveLoading, setLiveLoading] = useState(false)
 
+  // Live entities (personnel + equipment)
+  const [liveEntities, setLiveEntities] = useState<LiveEntity[]>([])
+
   // Layers
   const [activeLayers, setActiveLayers] = useState<Set<string>>(new Set(Object.keys(LAYER_CONFIG)))
 
@@ -110,6 +132,23 @@ export default function FacilityMap() {
   const [operiqResult, setOperiqResult] = useState<any>(null)
   const [operiqLoading, setOperiqLoading] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
+
+  // 3D view state
+  const [view3D, setView3D] = useState(false)
+  const [facilityDimensions, setFacilityDimensions] = useState<FacilityDimensions3D>({ xWidth: 100, yDepth: 50, zHeight: 10 })
+
+  // Pan/zoom state
+  const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 })
+  const [isDragging, setIsDragging] = useState(false)
+  const dragStart = useRef({ x: 0, y: 0, tx: 0, ty: 0 })
+
+  // Resize state
+  const [canvasHeight, setCanvasHeight] = useState(500)
+  const [isResizing, setIsResizing] = useState(false)
+  const resizeStart = useRef({ y: 0, h: 0 })
+
+  // OperIQ dimension detection
+  const [operiqDimLoading, setOperiqDimLoading] = useState(false)
 
   // Plan selector dropdown
   const [planDropdown, setPlanDropdown] = useState(false)
@@ -135,15 +174,48 @@ export default function FacilityMap() {
     } catch {} finally { setLiveLoading(false) }
   }, [selectedPlanId])
 
+  const loadLiveEntities = useCallback(async () => {
+    try {
+      const [personnel, equipment] = await Promise.all([
+        api.get<any[]>('/locations/live').catch(() => []),
+        api.get<any[]>('/map?type=equipment').catch(() => []),
+      ])
+      const mapped: LiveEntity[] = [
+        ...(Array.isArray(personnel) ? personnel : []).map((p: any) => ({
+          id: p.id || p.userId || String(Math.random()),
+          name: p.name || p.fullName || 'Personel',
+          type: 'personnel' as const,
+          x: p.x ?? p.longitude ?? p.lng ?? 0,
+          y: p.y ?? p.latitude ?? p.lat ?? 0,
+          z: p.z ?? p.altitude ?? undefined,
+          status: p.status,
+          department: p.department ?? p.departmentName,
+          lastSeen: p.lastSeen ?? p.updatedAt,
+        })),
+        ...(Array.isArray(equipment) ? equipment : []).map((e: any) => ({
+          id: e.id || String(Math.random()),
+          name: e.name || e.label || 'Ekipman',
+          type: 'equipment' as const,
+          x: e.x ?? e.longitude ?? e.lng ?? 0,
+          y: e.y ?? e.latitude ?? e.lat ?? 0,
+          z: e.z ?? e.altitude ?? undefined,
+          status: e.status,
+          lastSeen: e.lastSeen ?? e.updatedAt,
+        })),
+      ]
+      setLiveEntities(mapped)
+    } catch {}
+  }, [])
+
   useEffect(() => { loadFloorPlans() }, [loadFloorPlans])
-  useEffect(() => { if (selectedPlanId) loadLiveData() }, [selectedPlanId, loadLiveData])
+  useEffect(() => { if (selectedPlanId) { loadLiveData(); loadLiveEntities() } }, [selectedPlanId, loadLiveData, loadLiveEntities])
 
   // Auto-refresh every 30s
   useEffect(() => {
     if (!selectedPlanId) return
-    const id = setInterval(loadLiveData, 30000)
+    const id = setInterval(() => { loadLiveData(); loadLiveEntities() }, 30000)
     return () => clearInterval(id)
-  }, [selectedPlanId, loadLiveData])
+  }, [selectedPlanId, loadLiveData, loadLiveEntities])
 
   // Load templates
   useEffect(() => {
@@ -165,8 +237,11 @@ export default function FacilityMap() {
   const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!editMode || !canvasRef.current) return
     const rect = canvasRef.current.getBoundingClientRect()
-    const x = ((e.clientX - rect.left) / rect.width) * 100
-    const y = ((e.clientY - rect.top) / rect.height) * 100
+    // Account for pan/zoom transform
+    const rawX = e.clientX - rect.left
+    const rawY = e.clientY - rect.top
+    const x = ((rawX - transform.x) / (rect.width * transform.scale)) * 100
+    const y = ((rawY - transform.y) / (rect.height * transform.scale)) * 100
     setShowCreateZone(true)
     setNewZone(prev => ({ ...prev, x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 }))
   }
@@ -207,9 +282,98 @@ export default function FacilityMap() {
     } catch {} finally { setOperiqLoading(false) }
   }
 
+  // ── Pan/Zoom handlers ──────────────────────────────────────────────────
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (editMode) return // don't drag in edit mode
+    if (e.button !== 0) return
+    setIsDragging(true)
+    dragStart.current = { x: e.clientX, y: e.clientY, tx: transform.x, ty: transform.y }
+    e.preventDefault()
+  }, [editMode, transform.x, transform.y])
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDragging) return
+    const dx = e.clientX - dragStart.current.x
+    const dy = e.clientY - dragStart.current.y
+    setTransform(prev => ({ ...prev, x: dragStart.current.tx + dx, y: dragStart.current.ty + dy }))
+  }, [isDragging])
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false)
+  }, [])
+
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    const delta = e.deltaY > 0 ? -0.1 : 0.1
+    setTransform(prev => ({
+      ...prev,
+      scale: Math.max(0.25, Math.min(5, prev.scale + delta)),
+    }))
+  }, [])
+
+  // Attach non-passive wheel listener to allow preventDefault
+  useEffect(() => {
+    const el = canvasRef.current
+    if (!el) return
+    const handler = (e: WheelEvent) => { e.preventDefault() }
+    el.addEventListener('wheel', handler, { passive: false })
+    return () => el.removeEventListener('wheel', handler)
+  }, [selectedPlanId])
+
+  const resetTransform = useCallback(() => {
+    setTransform({ x: 0, y: 0, scale: 1 })
+  }, [])
+
+  // ── Resize handlers ───────────────────────────────────────────────────
+
+  const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsResizing(true)
+    resizeStart.current = { y: e.clientY, h: canvasHeight }
+
+    const handleResizeMove = (ev: MouseEvent) => {
+      const dy = ev.clientY - resizeStart.current.y
+      setCanvasHeight(Math.max(300, Math.min(1200, resizeStart.current.h + dy)))
+    }
+    const handleResizeUp = () => {
+      setIsResizing(false)
+      document.removeEventListener('mousemove', handleResizeMove)
+      document.removeEventListener('mouseup', handleResizeUp)
+    }
+    document.addEventListener('mousemove', handleResizeMove)
+    document.addEventListener('mouseup', handleResizeUp)
+  }, [canvasHeight])
+
+  // ── OperIQ Dimension Detection ────────────────────────────────────────
+
+  const handleOperIQDimension = async () => {
+    if (!selectedPlanId) return
+    setOperiqDimLoading(true)
+    try {
+      const data = await api.post<any>(`/facility-map/floor-plans/${selectedPlanId}/operiq`, {
+        analysisType: 'dimension_detection',
+      })
+      if (data?.dimensions) {
+        setFacilityDimensions({
+          xWidth: data.dimensions.width ?? 100,
+          yDepth: data.dimensions.depth ?? 50,
+          zHeight: data.dimensions.height ?? 10,
+        })
+      }
+      setOperiqResult(data)
+    } catch {} finally { setOperiqDimLoading(false) }
+  }
+
+  // ── Visible live entities (within 0-100 bounds) ───────────────────────
+
+  const visibleEntities = useMemo(() => {
+    return liveEntities.filter(e => e.x >= 0 && e.x <= 100 && e.y >= 0 && e.y <= 100)
+  }, [liveEntities])
+
   // ── New zone form state ────────────────────────────────────────────────
 
-  const [newZone, setNewZone] = useState({ name: '', type: 'MARKER' as string, x: 50, y: 50, width: 10, height: 10, color: '#6366f1', layer: 'general', linkedEntityType: '', linkedEntityId: '' })
+  const [newZone, setNewZone] = useState({ name: '', type: 'MARKER' as string, x: 50, y: 50, z: 0, width: 10, height: 10, color: '#6366f1', layer: 'general', linkedEntityType: '', linkedEntityId: '' })
   const [creatingZone, setCreatingZone] = useState(false)
 
   const handleCreateZone = async () => {
@@ -218,13 +382,14 @@ export default function FacilityMap() {
     try {
       await api.post(`/facility-map/floor-plans/${selectedPlanId}/zones`, {
         ...newZone,
+        z: newZone.z || undefined,
         width: ['ZONE', 'STOCK_AREA', 'DEPARTMENT', 'HAZARD'].includes(newZone.type) ? newZone.width : undefined,
         height: ['ZONE', 'STOCK_AREA', 'DEPARTMENT', 'HAZARD'].includes(newZone.type) ? newZone.height : undefined,
         linkedEntityType: newZone.linkedEntityType || undefined,
         linkedEntityId: newZone.linkedEntityId || undefined,
       })
       setShowCreateZone(false)
-      setNewZone({ name: '', type: 'MARKER', x: 50, y: 50, width: 10, height: 10, color: '#6366f1', layer: 'general', linkedEntityType: '', linkedEntityId: '' })
+      setNewZone({ name: '', type: 'MARKER', x: 50, y: 50, z: 0, width: 10, height: 10, color: '#6366f1', layer: 'general', linkedEntityType: '', linkedEntityId: '' })
       loadLiveData()
     } catch {} finally { setCreatingZone(false) }
   }
@@ -278,9 +443,35 @@ export default function FacilityMap() {
         @keyframes facilityPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); } 50% { box-shadow: 0 0 0 8px rgba(239,68,68,0); } }
         @keyframes facilityFadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         @keyframes markerBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+        @keyframes entityPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.5); } 50% { box-shadow: 0 0 0 6px rgba(59,130,246,0); } }
         .facility-pulse { animation: facilityPulse 2s ease-in-out infinite; }
         .facility-fade-in { animation: facilityFadeIn 0.6s ease-out; }
         .marker-bounce { animation: markerBounce 2s ease-in-out infinite; }
+        .entity-pulse { animation: entityPulse 2s ease-in-out infinite; }
+        .map-canvas-3d {
+          transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), perspective 0.8s ease;
+        }
+        .map-canvas-2d {
+          transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), perspective 0.8s ease;
+        }
+        .elevation-indicator {
+          position: absolute;
+          right: -24px;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 8px;
+          font-weight: 700;
+          color: #64748b;
+          white-space: nowrap;
+        }
+        .resize-handle {
+          cursor: ns-resize;
+          user-select: none;
+          touch-action: none;
+        }
+        .resize-handle:hover {
+          background: var(--accent-bg) !important;
+        }
       `}</style>
 
       {/* ── Controls ─────────────────────────────────────────────────────── */}
@@ -340,6 +531,11 @@ export default function FacilityMap() {
                 className="card px-3 py-2 flex items-center gap-1.5 text-[12px] font-semibold hover:shadow-md transition-all" style={{ color: '#14b8a6' }}>
                 {operiqLoading ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />} OperIQ
               </button>
+              <button type="button" onClick={() => setView3D(!view3D)}
+                className={clsx('card px-3 py-2 flex items-center gap-1.5 text-[12px] font-semibold transition-all', view3D ? 'ring-2 ring-violet-400 shadow-lg' : 'hover:shadow-md')}
+                style={{ color: view3D ? '#8b5cf6' : 'var(--text-1)' }}>
+                <Box size={14} /> {lang === 'tr' ? (view3D ? '3D Aktif' : '3D Goruntule') : (view3D ? '3D Active' : '3D View')}
+              </button>
             </>
           )}
         </div>
@@ -370,11 +566,11 @@ export default function FacilityMap() {
         {/* Canvas area */}
         <div className="flex-1">
           {loading ? (
-            <div className="card flex items-center justify-center" style={{ height: '500px' }}>
+            <div className="card flex items-center justify-center" style={{ height: `${canvasHeight}px` }}>
               <Loader2 size={32} className="animate-spin" style={{ color: 'var(--text-3)' }} />
             </div>
           ) : !selectedPlan ? (
-            <div className="card flex flex-col items-center justify-center gap-4" style={{ height: '500px' }}>
+            <div className="card flex flex-col items-center justify-center gap-4" style={{ height: `${canvasHeight}px` }}>
               <Building2 size={48} style={{ color: 'var(--text-3)', opacity: 0.3 }} />
               <p className="text-[14px] font-semibold" style={{ color: 'var(--text-2)' }}>
                 {lang === 'tr' ? 'Henuz kat plani yuklenmemis' : 'No floor plan uploaded yet'}
@@ -384,109 +580,267 @@ export default function FacilityMap() {
               </button>
             </div>
           ) : (
-            <div
-              ref={canvasRef}
-              className={clsx('card relative overflow-hidden facility-fade-in', editMode && 'cursor-crosshair', emergencyMode && 'ring-2 ring-red-500')}
-              style={{ minHeight: '500px', background: emergencyMode ? 'rgba(127,29,29,0.05)' : 'var(--surface)' }}
-              onClick={handleCanvasClick}
-            >
-              {/* Floor plan image */}
-              {imageUrl && (
-                <img
-                  src={imageUrl}
-                  alt={selectedPlan.name}
-                  className="w-full h-auto block select-none"
-                  draggable={false}
-                  onContextMenu={e => e.preventDefault()}
-                  style={{ opacity: emergencyMode ? 0.4 : 1, transition: 'opacity 0.5s' }}
-                />
-              )}
+            <div className="relative">
+              {/* Zoom controls */}
+              <div className="absolute top-3 right-3 z-30 flex flex-col gap-1">
+                <button type="button" onClick={() => setTransform(p => ({ ...p, scale: Math.min(5, p.scale + 0.25) }))}
+                  className="card w-8 h-8 flex items-center justify-center hover:shadow-md transition-all" title={lang === 'tr' ? 'Yaklas' : 'Zoom in'}>
+                  <ZoomIn size={14} style={{ color: 'var(--text-2)' }} />
+                </button>
+                <button type="button" onClick={() => setTransform(p => ({ ...p, scale: Math.max(0.25, p.scale - 0.25) }))}
+                  className="card w-8 h-8 flex items-center justify-center hover:shadow-md transition-all" title={lang === 'tr' ? 'Uzaklas' : 'Zoom out'}>
+                  <ZoomOut size={14} style={{ color: 'var(--text-2)' }} />
+                </button>
+                <button type="button" onClick={resetTransform}
+                  className="card w-8 h-8 flex items-center justify-center hover:shadow-md transition-all" title={lang === 'tr' ? 'Sifirla' : 'Reset'}>
+                  <RotateCcw size={14} style={{ color: 'var(--text-2)' }} />
+                </button>
+                <div className="card px-1 py-1 text-[9px] font-bold text-center" style={{ color: 'var(--text-3)' }}>
+                  {Math.round(transform.scale * 100)}%
+                </div>
+              </div>
 
-              {/* Zone overlays */}
-              {visibleZones.map(zone => {
-                const isArea = ['ZONE', 'STOCK_AREA', 'DEPARTMENT', 'HAZARD', 'EMERGENCY_EXIT'].includes(zone.type) && zone.width && zone.height
-                const isSelected = selectedZone?.id === zone.id
-                const isCritical = zone.liveData?.status === 'CRITICAL' || zone.liveData?.level === 'critical' || zone.type === 'HAZARD'
-                const isWarning = zone.liveData?.status === 'WARNING' || zone.liveData?.level === 'warning'
-
-                return (
-                  <div
-                    key={zone.id}
-                    className={clsx(
-                      'absolute transition-all duration-300 cursor-pointer group',
-                      isArea ? 'rounded-lg border-2' : 'rounded-full',
-                      isSelected && 'ring-2 ring-offset-1 ring-cyan-400 z-20',
-                      emergencyMode && isCritical && 'facility-pulse z-10',
-                      emergencyMode && !isCritical && zone.type !== 'EMERGENCY_EXIT' && 'opacity-30',
-                    )}
-                    style={{
-                      left: `${zone.x}%`,
-                      top: `${zone.y}%`,
-                      width: isArea ? `${zone.width}%` : '28px',
-                      height: isArea ? `${zone.height}%` : '28px',
-                      transform: isArea ? 'none' : 'translate(-50%, -50%)',
-                      borderColor: zone.color,
-                      backgroundColor: isArea ? `${zone.color}18` : zone.color,
-                      boxShadow: isSelected ? `0 0 20px ${zone.color}40` : isCritical ? `0 0 12px rgba(239,68,68,0.4)` : 'none',
-                    }}
-                    onClick={e => { e.stopPropagation(); setSelectedZone(zone) }}
-                  >
-                    {/* Zone name label */}
-                    {isArea && (
-                      <span className="absolute top-1 left-2 text-[9px] font-bold truncate max-w-[90%] pointer-events-none" style={{ color: zone.color }}>{zone.name}</span>
-                    )}
-
-                    {/* Marker icon */}
-                    {!isArea && (
-                      <div className="w-full h-full flex items-center justify-center marker-bounce">
-                        {zone.layer === 'iot' ? <Radio size={12} className="text-white" /> :
-                         zone.layer === 'stock' ? <Package size={12} className="text-white" /> :
-                         zone.type === 'EMERGENCY_EXIT' ? <AlertTriangle size={12} className="text-white" /> :
-                         <MapPin size={12} className="text-white" />}
-                      </div>
-                    )}
-
-                    {/* Live status badge */}
-                    {zone.liveData && (
-                      <span
-                        className={clsx('absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-white', isCritical && 'animate-ping')}
-                        style={{ background: isCritical ? '#ef4444' : isWarning ? '#f59e0b' : '#22c55e' }}
-                      />
-                    )}
-
-                    {/* Task count badge */}
-                    {zone.liveData?.type === 'tasks' && zone.liveData.total > 0 && (
-                      <span className="absolute -bottom-2 -right-2 px-1.5 py-0.5 rounded-full text-[8px] font-bold text-white" style={{ background: zone.liveData.overdue > 0 ? '#ef4444' : '#6366f1' }}>
-                        {zone.liveData.total}
-                      </span>
-                    )}
-
-                    {/* Stock level bar */}
-                    {zone.liveData?.type === 'stock' && isArea && (
-                      <div className="absolute bottom-1 left-2 right-2 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.1)' }}>
-                        <div className="h-full rounded-full transition-all" style={{
-                          width: `${Math.min(100, (zone.liveData.quantity / Math.max(1, zone.liveData.minLevel)) * 50)}%`,
-                          background: zone.liveData.level === 'critical' ? '#ef4444' : zone.liveData.level === 'warning' ? '#f59e0b' : '#22c55e',
-                        }} />
-                      </div>
-                    )}
-
-                    {/* Hover tooltip */}
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded-md text-[10px] font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-30"
-                      style={{ background: 'rgba(15,23,42,0.9)', color: '#fff' }}>
-                      {zone.name}
-                    </div>
-                  </div>
-                )
-              })}
-
-              {/* Edit mode indicator */}
-              {editMode && (
-                <div className="absolute top-3 left-3 px-3 py-1.5 rounded-lg text-[11px] font-bold z-20"
-                  style={{ background: 'rgba(6,182,212,0.9)', color: '#fff' }}>
-                  {lang === 'tr' ? 'Duzenleme modu - plana tiklayarak alan ekleyin' : 'Edit mode - click on plan to add zones'}
+              {/* 3D mode indicator */}
+              {view3D && (
+                <div className="absolute top-3 left-14 px-3 py-1.5 rounded-lg text-[11px] font-bold z-20"
+                  style={{ background: 'rgba(139,92,246,0.9)', color: '#fff' }}>
+                  3D {lang === 'tr' ? 'Gorunum' : 'View'} - {facilityDimensions.xWidth}x{facilityDimensions.yDepth}x{facilityDimensions.zHeight}m
                 </div>
               )}
+
+              <div
+                ref={canvasRef}
+                className={clsx(
+                  'card relative overflow-hidden facility-fade-in',
+                  editMode && 'cursor-crosshair',
+                  emergencyMode && 'ring-2 ring-red-500',
+                  !editMode && !isDragging && 'cursor-grab',
+                  isDragging && 'cursor-grabbing',
+                  view3D ? 'map-canvas-3d' : 'map-canvas-2d',
+                )}
+                style={{
+                  height: `${canvasHeight}px`,
+                  background: emergencyMode ? 'rgba(127,29,29,0.05)' : 'var(--surface)',
+                  perspective: view3D ? '1200px' : 'none',
+                }}
+                onClick={handleCanvasClick}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                onWheel={handleWheel}
+              >
+                {/* Transformable inner container */}
+                <div
+                  className={view3D ? 'map-canvas-3d' : 'map-canvas-2d'}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    position: 'relative',
+                    transformOrigin: 'center center',
+                    transform: view3D
+                      ? `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale}) rotateX(45deg) rotateZ(-15deg)`
+                      : `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
+                    transformStyle: view3D ? 'preserve-3d' : 'flat',
+                  }}
+                >
+                  {/* Floor plan image */}
+                  {imageUrl && (
+                    <img
+                      src={imageUrl}
+                      alt={selectedPlan.name}
+                      className="w-full h-auto block select-none"
+                      draggable={false}
+                      onContextMenu={e => e.preventDefault()}
+                      style={{ opacity: emergencyMode ? 0.4 : 1, transition: 'opacity 0.5s' }}
+                    />
+                  )}
+
+                  {/* Zone overlays */}
+                  {visibleZones.map(zone => {
+                    const isArea = ['ZONE', 'STOCK_AREA', 'DEPARTMENT', 'HAZARD', 'EMERGENCY_EXIT'].includes(zone.type) && zone.width && zone.height
+                    const isSelected = selectedZone?.id === zone.id
+                    const isCritical = zone.liveData?.status === 'CRITICAL' || zone.liveData?.level === 'critical' || zone.type === 'HAZARD'
+                    const isWarning = zone.liveData?.status === 'WARNING' || zone.liveData?.level === 'warning'
+                    const zoneZ = zone.metadata?.z ?? 0
+
+                    return (
+                      <div
+                        key={zone.id}
+                        className={clsx(
+                          'absolute transition-all duration-300 cursor-pointer group',
+                          isArea ? 'rounded-lg border-2' : 'rounded-full',
+                          isSelected && 'ring-2 ring-offset-1 ring-cyan-400 z-20',
+                          emergencyMode && isCritical && 'facility-pulse z-10',
+                          emergencyMode && !isCritical && zone.type !== 'EMERGENCY_EXIT' && 'opacity-30',
+                        )}
+                        style={{
+                          left: `${zone.x}%`,
+                          top: `${zone.y}%`,
+                          width: isArea ? `${zone.width}%` : '28px',
+                          height: isArea ? `${zone.height}%` : '28px',
+                          transform: view3D && zoneZ
+                            ? `${isArea ? 'none' : 'translate(-50%, -50%)'} translateZ(${zoneZ * 4}px)`
+                            : isArea ? 'none' : 'translate(-50%, -50%)',
+                          borderColor: zone.color,
+                          backgroundColor: isArea ? `${zone.color}18` : zone.color,
+                          boxShadow: isSelected ? `0 0 20px ${zone.color}40` : isCritical ? `0 0 12px rgba(239,68,68,0.4)` : 'none',
+                        }}
+                        onClick={e => { e.stopPropagation(); setSelectedZone(zone) }}
+                      >
+                        {/* Zone name label */}
+                        {isArea && (
+                          <span className="absolute top-1 left-2 text-[9px] font-bold truncate max-w-[90%] pointer-events-none" style={{ color: zone.color }}>{zone.name}</span>
+                        )}
+
+                        {/* Marker icon */}
+                        {!isArea && (
+                          <div className="w-full h-full flex items-center justify-center marker-bounce">
+                            {zone.layer === 'iot' ? <Radio size={12} className="text-white" /> :
+                             zone.layer === 'stock' ? <Package size={12} className="text-white" /> :
+                             zone.type === 'EMERGENCY_EXIT' ? <AlertTriangle size={12} className="text-white" /> :
+                             <MapPin size={12} className="text-white" />}
+                          </div>
+                        )}
+
+                        {/* Live status badge */}
+                        {zone.liveData && (
+                          <span
+                            className={clsx('absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-white', isCritical && 'animate-ping')}
+                            style={{ background: isCritical ? '#ef4444' : isWarning ? '#f59e0b' : '#22c55e' }}
+                          />
+                        )}
+
+                        {/* Task count badge */}
+                        {zone.liveData?.type === 'tasks' && zone.liveData.total > 0 && (
+                          <span className="absolute -bottom-2 -right-2 px-1.5 py-0.5 rounded-full text-[8px] font-bold text-white" style={{ background: zone.liveData.overdue > 0 ? '#ef4444' : '#6366f1' }}>
+                            {zone.liveData.total}
+                          </span>
+                        )}
+
+                        {/* Stock level bar */}
+                        {zone.liveData?.type === 'stock' && isArea && (
+                          <div className="absolute bottom-1 left-2 right-2 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.1)' }}>
+                            <div className="h-full rounded-full transition-all" style={{
+                              width: `${Math.min(100, (zone.liveData.quantity / Math.max(1, zone.liveData.minLevel)) * 50)}%`,
+                              background: zone.liveData.level === 'critical' ? '#ef4444' : zone.liveData.level === 'warning' ? '#f59e0b' : '#22c55e',
+                            }} />
+                          </div>
+                        )}
+
+                        {/* Elevation indicator (3D mode) */}
+                        {view3D && zoneZ > 0 && (
+                          <span className="elevation-indicator">Z:{zoneZ}m</span>
+                        )}
+
+                        {/* Hover tooltip */}
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded-md text-[10px] font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-30"
+                          style={{ background: 'rgba(15,23,42,0.9)', color: '#fff' }}>
+                          {zone.name}{view3D && zoneZ ? ` (Z: ${zoneZ}m)` : ''}
+                        </div>
+                      </div>
+                    )
+                  })}
+
+                  {/* Live personnel markers */}
+                  {visibleEntities.filter(e => e.type === 'personnel').map(entity => (
+                    <div
+                      key={`person-${entity.id}`}
+                      className="absolute entity-pulse cursor-pointer group"
+                      style={{
+                        left: `${entity.x}%`,
+                        top: `${entity.y}%`,
+                        width: '24px',
+                        height: '24px',
+                        transform: view3D && entity.z
+                          ? `translate(-50%, -50%) translateZ(${(entity.z ?? 0) * 4}px)`
+                          : 'translate(-50%, -50%)',
+                        borderRadius: '50%',
+                        background: '#3b82f6',
+                        border: '2px solid #fff',
+                        boxShadow: '0 2px 8px rgba(59,130,246,0.4)',
+                        zIndex: 25,
+                      }}
+                    >
+                      <div className="w-full h-full flex items-center justify-center">
+                        <User size={10} className="text-white" />
+                      </div>
+                      {/* Name tooltip */}
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded-md text-[9px] font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-30"
+                        style={{ background: 'rgba(59,130,246,0.95)', color: '#fff' }}>
+                        {entity.name}{entity.department ? ` - ${entity.department}` : ''}
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Live equipment markers */}
+                  {visibleEntities.filter(e => e.type === 'equipment').map(entity => (
+                    <div
+                      key={`equip-${entity.id}`}
+                      className="absolute cursor-pointer group"
+                      style={{
+                        left: `${entity.x}%`,
+                        top: `${entity.y}%`,
+                        width: '22px',
+                        height: '22px',
+                        transform: view3D && entity.z
+                          ? `translate(-50%, -50%) translateZ(${(entity.z ?? 0) * 4}px)`
+                          : 'translate(-50%, -50%)',
+                        borderRadius: '4px',
+                        background: '#f59e0b',
+                        border: '2px solid #fff',
+                        boxShadow: '0 2px 8px rgba(245,158,11,0.4)',
+                        zIndex: 24,
+                      }}
+                    >
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Wrench size={10} className="text-white" />
+                      </div>
+                      {/* Name tooltip */}
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded-md text-[9px] font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-30"
+                        style={{ background: 'rgba(245,158,11,0.95)', color: '#fff' }}>
+                        {entity.name}{entity.status ? ` (${entity.status})` : ''}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Edit mode indicator */}
+                {editMode && (
+                  <div className="absolute top-3 left-3 px-3 py-1.5 rounded-lg text-[11px] font-bold z-20"
+                    style={{ background: 'rgba(6,182,212,0.9)', color: '#fff' }}>
+                    {lang === 'tr' ? 'Duzenleme modu - plana tiklayarak alan ekleyin' : 'Edit mode - click on plan to add zones'}
+                  </div>
+                )}
+
+                {/* Live entities legend */}
+                {visibleEntities.length > 0 && (
+                  <div className="absolute bottom-3 left-3 z-20 flex items-center gap-3 px-3 py-1.5 rounded-lg"
+                    style={{ background: 'rgba(15,23,42,0.85)', backdropFilter: 'blur(4px)' }}>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-3 h-3 rounded-full" style={{ background: '#3b82f6', border: '1.5px solid #fff' }} />
+                      <span className="text-[9px] font-semibold text-white">
+                        {visibleEntities.filter(e => e.type === 'personnel').length} {lang === 'tr' ? 'Personel' : 'Personnel'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-3 h-3 rounded" style={{ background: '#f59e0b', border: '1.5px solid #fff' }} />
+                      <span className="text-[9px] font-semibold text-white">
+                        {visibleEntities.filter(e => e.type === 'equipment').length} {lang === 'tr' ? 'Ekipman' : 'Equipment'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Resize handle */}
+              <div
+                className="resize-handle flex items-center justify-center py-1 rounded-b-lg"
+                style={{ background: 'var(--border-subtle)', border: '1px solid var(--border)', borderTop: 'none' }}
+                onMouseDown={handleResizeMouseDown}
+              >
+                <GripVertical size={14} style={{ color: 'var(--text-3)', transform: 'rotate(90deg)' }} />
+              </div>
             </div>
           )}
         </div>
@@ -508,7 +862,7 @@ export default function FacilityMap() {
               <InfoRow label={lang === 'tr' ? 'Tip' : 'Type'} value={ZONE_TYPE_CONFIG[selectedZone.type]?.[lang === 'tr' ? 'label' : 'labelEn'] ?? selectedZone.type} />
               <InfoRow label={lang === 'tr' ? 'Katman' : 'Layer'} value={LAYER_CONFIG[selectedZone.layer]?.[lang === 'tr' ? 'label' : 'labelEn'] ?? selectedZone.layer} />
               {selectedZone.description && <InfoRow label={lang === 'tr' ? 'Aciklama' : 'Description'} value={selectedZone.description} />}
-              <InfoRow label={lang === 'tr' ? 'Konum' : 'Position'} value={`X: ${selectedZone.x.toFixed(1)}% Y: ${selectedZone.y.toFixed(1)}%`} />
+              <InfoRow label={lang === 'tr' ? 'Konum' : 'Position'} value={`X: ${selectedZone.x.toFixed(1)}% Y: ${selectedZone.y.toFixed(1)}%${selectedZone.metadata?.z ? ` Z: ${selectedZone.metadata.z}m` : ''}`} />
             </div>
 
             {/* Live data */}
@@ -613,6 +967,29 @@ export default function FacilityMap() {
               <label className="block text-[11px] font-semibold mb-1" style={{ color: 'var(--text-3)' }}>{lang === 'tr' ? 'Plan Gorseli' : 'Plan Image'} * (PNG, JPG, SVG)</label>
               <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/svg+xml,application/pdf" onChange={e => setUploadFile(e.target.files?.[0] ?? null)} className="input text-[12px]" />
             </div>
+            {/* 3D Facility Dimensions (optional) */}
+            <div>
+              <label className="block text-[11px] font-semibold mb-1" style={{ color: 'var(--text-3)' }}>
+                {lang === 'tr' ? '3D Boyutlar (istege bagli)' : '3D Dimensions (optional)'}
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block text-[9px] mb-0.5" style={{ color: 'var(--text-3)' }}>X ({lang === 'tr' ? 'Genislik' : 'Width'}) m</label>
+                  <input type="number" className="input" min={1} step={1} value={facilityDimensions.xWidth}
+                    onChange={e => setFacilityDimensions(p => ({ ...p, xWidth: +e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-[9px] mb-0.5" style={{ color: 'var(--text-3)' }}>Y ({lang === 'tr' ? 'Derinlik' : 'Depth'}) m</label>
+                  <input type="number" className="input" min={1} step={1} value={facilityDimensions.yDepth}
+                    onChange={e => setFacilityDimensions(p => ({ ...p, yDepth: +e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-[9px] mb-0.5" style={{ color: 'var(--text-3)' }}>Z ({lang === 'tr' ? 'Yukseklik' : 'Height'}) m</label>
+                  <input type="number" className="input" min={1} step={1} value={facilityDimensions.zHeight}
+                    onChange={e => setFacilityDimensions(p => ({ ...p, zHeight: +e.target.value }))} />
+                </div>
+              </div>
+            </div>
             <div className="flex justify-end gap-2 pt-2">
               <button type="button" onClick={() => setShowUpload(false)} className="btn-secondary">{lang === 'tr' ? 'Iptal' : 'Cancel'}</button>
               <button type="button" onClick={handleUpload} disabled={uploading || !uploadFile || !uploadName.trim()} className="btn-primary disabled:opacity-40">
@@ -645,7 +1022,7 @@ export default function FacilityMap() {
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-4 gap-3">
               <div>
                 <label className="block text-[11px] font-semibold mb-1" style={{ color: 'var(--text-3)' }}>X %</label>
                 <input type="number" className="input" min={0} max={100} step={0.1} value={newZone.x} onChange={e => setNewZone({ ...newZone, x: +e.target.value })} />
@@ -653,6 +1030,10 @@ export default function FacilityMap() {
               <div>
                 <label className="block text-[11px] font-semibold mb-1" style={{ color: 'var(--text-3)' }}>Y %</label>
                 <input type="number" className="input" min={0} max={100} step={0.1} value={newZone.y} onChange={e => setNewZone({ ...newZone, y: +e.target.value })} />
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold mb-1" style={{ color: 'var(--text-3)' }}>Z (m)</label>
+                <input type="number" className="input" min={0} max={200} step={0.5} value={newZone.z} onChange={e => setNewZone({ ...newZone, z: +e.target.value })} placeholder="0" />
               </div>
               <div>
                 <label className="block text-[11px] font-semibold mb-1" style={{ color: 'var(--text-3)' }}>{lang === 'tr' ? 'Renk' : 'Color'}</label>
@@ -732,6 +1113,21 @@ export default function FacilityMap() {
           <span>{zones.length} {lang === 'tr' ? 'alan' : 'zones'}</span>
           <span>-</span>
           <span>{new Date(selectedPlan.createdAt).toLocaleDateString('tr-TR')}</span>
+          {visibleEntities.length > 0 && (
+            <>
+              <span>-</span>
+              <span className="flex items-center gap-1">
+                <User size={10} className="text-blue-500" /> {visibleEntities.filter(e => e.type === 'personnel').length}
+                <Wrench size={10} className="text-amber-500 ml-1" /> {visibleEntities.filter(e => e.type === 'equipment').length}
+              </span>
+            </>
+          )}
+          <button type="button" onClick={handleOperIQDimension} disabled={operiqDimLoading}
+            className="flex items-center gap-1 text-teal-500 hover:text-teal-600 transition-colors"
+            title={lang === 'tr' ? 'OperIQ ile boyut tanima' : 'OperIQ dimension detection'}>
+            {operiqDimLoading ? <Loader2 size={11} className="animate-spin" /> : <Scan size={11} />}
+            {lang === 'tr' ? 'OperIQ ile Boyut Tanima' : 'OperIQ Dimension Detection'}
+          </button>
           <button type="button" onClick={handleDeletePlan} className="ml-auto text-red-400 hover:text-red-600 transition-colors flex items-center gap-1">
             <Trash2 size={11} /> {lang === 'tr' ? 'Plani Sil' : 'Delete Plan'}
           </button>

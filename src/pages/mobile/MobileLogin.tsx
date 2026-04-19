@@ -5,12 +5,17 @@ import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import { FlagTR, FlagUS } from '../../components/ui/Flags'
 import BrandMark from '../../components/ui/BrandMark'
+import SplashScreen from '../../components/ui/SplashScreen'
 
 export default function MobileLogin() {
   const { lang, setLang, t } = useLanguage()
   const { mobileLogin } = useAuth()
   const navigate = useNavigate()
 
+  const [showSplash, setShowSplash] = useState(() => {
+    const seen = sessionStorage.getItem('actledger_mobile_splash_seen')
+    return !seen
+  })
   const [code, setCode] = useState('')
   const [password, setPassword] = useState('')
   const [showPass, setShowPass] = useState(false)
@@ -34,6 +39,10 @@ export default function MobileLogin() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (showSplash) {
+    return <SplashScreen onComplete={() => { sessionStorage.setItem('actledger_mobile_splash_seen', '1'); setShowSplash(false) }} />
   }
 
   return (

@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { CompanyProvider } from './context/CompanyContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { LanguageProvider } from './context/LanguageContext'
 import { ShortcutsProvider, useShortcut, useShortcutsContext } from './context/ShortcutsContext'
+import SplashScreen from './components/ui/SplashScreen'
 import ShortcutsHelpModal from './components/ui/ShortcutsHelpModal'
 import HelpTooltips from './components/ui/HelpTooltips'
 import AppLayout from './components/layout/AppLayout'
@@ -175,6 +177,20 @@ function AppRoutes() {
 }
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(() => {
+    const seen = sessionStorage.getItem('actledger_splash_seen')
+    return !seen
+  })
+
+  const handleSplashComplete = () => {
+    sessionStorage.setItem('actledger_splash_seen', '1')
+    setShowSplash(false)
+  }
+
+  if (showSplash) {
+    return <SplashScreen onComplete={handleSplashComplete} />
+  }
+
   return (
     <LanguageProvider>
       <ThemeProvider>

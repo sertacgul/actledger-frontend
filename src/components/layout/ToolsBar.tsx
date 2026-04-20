@@ -53,16 +53,16 @@ function ToolButton({ icon, label, shortLabel, onClick, disabled, variant = 'def
       data-help={label}
       title={label}
       aria-label={label}
-      className={`flex items-center gap-2 h-11 px-3 rounded-md font-bold text-[18px] transition-colors disabled:opacity-30 disabled:hover:bg-transparent ${tone}`}
+      className={`flex items-center gap-1.5 h-8 px-2 rounded-md font-semibold text-[13px] transition-colors disabled:opacity-30 disabled:hover:bg-transparent ${tone}`}
     >
       {icon}
-      <span className="hidden lg:inline">{shortLabel ?? label}</span>
+      <span className="hidden lg:inline text-[11px]">{shortLabel ?? label}</span>
     </button>
   )
 }
 
 function Divider() {
-  return <div className="w-px h-8 mx-2" style={{ background: 'var(--border)' }} />
+  return <div className="w-px h-6 mx-1.5" style={{ background: 'var(--border)' }} />
 }
 
 export default function ToolsBar() {
@@ -96,7 +96,7 @@ export default function ToolsBar() {
 
   return (
     <div
-      className="flex items-center gap-1 px-4 py-2 border-b print:hidden overflow-x-auto scrollbar-hide"
+      className="flex items-center gap-0.5 px-3 py-1 border-b print:hidden overflow-x-auto scrollbar-hide"
       style={{
         background: 'var(--surface)',
         borderColor: 'var(--border)',
@@ -106,24 +106,24 @@ export default function ToolsBar() {
       }}
     >
       {/* Navigation cluster */}
-      <ToolButton icon={<Home         size={24} />} label={t('toolbar_home')} shortLabel={t('toolbar_home_short')} onClick={handleHome} />
-      <ToolButton icon={<ChevronLeft  size={24} />} label={t('toolbar_back')}    onClick={handleBack} />
-      <ToolButton icon={<ChevronRight size={24} />} label={t('toolbar_forward')} onClick={handleForward} />
+      <ToolButton icon={<Home         size={16} />} label={t('toolbar_home')} shortLabel={t('toolbar_home_short')} onClick={handleHome} />
+      <ToolButton icon={<ChevronLeft  size={16} />} label={t('toolbar_back')}    onClick={handleBack} />
+      <ToolButton icon={<ChevronRight size={16} />} label={t('toolbar_forward')} onClick={handleForward} />
 
       <Divider />
 
       {/* Data ops */}
-      <ToolButton icon={<Search       size={24} />} label={t('toolbar_search')} shortLabel={t('toolbar_search_short')} onClick={() => dispatch(TOOLBAR_EVENTS.search)} />
-      <ToolButton icon={<RefreshCw      size={24} />} label={t('toolbar_refresh')}                                        onClick={() => dispatch(TOOLBAR_EVENTS.refresh)} />
-      <ToolButton icon={<FileSpreadsheet size={24}/>} label={t('toolbar_export')} shortLabel={t('toolbar_export_short')}   onClick={() => dispatch(TOOLBAR_EVENTS.exportExcel)} />
-      <ToolButton icon={<Printer        size={24} />} label={t('toolbar_print')}                                           onClick={handlePrint} />
+      <ToolButton icon={<Search       size={16} />} label={t('toolbar_search')} shortLabel={t('toolbar_search_short')} onClick={() => dispatch(TOOLBAR_EVENTS.search)} />
+      <ToolButton icon={<RefreshCw      size={16} />} label={t('toolbar_refresh')}                                        onClick={() => dispatch(TOOLBAR_EVENTS.refresh)} />
+      <ToolButton icon={<FileSpreadsheet size={16}/>} label={t('toolbar_export')} shortLabel={t('toolbar_export_short')}   onClick={() => dispatch(TOOLBAR_EVENTS.exportExcel)} />
+      <ToolButton icon={<Printer        size={16} />} label={t('toolbar_print')}                                           onClick={handlePrint} />
 
       <Divider />
 
       {/* Utility */}
-      <ToolButton icon={<FolderOpen     size={24} />} label={t('toolbar_files')}                                           onClick={() => navigate('/dosyalar')} />
-      <ToolButton icon={<BookOpen       size={24} />} label={lang === 'tr' ? 'Kullanim Kılavuzu' : 'User Guide'}          onClick={() => navigate('/manuel')} />
-      <ToolButton icon={<HelpCircle     size={24} />} label={t('toolbar_shortcuts')} shortLabel={t('toolbar_help')}        onClick={() => setHelpOpen(true)} />
+      <ToolButton icon={<FolderOpen     size={16} />} label={t('toolbar_files')}                                           onClick={() => navigate('/dosyalar')} />
+      <ToolButton icon={<BookOpen       size={16} />} label={lang === 'tr' ? 'Kullanim Kılavuzu' : 'User Guide'}          onClick={() => navigate('/manuel')} />
+      <ToolButton icon={<HelpCircle     size={16} />} label={t('toolbar_shortcuts')} shortLabel={t('toolbar_help')}        onClick={() => setHelpOpen(true)} />
 
       {/* Right side - current path breadcrumb */}
       <div className="flex-1" />

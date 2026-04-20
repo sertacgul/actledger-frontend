@@ -388,7 +388,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           userSelect: 'none',
         }}
       >
-        Operasyonel M\u00fckemmellik Sistemi
+        {'Operasyonel M\u00fckemmellik Sistemi'}
       </p>
 
       {/* ---- Loading bar ---- */}

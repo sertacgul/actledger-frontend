@@ -261,7 +261,7 @@ export default function MobileTaskDetail() {
 
         {/* Photo upload */}
         <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <p className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">{lang === 'tr' ? 'Fotograf Ekle' : 'Add Photo'}</p>
+          <p className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">{lang === 'tr' ? 'Fotoğraf Ekle' : 'Add Photo'}</p>
           <div className="flex gap-2 flex-wrap items-center">
             <label className="w-16 h-16 rounded-xl border-2 border-dashed border-cyan-300 flex items-center justify-center cursor-pointer active:bg-cyan-50 bg-cyan-50/50">
               <Camera size={22} className="text-cyan-500" />
@@ -283,7 +283,7 @@ export default function MobileTaskDetail() {
             <button type="button" onClick={handleUploadPhotos} disabled={uploading}
               className="mt-3 w-full py-2 rounded-lg bg-cyan-600 text-white text-sm font-bold disabled:opacity-50 active:scale-[0.98]">
               {uploading ? <Loader2 size={14} className="animate-spin inline mr-1" /> : null}
-              {lang === 'tr' ? `${photos.length} Fotografi Gonder` : `Send ${photos.length} Photo(s)`}
+              {lang === 'tr' ? `${photos.length} Fotoğrafı Gönder` : `Send ${photos.length} Photo(s)`}
             </button>
           )}
         </div>

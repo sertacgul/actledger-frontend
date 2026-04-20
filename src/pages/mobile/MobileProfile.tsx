@@ -142,7 +142,7 @@ export default function MobileProfile() {
               ]} />
               <GuideSection title={lang === 'tr' ? 'OperIQ Asistan' : 'OperIQ Assistant'} items={[
                 lang === 'tr' ? 'Alt menudeki OperIQ ikonuna tıklayin ve gorev/departman ile ilgili sorular sorun.' : 'Tap OperIQ icon and ask questions about tasks/department.',
-                lang === 'tr' ? 'Fotograf analizi için kamera ikonunu kullanin (gunluk 5 limit).' : 'Use camera icon for photo analysis (5/day limit).',
+                lang === 'tr' ? 'Fotoğraf analizi için kamera ikonunu kullanin (gunluk 5 limit).' : 'Use camera icon for photo analysis (5/day limit).',
                 lang === 'tr' ? 'AI size gorev bazli rehberlik, checklist ve teknik dokuman referansi sunar.' : 'AI provides task guidance, checklists and technical references.',
               ]} />
               <GuideSection title={lang === 'tr' ? 'Konum Paylasimi' : 'Location Sharing'} items={[

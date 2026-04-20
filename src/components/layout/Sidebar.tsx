@@ -51,7 +51,7 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
         { to: '/envanter',     icon: Package,    label: t('nav_inventory'),   desc: t('tooltip_inventory' as TranslationKey),   shortcut: 'g e' },
         { to: '/stok',         icon: Boxes,      label: t('nav_stock' as TranslationKey), desc: t('tooltip_stock' as TranslationKey), shortcut: 'g q' },
         { to: '/iot',          icon: Radio,      label: 'IoT',                desc: 'IoT cihaz ve sensör yönetimi',              shortcut: 'g o' },
-        { to: '/envanter-zeka', icon: ScanLine,  label: 'AssetIQ', desc: lang === 'tr' ? 'QR, batch, lokasyon, stok zekası' : 'QR, batch, location, stock intelligence', shortcut: 'g z' },
+        { to: '/envanter-zeka', icon: ScanLine,  label: 'AssetIQ', desc: 'AssetIQ', shortcut: 'g z' },
       ],
     },
     {

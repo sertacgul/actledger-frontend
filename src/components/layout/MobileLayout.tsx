@@ -119,13 +119,13 @@ export default function MobileLayout() {
             <div className="flex-1">
               <p className="text-[11px] font-semibold text-blue-800">Konum Bilgisi</p>
               <p className="text-[10px] text-blue-700 leading-relaxed mt-0.5">
-                Mesai baslangicidan bitisine kadar konum bilginiz acik olacaktir. <strong>Kimlik bilgileriniz kesinlikle takip edilmemektedir.</strong> Bu uygulama emniyeti ve operasyonel verimliligi arttirmak için kullanilmaktadir.
+                {'Mesai ba\u015flang\u0131c\u0131ndan biti\u015fine kadar konum bilginiz a\u00e7\u0131k olacakt\u0131r.'} <strong>{'Kimlik bilgileriniz kesinlikle takip edilmemektedir.'}</strong> {'Bu uygulama emniyeti ve operasyonel verimlili\u011fi art\u0131rmak i\u00e7in kullan\u0131lmaktad\u0131r.'}
               </p>
             </div>
           </div>
           <button type="button" onClick={() => setLocationDismissed(true)}
             className="px-6 py-1.5 rounded-lg text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-500">
-            Anladim
+            {'Anlad\u0131m'}
           </button>
         </div>
       )}

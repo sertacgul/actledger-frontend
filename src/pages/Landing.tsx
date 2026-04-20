@@ -467,7 +467,7 @@ function ScrollGrowIphone({ src }: { src: string }) {
               </p>
               <p style={{ fontSize: '12px', fontWeight: 700, color: '#22d3ee', letterSpacing: '4px', textTransform: 'uppercase', marginTop: '4px' }}>Mobile</p>
             </div>
-            <p style={{ fontSize: '8px', color: 'rgba(148,163,184,0.5)', letterSpacing: '2px', textTransform: 'uppercase', marginTop: '8px' }}>Operasyonel M\u00fckemmellik</p>
+            <p style={{ fontSize: '8px', color: 'rgba(148,163,184,0.5)', letterSpacing: '2px', textTransform: 'uppercase', marginTop: '8px' }}>{'Operasyonel M\u00fckemmellik'}</p>
           </div>
         )
       case 'tasks':

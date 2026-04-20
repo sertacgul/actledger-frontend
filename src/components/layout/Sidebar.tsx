@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, CheckSquare, FileText, Building2,
   Users, Smartphone, Settings, LogOut, Cpu, FolderOpen, Package, Radio, MapPin,
-  ZoomIn, ZoomOut, RotateCcw, Target, Boxes, Zap, GitBranch,
+  ZoomIn, ZoomOut, RotateCcw, Target, Boxes, Zap, GitBranch, ScanLine,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useAuth } from '../../context/AuthContext'
@@ -51,12 +51,13 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
         { to: '/envanter',     icon: Package,    label: t('nav_inventory'),   desc: t('tooltip_inventory' as TranslationKey),   shortcut: 'g e' },
         { to: '/stok',         icon: Boxes,      label: t('nav_stock' as TranslationKey), desc: t('tooltip_stock' as TranslationKey), shortcut: 'g q' },
         { to: '/iot',          icon: Radio,      label: 'IoT',                desc: 'IoT cihaz ve sensör yönetimi',              shortcut: 'g o' },
+        { to: '/envanter-zeka', icon: ScanLine,  label: 'AssetIQ', desc: lang === 'tr' ? 'QR, batch, lokasyon, stok zekasi' : 'QR, batch, location, stock intelligence', shortcut: 'g z' },
       ],
     },
     {
       label: t('sidebar_section_plat'),
       items: [
-        { to: '/mobil',     icon: Smartphone, label: t('nav_mobile'),   desc: t('tooltip_mobile' as TranslationKey),   shortcut: 'g m', badge: t('sidebar_badge_new') },
+        { to: '/mobil',     icon: Smartphone, label: t('nav_mobile'),   desc: t('tooltip_mobile' as TranslationKey),   shortcut: 'g m' },
         { to: '/kpi-panel', icon: Target,     label: 'KPI',             desc: 'KPI Ajandasi ve Analizi',                shortcut: 'g k' },
         { to: '/otomasyon',   icon: Zap,       label: t('nav_automation' as TranslationKey), desc: t('tooltip_automation' as TranslationKey), shortcut: 'g a' },
         { to: '/is-akislari', icon: GitBranch, label: t('nav_workflows' as TranslationKey),  desc: t('tooltip_workflows' as TranslationKey),  shortcut: 'g w' },

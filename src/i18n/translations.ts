@@ -171,6 +171,8 @@ export const translations = {
     page_inventory_subtitle:    'Demirbaş, tüketim malzemesi ve maliyet etkinliği',
     page_stock_title:           'Stok Yonetimi',
     page_stock_subtitle:        'Stok takibi, hareketler ve uyarilar',
+    page_inventory_intelligence_title:    'AssetIQ',
+    page_inventory_intelligence_subtitle: 'QR, lokasyon, parti/lot, operasyonel stok zekasi',
     page_settings_title:        'Ayarlar',
     page_settings_subtitle:     'Sistem ve dağıtım yapılandırması',
 
@@ -539,6 +541,8 @@ export const translations = {
     page_inventory_subtitle:    'Assets, consumables and cost effectiveness',
     page_stock_title:           'Stock Management',
     page_stock_subtitle:        'Stock tracking, movements and alerts',
+    page_inventory_intelligence_title:    'AssetIQ',
+    page_inventory_intelligence_subtitle: 'QR, locations, batch/lot, operational stock intelligence',
     page_settings_title:        'Settings',
     page_settings_subtitle:     'System and deployment configuration',
 

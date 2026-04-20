@@ -96,7 +96,10 @@ export default function SectorApplyModal({ sectorId, onClose, onApplied }: Props
       setResult({ ok: true, n: res.createdDepartments, k: res.createdKpis })
       onApplied?.()
     } catch (e: any) {
-      setResult({ ok: false, msg: e.message ?? t('apply_modal_failure') })
+      const msg = (e.status === 429 || (e.message && e.message.includes('fazla istek')))
+        ? 'Yeni bir sablon uygulamak istiyorsaniz ActLedger destek ile gorusunuz.'
+        : (e.message ?? t('apply_modal_failure'))
+      setResult({ ok: false, msg })
     } finally {
       setApplying(false)
     }

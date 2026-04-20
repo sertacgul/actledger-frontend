@@ -29,6 +29,7 @@ import StockManagement from './pages/StockManagement'
 import SuperAdmin from './pages/SuperAdmin'
 import Automation from './pages/Automation'
 import Workflows from './pages/Workflows'
+import InventoryIntelligence from './pages/InventoryIntelligence'
 import UserGuide from './pages/UserGuide'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfUse from './pages/TermsOfUse'
@@ -150,6 +151,7 @@ function AppRoutes() {
           <Route path="harita"      element={<LiveMap />}     />
           <Route path="kpi-panel"    element={<KPIPanel />}    />
           <Route path="stok"         element={<StockManagement />} />
+          <Route path="envanter-zeka" element={<InventoryIntelligence />} />
           <Route path="otomasyon"    element={<Automation />}  />
           <Route path="is-akislari"  element={<Workflows />}   />
           <Route path="ayarlar"      element={<Settings />}    />

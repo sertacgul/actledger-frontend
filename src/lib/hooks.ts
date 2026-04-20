@@ -882,3 +882,210 @@ export async function cancelWorkflowInstance(instanceId: string) {
 export async function cloneWorkflowTemplate(templateId: string) {
   return api.post<any>(`/workflows/templates/${templateId}/clone`, {})
 }
+
+// ── Inventory Intelligence ───────────────────────────────────────────────────
+
+const II = '/inventory-intelligence'
+
+// QR Entity
+export interface QrEntity {
+  id: string; code: string; entityType: string; entityId?: string | null
+  label?: string | null; description?: string | null; metadata?: any
+  active: boolean; createdAt: string
+}
+
+export interface QrScanResult {
+  qrEntity: QrEntity; entityType: string; entityContext: string
+  entityData: any; sectorTemplate: any; availableActions: string[]
+}
+
+export function useQrEntities(filter: { entityType?: string; search?: string } = {}) {
+  const params = new URLSearchParams({ pageSize: '100' })
+  if (filter.entityType) params.set('entityType', filter.entityType)
+  if (filter.search) params.set('search', filter.search)
+  const { data, loading, error, refetch } = useFetch<PaginatedResult<QrEntity>>(
+    () => api.get(`${II}/qr?${params}`), [filter.entityType, filter.search],
+  )
+  return { items: (data?.data ?? []) as QrEntity[], total: data?.meta?.total ?? 0, loading, error, refetch }
+}
+
+export async function createQrEntity(body: Record<string, unknown>) { return api.post<QrEntity>(`${II}/qr`, body) }
+export async function deleteQrEntity(id: string) { await api.delete(`${II}/qr/${id}`) }
+export async function autoGenerateQr() { return api.post<{ created: number; total: number; alreadyExisted: number }>(`${II}/qr/auto-generate`, {}) }
+export async function scanQrCode(body: { code: string; action?: string; latitude?: number; longitude?: number }) {
+  return api.post<QrScanResult>(`${II}/qr/scan`, body)
+}
+
+// Inventory Location
+export interface InventoryLocation {
+  id: string; name: string; code?: string | null; category: string
+  departmentId?: string | null; department?: { id: string; name: string; code: string } | null
+  parentId?: string | null; parent?: { id: string; name: string } | null
+  description?: string | null; active: boolean; _count?: { stockItems: number; children: number }
+}
+
+export function useInventoryLocations(filter: { category?: string; search?: string; parentId?: string } = {}) {
+  const params = new URLSearchParams({ pageSize: '100' })
+  if (filter.category) params.set('category', filter.category)
+  if (filter.search) params.set('search', filter.search)
+  if (filter.parentId) params.set('parentId', filter.parentId)
+  const { data, loading, error, refetch } = useFetch<PaginatedResult<InventoryLocation>>(
+    () => api.get(`${II}/locations?${params}`), [filter.category, filter.search, filter.parentId],
+  )
+  return { items: (data?.data ?? []) as InventoryLocation[], total: data?.meta?.total ?? 0, loading, error, refetch }
+}
+
+export function useLocationTree() {
+  return useFetch<any[]>(() => api.get(`${II}/locations/tree`))
+}
+
+export async function createInventoryLocation(body: Record<string, unknown>) { return api.post(`${II}/locations`, body) }
+export async function updateInventoryLocation(id: string, body: Record<string, unknown>) { return api.patch(`${II}/locations/${id}`, body) }
+export async function deleteInventoryLocation(id: string) { await api.delete(`${II}/locations/${id}`) }
+
+// Inventory Batch
+export interface InventoryBatch {
+  id: string; stockItemId: string; batchNumber: string; status: string
+  quantity: number; unit?: string | null; productionDate?: string | null
+  expiryDate?: string | null; supplier?: string | null; locationId?: string | null
+  stockItem?: { id: string; name: string; code?: string | null; unit: string } | null
+  location?: { id: string; name: string } | null
+  createdAt: string
+}
+
+export function useInventoryBatches(filter: { stockItemId?: string; status?: string; expiringSoon?: boolean } = {}) {
+  const params = new URLSearchParams({ pageSize: '100' })
+  if (filter.stockItemId) params.set('stockItemId', filter.stockItemId)
+  if (filter.status) params.set('status', filter.status)
+  if (filter.expiringSoon) params.set('expiringSoon', 'true')
+  const { data, loading, error, refetch } = useFetch<PaginatedResult<InventoryBatch>>(
+    () => api.get(`${II}/batches?${params}`), [filter.stockItemId, filter.status, filter.expiringSoon],
+  )
+  return { items: (data?.data ?? []) as InventoryBatch[], total: data?.meta?.total ?? 0, loading, error, refetch }
+}
+
+export async function createInventoryBatch(body: Record<string, unknown>) { return api.post(`${II}/batches`, body) }
+export async function updateInventoryBatch(id: string, body: Record<string, unknown>) { return api.patch(`${II}/batches/${id}`, body) }
+
+// Inventory Transaction
+export interface InventoryTransaction {
+  id: string; stockItemId: string; type: string; quantity: number
+  previousQty: number; newQty: number; batchId?: string | null
+  taskId?: string | null; userId: string; description?: string | null
+  sectorLabel?: string | null; createdAt: string
+  stockItem?: { id: string; name: string; code?: string | null; unit: string } | null
+  batch?: { id: string; batchNumber: string } | null
+  fromLocation?: { id: string; name: string } | null
+  toLocation?: { id: string; name: string } | null
+}
+
+export function useInventoryTransactions(filter: { stockItemId?: string; type?: string; taskId?: string } = {}) {
+  const params = new URLSearchParams({ pageSize: '100' })
+  if (filter.stockItemId) params.set('stockItemId', filter.stockItemId)
+  if (filter.type) params.set('type', filter.type)
+  if (filter.taskId) params.set('taskId', filter.taskId)
+  const { data, loading, error, refetch } = useFetch<PaginatedResult<InventoryTransaction>>(
+    () => api.get(`${II}/transactions?${params}`), [filter.stockItemId, filter.type, filter.taskId],
+  )
+  return { items: (data?.data ?? []) as InventoryTransaction[], total: data?.meta?.total ?? 0, loading, error, refetch }
+}
+
+export async function createInventoryTransaction(body: Record<string, unknown>) { return api.post(`${II}/transactions`, body) }
+export async function quickConsume(body: Record<string, unknown>) { return api.post(`${II}/quick-consume`, body) }
+export async function taskConsume(taskId: string, items: { stockItemId: string; quantity: number; batchId?: string }[]) {
+  return api.post(`${II}/task-consume/${taskId}`, { items })
+}
+
+// Reservations
+export interface InventoryReservation {
+  id: string; stockItemId: string; status: string; quantity: number
+  taskId?: string | null; description?: string | null
+  reservedAt: string; expiresAt?: string | null
+  stockItem?: { id: string; name: string; quantity: number; unit: string } | null
+}
+
+export function useInventoryReservations(filter: { stockItemId?: string; taskId?: string; status?: string } = {}) {
+  const params = new URLSearchParams({ pageSize: '100' })
+  if (filter.stockItemId) params.set('stockItemId', filter.stockItemId)
+  if (filter.taskId) params.set('taskId', filter.taskId)
+  if (filter.status) params.set('status', filter.status)
+  const { data, loading, error, refetch } = useFetch<PaginatedResult<InventoryReservation>>(
+    () => api.get(`${II}/reservations?${params}`), [filter.stockItemId, filter.taskId, filter.status],
+  )
+  return { items: (data?.data ?? []) as InventoryReservation[], total: data?.meta?.total ?? 0, loading, error, refetch }
+}
+
+export async function createReservation(body: Record<string, unknown>) { return api.post(`${II}/reservations`, body) }
+export async function cancelReservation(id: string) { return api.patch(`${II}/reservations/${id}/cancel`, {}) }
+
+// IoT Responsible
+export interface IoTDeviceResponsible {
+  id: string; deviceId: string; userId: string; roleType: string
+  notifyOnAlert: boolean; notifyOnCritical: boolean; notifyOnOffline: boolean; notifyRoutine: boolean
+  user?: { id: string; name: string; email: string } | null
+  device?: { id: string; name: string; deviceId: string; status: string } | null
+}
+
+export function useDeviceResponsibles(deviceId: string) {
+  return useFetch<IoTDeviceResponsible[]>(() => api.get(`${II}/iot-responsibles/device/${deviceId}`), [deviceId])
+}
+
+export function useUserDevices(userId: string) {
+  return useFetch<IoTDeviceResponsible[]>(() => api.get(`${II}/iot-responsibles/user/${userId}`), [userId])
+}
+
+export async function assignIoTResponsible(body: Record<string, unknown>) { return api.post(`${II}/iot-responsibles`, body) }
+export async function updateIoTResponsible(id: string, body: Record<string, unknown>) { return api.patch(`${II}/iot-responsibles/${id}`, body) }
+export async function removeIoTResponsible(id: string) { await api.delete(`${II}/iot-responsibles/${id}`) }
+
+// Purchase Responsible
+export interface PurchaseResponsible {
+  id: string; userId: string; roleType: string; departmentIds: string[]; categories: string[]
+  active: boolean; user?: { id: string; name: string; email: string; role: string; title?: string | null } | null
+}
+
+export function usePurchaseResponsibles() {
+  return useFetch<PurchaseResponsible[]>(() => api.get(`${II}/purchase-responsibles`))
+}
+
+export async function createPurchaseResponsible(body: Record<string, unknown>) { return api.post(`${II}/purchase-responsibles`, body) }
+export async function updatePurchaseResponsible(id: string, body: Record<string, unknown>) { return api.patch(`${II}/purchase-responsibles/${id}`, body) }
+export async function deletePurchaseResponsible(id: string) { await api.delete(`${II}/purchase-responsibles/${id}`) }
+
+// Analytics
+export function useInventoryAnalytics(filter: { departmentId?: string; days?: number } = {}) {
+  const params = new URLSearchParams()
+  if (filter.departmentId) params.set('departmentId', filter.departmentId)
+  if (filter.days) params.set('days', String(filter.days))
+  return useFetch<any>(() => api.get(`${II}/analytics/dashboard?${params}`), [filter.departmentId, filter.days])
+}
+
+export function useInventoryTurnover(days: number = 30) {
+  return useFetch<any[]>(() => api.get(`${II}/analytics/turnover?days=${days}`), [days])
+}
+
+export function useInventoryHeatmap(type: string = 'consumption', days: number = 30) {
+  return useFetch<any[]>(() => api.get(`${II}/analytics/heatmap?type=${type}&days=${days}`), [type, days])
+}
+
+export function useTaskConsumptionReport(days: number = 30) {
+  return useFetch<any[]>(() => api.get(`${II}/analytics/task-consumption?days=${days}`), [days])
+}
+
+// OperIQ Intelligence
+export function useInventoryIntelligence() {
+  return useFetch<any>(() => api.get(`${II}/operiq/insights`))
+}
+
+export async function analyzeInventoryIntelligence() {
+  return api.post<any>(`${II}/operiq/analyze`, {})
+}
+
+// Sector Templates
+export function useSectorTemplates() {
+  return useFetch<any[]>(() => api.get(`${II}/sectors`))
+}
+
+export function useCurrentSectorTemplate() {
+  return useFetch<any>(() => api.get(`${II}/sectors/current`))
+}

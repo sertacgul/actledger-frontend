@@ -4,7 +4,7 @@ import {
   ChevronDown, X, Loader2, Zap, Activity, Package, ClipboardList,
   Shield, MapPin, Radio, Cpu, Settings2, Maximize2, Minimize2,
   CheckCircle2, XCircle, RefreshCw, Box, User, Wrench, Move,
-  ZoomIn, ZoomOut, RotateCcw, GripVertical, Scan,
+  ZoomIn, ZoomOut, RotateCcw, RotateCw, ChevronUp, GripVertical, Scan,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useLanguage } from '../context/LanguageContext'
@@ -141,6 +141,11 @@ export default function FacilityMap() {
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 })
   const [isDragging, setIsDragging] = useState(false)
   const dragStart = useRef({ x: 0, y: 0, tx: 0, ty: 0 })
+
+  // Rotation state (2D: rotateZ only, 3D: rotateX + rotateY + rotateZ)
+  const [rotation, setRotation] = useState({ x: 45, y: 0, z: -15 })
+  const [isRotating, setIsRotating] = useState(false)
+  const rotateStart = useRef({ mx: 0, my: 0, rx: 0, ry: 0, rz: 0 })
 
   // Resize state
   const [canvasHeight, setCanvasHeight] = useState(500)
@@ -285,22 +290,47 @@ export default function FacilityMap() {
   // ── Pan/Zoom handlers ──────────────────────────────────────────────────
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (editMode) return // don't drag in edit mode
+    if (editMode) return
+    // Right click or Alt+click = rotate mode
+    if (e.button === 2 || (e.button === 0 && e.altKey)) {
+      e.preventDefault()
+      setIsRotating(true)
+      rotateStart.current = { mx: e.clientX, my: e.clientY, rx: rotation.x, ry: rotation.y, rz: rotation.z }
+      return
+    }
     if (e.button !== 0) return
     setIsDragging(true)
     dragStart.current = { x: e.clientX, y: e.clientY, tx: transform.x, ty: transform.y }
     e.preventDefault()
-  }, [editMode, transform.x, transform.y])
+  }, [editMode, transform.x, transform.y, rotation])
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (isRotating) {
+      const dx = e.clientX - rotateStart.current.mx
+      const dy = e.clientY - rotateStart.current.my
+      if (view3D) {
+        setRotation({
+          x: Math.max(-90, Math.min(90, rotateStart.current.rx - dy * 0.5)),
+          y: rotateStart.current.ry + dx * 0.5,
+          z: rotateStart.current.rz,
+        })
+      } else {
+        setRotation(prev => ({
+          ...prev,
+          z: rotateStart.current.rz + dx * 0.5,
+        }))
+      }
+      return
+    }
     if (!isDragging) return
     const dx = e.clientX - dragStart.current.x
     const dy = e.clientY - dragStart.current.y
     setTransform(prev => ({ ...prev, x: dragStart.current.tx + dx, y: dragStart.current.ty + dy }))
-  }, [isDragging])
+  }, [isDragging, isRotating, view3D])
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false)
+    setIsRotating(false)
   }, [])
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
@@ -322,7 +352,8 @@ export default function FacilityMap() {
 
   const resetTransform = useCallback(() => {
     setTransform({ x: 0, y: 0, scale: 1 })
-  }, [])
+    setRotation(view3D ? { x: 45, y: 0, z: -15 } : { x: 0, y: 0, z: 0 })
+  }, [view3D])
 
   // ── Resize handlers ───────────────────────────────────────────────────
 
@@ -600,11 +631,42 @@ export default function FacilityMap() {
                 </div>
               </div>
 
+              {/* Rotation controls */}
+              <div className="absolute top-3 right-14 z-30 flex flex-col gap-1">
+                <button type="button" onClick={() => setRotation(p => ({ ...p, z: p.z - 15 }))}
+                  className="card w-8 h-8 flex items-center justify-center hover:shadow-md transition-all" title={lang === 'tr' ? 'Sola d\u00f6nd\u00fcr' : 'Rotate left'}>
+                  <RotateCcw size={12} style={{ color: 'var(--text-2)' }} />
+                </button>
+                <button type="button" onClick={() => setRotation(p => ({ ...p, z: p.z + 15 }))}
+                  className="card w-8 h-8 flex items-center justify-center hover:shadow-md transition-all" title={lang === 'tr' ? 'Sa\u011fa d\u00f6nd\u00fcr' : 'Rotate right'}>
+                  <RotateCw size={12} style={{ color: 'var(--text-2)' }} />
+                </button>
+                {view3D && (
+                  <>
+                    <button type="button" onClick={() => setRotation(p => ({ ...p, x: Math.min(90, p.x + 15) }))}
+                      className="card w-8 h-8 flex items-center justify-center hover:shadow-md transition-all text-[10px] font-bold" style={{ color: 'var(--text-2)' }} title="Tilt up">
+                      <ChevronUp size={14} />
+                    </button>
+                    <button type="button" onClick={() => setRotation(p => ({ ...p, x: Math.max(-90, p.x - 15) }))}
+                      className="card w-8 h-8 flex items-center justify-center hover:shadow-md transition-all text-[10px] font-bold" style={{ color: 'var(--text-2)' }} title="Tilt down">
+                      <ChevronDown size={14} />
+                    </button>
+                  </>
+                )}
+                <button type="button" onClick={() => setRotation(view3D ? { x: 45, y: 0, z: -15 } : { x: 0, y: 0, z: 0 })}
+                  className="card w-8 h-8 flex items-center justify-center hover:shadow-md transition-all text-[9px] font-bold" style={{ color: 'var(--text-3)' }} title="Reset rotation">
+                  0&deg;
+                </button>
+                <div className="card px-1 py-1 text-[8px] font-bold text-center leading-tight" style={{ color: 'var(--text-3)' }}>
+                  {Math.round(rotation.z)}&deg;
+                </div>
+              </div>
+
               {/* 3D mode indicator */}
               {view3D && (
                 <div className="absolute top-3 left-14 px-3 py-1.5 rounded-lg text-[11px] font-bold z-20"
                   style={{ background: 'rgba(139,92,246,0.9)', color: '#fff' }}>
-                  3D {lang === 'tr' ? 'Görünüm' : 'View'} - {facilityDimensions.xWidth}x{facilityDimensions.yDepth}x{facilityDimensions.zHeight}m
+                  3D {lang === 'tr' ? 'G\u00f6r\u00fcn\u00fcm' : 'View'} - {facilityDimensions.xWidth}x{facilityDimensions.yDepth}x{facilityDimensions.zHeight}m
                 </div>
               )}
 
@@ -614,8 +676,9 @@ export default function FacilityMap() {
                   'card relative overflow-hidden facility-fade-in',
                   editMode && 'cursor-crosshair',
                   emergencyMode && 'ring-2 ring-red-500',
-                  !editMode && !isDragging && 'cursor-grab',
+                  !editMode && !isDragging && !isRotating && 'cursor-grab',
                   isDragging && 'cursor-grabbing',
+                  isRotating && 'cursor-move',
                   view3D ? 'map-canvas-3d' : 'map-canvas-2d',
                 )}
                 style={{
@@ -629,6 +692,7 @@ export default function FacilityMap() {
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
                 onWheel={handleWheel}
+                onContextMenu={e => e.preventDefault()}
               >
                 {/* Transformable inner container */}
                 <div
@@ -639,8 +703,8 @@ export default function FacilityMap() {
                     position: 'relative',
                     transformOrigin: 'center center',
                     transform: view3D
-                      ? `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale}) rotateX(45deg) rotateZ(-15deg)`
-                      : `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
+                      ? `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale}) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) rotateZ(${rotation.z}deg)`
+                      : `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale}) rotateZ(${rotation.z}deg)`,
                     transformStyle: view3D ? 'preserve-3d' : 'flat',
                   }}
                 >

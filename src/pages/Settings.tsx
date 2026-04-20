@@ -221,7 +221,7 @@ function CompanySettings() {
 
       {/* Read-only sector info */}
       {sector && (
-        <Section title="Aktif Sektor" description="Sektor yapilandirmasi Admin Panel uzerinden yonetilir">
+        <Section title="Aktif Sektor" description="Sektor yapılandirmasi Admin Panel üzerinden yonetilir">
           <div className="p-4">
             <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: 'var(--border-subtle)' }}>
               <span className="text-2xl">{sector.icon}</span>
@@ -236,7 +236,7 @@ function CompanySettings() {
 
       {/* Read-only company info */}
       {config && (
-        <Section title="Firma" description="Firma bilgileri Admin Panel uzerinden yonetilir">
+        <Section title="Firma" description="Firma bilgileri Admin Panel üzerinden yonetilir">
           <div className="p-4 grid grid-cols-2 gap-3">
             <div className="p-3 rounded-lg" style={{ background: 'var(--border-subtle)' }}>
               <p className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--text-3)' }}>Firma</p>
@@ -305,7 +305,7 @@ function SecuritySettings() {
         </div>
       </Section>
 
-      <Section title="Kimlik Dogrulama" description="Oturum ve erisim guvenligi">
+      <Section title="Kimlik Dogrulama" description="Oturum ve erişim guvenligi">
         <SettingRow label="İki Faktörlü Doğrulama" description="Tüm hesaplarda 2FA zorunluluğu">
           <label className="relative inline-flex cursor-pointer items-center">
             <input type="checkbox" className="sr-only peer" defaultChecked />

@@ -1089,3 +1089,20 @@ export function useSectorTemplates() {
 export function useCurrentSectorTemplate() {
   return useFetch<any>(() => api.get(`${II}/sectors/current`))
 }
+
+// Stock Approvals
+export function usePendingApprovals() {
+  return useFetch<any[]>(() => api.get(`${II}/approvals/pending`))
+}
+
+export function useMyStockRequests() {
+  return useFetch<any[]>(() => api.get(`${II}/approvals/my-requests`))
+}
+
+export async function createStockApproval(body: Record<string, unknown>) {
+  return api.post<any>(`${II}/approvals`, body)
+}
+
+export async function processStockApproval(id: string, action: 'ONAYLA' | 'REDDET', rejectReason?: string) {
+  return api.patch<any>(`${II}/approvals/${id}`, { action, rejectReason })
+}

@@ -43,7 +43,7 @@ export default function NLWidgetGenerator({ onClose, onCreated }: Props) {
       'kullanici', 'kullanıcı', 'user', 'personel', 'staff', 'envanter', 'inventory',
       'bar', 'pie', 'line', 'pasta', 'cizgi', 'çizgi',
       'stok', 'stock', 'gecik', 'overdue', 'tamamla', 'complete', 'bekle', 'pending',
-      'oncelik', 'öncelik', 'priority', 'durum', 'status', 'hafta', 'week', 'ay', 'month', 'gun', 'gün', 'day',
+      'öncelik', 'öncelik', 'priority', 'durum', 'status', 'hafta', 'week', 'ay', 'month', 'gun', 'gün', 'day',
     ]
     return !DATA_TERMS.some(term => lower.includes(term))
   }
@@ -51,7 +51,7 @@ export default function NLWidgetGenerator({ onClose, onCreated }: Props) {
   const handleGenerate = async () => {
     if (!prompt.trim()) return
     if (isOffTopic(prompt)) {
-      setError('Bu platform yalnizca operasyonel veri gorsellestirme icin kullanilabilir. Lutfen gorev, departman, KPI veya rapor ile ilgili bir istek girin.')
+      setError('Bu platform yalnizca operasyonel veri görsellestirme için kullanilabilir. Lutfen gorev, departman, KPI veya rapor ile ilgili bir istek girin.')
       return
     }
     setLoading(true)
@@ -99,7 +99,7 @@ export default function NLWidgetGenerator({ onClose, onCreated }: Props) {
         {/* Prompt input */}
         <div>
           <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
-            Operasyonel veri gorsellestirme isteginizi yazin
+            Operasyonel veri görsellestirme isteginizi yazin
           </label>
           <textarea
             value={prompt}

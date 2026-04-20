@@ -122,7 +122,7 @@ export default function ToolsBar() {
 
       {/* Utility */}
       <ToolButton icon={<FolderOpen     size={24} />} label={t('toolbar_files')}                                           onClick={() => navigate('/dosyalar')} />
-      <ToolButton icon={<BookOpen       size={24} />} label={lang === 'tr' ? 'Kullanim Kilavuzu' : 'User Guide'}          onClick={() => navigate('/manuel')} />
+      <ToolButton icon={<BookOpen       size={24} />} label={lang === 'tr' ? 'Kullanim Kılavuzu' : 'User Guide'}          onClick={() => navigate('/manuel')} />
       <ToolButton icon={<HelpCircle     size={24} />} label={t('toolbar_shortcuts')} shortLabel={t('toolbar_help')}        onClick={() => setHelpOpen(true)} />
 
       {/* Right side - current path breadcrumb */}

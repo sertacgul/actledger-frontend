@@ -282,7 +282,7 @@ export default function Inventory() {
             <div>
               <p className="text-sm font-semibold text-zinc-800">Yetkiniz bulunmuyor</p>
               <p className="text-xs text-zinc-500 mt-2 leading-relaxed">
-                Yeni envanter yuklemesi yapmak veya mevcut envanterde ekleme, cikarma yapmak icin yoneticinize basvurun.
+                Yeni envanter yuklemesi yapmak veya mevcut envanterde ekleme, cikarma yapmak için yöneticinize basvurun.
               </p>
             </div>
             <button

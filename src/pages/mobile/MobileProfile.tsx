@@ -91,7 +91,7 @@ export default function MobileProfile() {
           onClick={() => setShowGuide(true)}
           className="w-full bg-cyan-50 rounded-xl border border-cyan-200 p-4 flex items-center justify-between active:bg-cyan-100"
         >
-          <span className="text-sm font-semibold text-cyan-700 flex items-center gap-2"><BookOpen size={16} /> {lang === 'tr' ? 'Mobil Kullanim Kilavuzu' : 'Mobile User Guide'}</span>
+          <span className="text-sm font-semibold text-cyan-700 flex items-center gap-2"><BookOpen size={16} /> {lang === 'tr' ? 'Mobil Kullanim Kılavuzu' : 'Mobile User Guide'}</span>
           <ChevronRight size={16} className="text-cyan-300" />
         </button>
 
@@ -123,7 +123,7 @@ export default function MobileProfile() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center">
           <div className="bg-white w-full max-h-[85vh] rounded-t-2xl overflow-y-auto animate-slideUp">
             <div className="sticky top-0 bg-white border-b border-slate-100 px-4 py-3 flex items-center justify-between z-10">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2"><BookOpen size={18} className="text-cyan-600" /> {lang === 'tr' ? 'Mobil Kullanim Kilavuzu' : 'Mobile User Guide'}</h3>
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2"><BookOpen size={18} className="text-cyan-600" /> {lang === 'tr' ? 'Mobil Kullanim Kılavuzu' : 'Mobile User Guide'}</h3>
               <button type="button" onClick={() => setShowGuide(false)} className="p-1 rounded-full bg-slate-100"><ChevronRight size={16} className="rotate-90 text-slate-500" /></button>
             </div>
             <div className="p-4 space-y-4 text-[13px] text-slate-700">
@@ -133,7 +133,7 @@ export default function MobileProfile() {
               ]} />
               <GuideSection title={lang === 'tr' ? 'Gorevler' : 'Tasks'} items={[
                 lang === 'tr' ? 'Alt menudeki "Gorevler" sekmesinde size atanan tum gorevleri gorun.' : 'See all tasks assigned to you in the "Tasks" tab.',
-                lang === 'tr' ? 'Gorev detayina girerek checklist maddelerini isaretleyin ve durumu guncelleyin.' : 'Enter task detail to check items and update status.',
+                lang === 'tr' ? 'Gorev detayina girerek checklist maddelerini isaretleyin ve durumu güncelleyin.' : 'Enter task detail to check items and update status.',
                 lang === 'tr' ? 'Geciken gorevler kirmizi ile isaretlenir.' : 'Overdue tasks are marked in red.',
               ]} />
               <GuideSection title={lang === 'tr' ? 'Formlar' : 'Forms'} items={[
@@ -141,14 +141,14 @@ export default function MobileProfile() {
                 lang === 'tr' ? 'Gerekirse fotograf ekleyebilirsiniz.' : 'Add photos if needed.',
               ]} />
               <GuideSection title={lang === 'tr' ? 'OperIQ Asistan' : 'OperIQ Assistant'} items={[
-                lang === 'tr' ? 'Alt menudeki OperIQ ikonuna tiklayin ve gorev/departman ile ilgili sorular sorun.' : 'Tap OperIQ icon and ask questions about tasks/department.',
-                lang === 'tr' ? 'Fotograf analizi icin kamera ikonunu kullanin (gunluk 5 limit).' : 'Use camera icon for photo analysis (5/day limit).',
+                lang === 'tr' ? 'Alt menudeki OperIQ ikonuna tıklayin ve gorev/departman ile ilgili sorular sorun.' : 'Tap OperIQ icon and ask questions about tasks/department.',
+                lang === 'tr' ? 'Fotograf analizi için kamera ikonunu kullanin (gunluk 5 limit).' : 'Use camera icon for photo analysis (5/day limit).',
                 lang === 'tr' ? 'AI size gorev bazli rehberlik, checklist ve teknik dokuman referansi sunar.' : 'AI provides task guidance, checklists and technical references.',
               ]} />
               <GuideSection title={lang === 'tr' ? 'Konum Paylasimi' : 'Location Sharing'} items={[
                 lang === 'tr' ? 'Konum izni verdikten sonra konumunuz her 60 saniyede platforma gonderilir.' : 'After granting permission, your location is sent every 60 seconds.',
                 lang === 'tr' ? 'Profil sayfanizda mevcut konumunuzu gorebilirsiniz.' : 'You can see your current location on the profile page.',
-                lang === 'tr' ? 'Yoneticiler canli harita uzerinden konumunuzu gorebilir.' : 'Managers can see your location on the live map.',
+                lang === 'tr' ? 'Yoneticiler canli harita üzerinden konumunuzu gorebilir.' : 'Managers can see your location on the live map.',
               ]} />
               <GuideSection title={lang === 'tr' ? 'Mesajlasma' : 'Messaging'} items={[
                 lang === 'tr' ? 'Bildirimler sekmesinden gelen mesajlari gorun.' : 'See incoming messages in the notifications tab.',

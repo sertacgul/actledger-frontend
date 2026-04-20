@@ -115,7 +115,7 @@ export default function SmartImportModal({ title, target, defaultType, onClose, 
 
       // CSV/TSV
       const lines = text.split('\n').filter(l => l.trim())
-      if (lines.length < 2) { setError('En az 2 satir gerekli (baslik + veri)'); return }
+      if (lines.length < 2) { setError('En az 2 satir gerekli (başlık + veri)'); return }
       const sep = lines[0].includes('\t') ? '\t' : ','
       const hdrs = lines[0].split(sep).map(h => h.trim().replace(/["`]/g, ''))
       const rows = lines.slice(1).map(line => {
@@ -287,7 +287,7 @@ export default function SmartImportModal({ title, target, defaultType, onClose, 
                   </div>
                   <div className="text-center">
                     <p className="text-sm font-semibold text-zinc-700">
-                      {dragOver ? 'Dosyayi birakin...' : 'Dosyayi surukleyin veya tiklayin'}
+                      {dragOver ? 'Dosyayi birakin...' : 'Dosyayi surukleyin veya tıklayin'}
                     </p>
                     <p className="text-xs text-zinc-400 mt-1">.xlsx, .xls, .csv</p>
                   </div>
@@ -474,7 +474,7 @@ export default function SmartImportModal({ title, target, defaultType, onClose, 
               {result.skipped > 0 && (
                 <p className="text-xs text-amber-600 mt-1">{result.skipped} satir atlandi</p>
               )}
-              <p className="text-xs text-zinc-400 mt-2">Envanter ve Stok Yonetimi otomatik senkronize edildi</p>
+              <p className="text-xs text-zinc-400 mt-2">Envanter ve Stok Yönetimi otomatik senkronize edildi</p>
             </div>
             <button
               onClick={onClose}

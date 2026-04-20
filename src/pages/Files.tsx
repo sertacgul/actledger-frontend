@@ -324,7 +324,7 @@ export default function Files() {
                       type="button"
                       onClick={(e) => { e.stopPropagation(); setPreviewFile(f) }}
                       className="w-7 h-7 rounded flex items-center justify-center text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
-                      data-help="Dosyayi goruntule"
+                      data-help="Dosyayi görüntüle"
                     >
                       <Eye size={12} />
                     </button>
@@ -610,7 +610,7 @@ function FilePreviewModal({
               {isPptx ? (
                 <>
                   <FileType size={40} className="mb-3 opacity-40" />
-                  <p className="text-[13px] font-medium text-zinc-600">PowerPoint dosyalari icin onizleme destegi henuz mevcut degil</p>
+                  <p className="text-[13px] font-medium text-zinc-600">PowerPoint dosyalari için onizleme destegi henuz mevcut degil</p>
                 </>
               ) : (
                 <>
@@ -618,7 +618,7 @@ function FilePreviewModal({
                   <p className="text-[13px] font-medium text-zinc-600">Bu dosya turunun onizlemesi desteklenmiyor</p>
                 </>
               )}
-              <p className="text-[11px] mt-1">Dosyayi indirerek goruntuleyebilirsiniz</p>
+              <p className="text-[11px] mt-1">Dosyayi indirerek görüntüleyebilirsiniz</p>
             </div>
           )}
         </div>

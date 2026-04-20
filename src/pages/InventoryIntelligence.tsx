@@ -141,7 +141,7 @@ export default function InventoryIntelligence() {
     setGenerating(true)
     try {
       const result = await autoGenerateQr()
-      alert(`${result.created} yeni QR kodu olusturuldu (toplam: ${result.total}, mevcut: ${result.alreadyExisted})`)
+      alert(`${result.created} yeni QR kodu oluşturuldu (toplam: ${result.total}, mevcut: ${result.alreadyExisted})`)
       refetchQr()
     } catch (e: any) {
       alert(e.message || 'QR oluşturma hatası')
@@ -163,7 +163,7 @@ export default function InventoryIntelligence() {
     document.body.appendChild(tempDiv)
     const tempCanvas = document.createElement('canvas')
     tempDiv.appendChild(tempCanvas)
-    // Basit QR encode - canvas uzerinden
+    // Basit QR encode - canvas üzerinden
     // qrcode.react'in internal'ini kullanmak yerine mevcut SVG'den PNG'ye ceviriyoruz
     document.body.removeChild(tempDiv)
 
@@ -183,7 +183,7 @@ export default function InventoryIntelligence() {
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
     const pageW = pdf.internal.pageSize.getWidth()
 
-    // Baslik
+    // Başlık
     pdf.setFontSize(16)
     pdf.text('ActLedger - QR Kod', pageW / 2, 20, { align: 'center' })
 
@@ -231,7 +231,7 @@ export default function InventoryIntelligence() {
     const marginX = 10
     const marginY = 15
 
-    // Baslik sayfasi
+    // Başlık sayfasi
     pdf.setFontSize(18)
     pdf.text('ActLedger - QR Kod Listesi', pageW / 2, 15, { align: 'center' })
     pdf.setFontSize(10)
@@ -241,7 +241,7 @@ export default function InventoryIntelligence() {
     const perPage = cols * rows
     const totalPages = Math.ceil(qrEntities.length / perPage)
 
-    // Her QR kodu icin SVG'yi canvas'a cevir
+    // Her QR kodu için SVG'yi canvas'a cevir
     const svgElements = qrEntities.map(qr => {
       const el = document.getElementById(`qr-svg-${qr.id}`) as SVGSVGElement | null
       if (!el) return null
@@ -253,7 +253,7 @@ export default function InventoryIntelligence() {
     const images: { qr: QrEntity; dataUrl: string }[] = []
 
     if (svgElements.length === 0) {
-      // SVG element yok - sadece metin olarak olustur
+      // SVG element yok - sadece metin olarak oluştur
       qrEntities.forEach((qr, i) => {
         if (i > 0 && i % perPage === 0) pdf.addPage()
         const pageIdx = i % perPage
@@ -278,7 +278,7 @@ export default function InventoryIntelligence() {
     // SVG -> PNG -> PDF (async chain)
     const processNext = (idx: number) => {
       if (idx >= svgElements.length) {
-        // Tum resimler yuklendi, PDF'i olustur
+        // Tum resimler yuklendi, PDF'i oluştur
         images.forEach((item, i) => {
           if (i > 0 && i % perPage === 0) pdf.addPage()
           const pageIdx = i % perPage
@@ -922,7 +922,7 @@ export default function InventoryIntelligence() {
             ))}
             {(!intelligence?.insights || intelligence.insights.length === 0) && !analyzing && (
               <div className="text-center text-zinc-400 py-8 text-sm">
-                Henüz analiz yapılmamış. "Analiz Et" butonuna tiklayin.
+                Henüz analiz yapılmamış. "Analiz Et" butonuna tıklayin.
               </div>
             )}
           </div>

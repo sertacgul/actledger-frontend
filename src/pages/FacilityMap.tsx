@@ -520,7 +520,7 @@ export default function FacilityMap() {
               <button type="button" onClick={() => setEditMode(!editMode)}
                 className={clsx('card px-3 py-2 flex items-center gap-1.5 text-[12px] font-semibold transition-all', editMode ? 'ring-2 ring-cyan-400 shadow-lg' : 'hover:shadow-md')}
                 style={{ color: editMode ? '#06b6d4' : 'var(--text-1)' }}>
-                <Plus size={14} /> {lang === 'tr' ? (editMode ? 'Duzenleme Aktif' : 'Duzenle') : (editMode ? 'Editing' : 'Edit')}
+                <Plus size={14} /> {lang === 'tr' ? (editMode ? 'Düzenleme Aktif' : 'Düzenle') : (editMode ? 'Editing' : 'Edit')}
               </button>
               <button type="button" onClick={() => setEmergencyMode(!emergencyMode)}
                 className={clsx('card px-3 py-2 flex items-center gap-1.5 text-[12px] font-bold transition-all', emergencyMode ? 'bg-red-600 text-white border-red-600' : 'hover:shadow-md')}
@@ -604,7 +604,7 @@ export default function FacilityMap() {
               {view3D && (
                 <div className="absolute top-3 left-14 px-3 py-1.5 rounded-lg text-[11px] font-bold z-20"
                   style={{ background: 'rgba(139,92,246,0.9)', color: '#fff' }}>
-                  3D {lang === 'tr' ? 'Gorunum' : 'View'} - {facilityDimensions.xWidth}x{facilityDimensions.yDepth}x{facilityDimensions.zHeight}m
+                  3D {lang === 'tr' ? 'Görünüm' : 'View'} - {facilityDimensions.xWidth}x{facilityDimensions.yDepth}x{facilityDimensions.zHeight}m
                 </div>
               )}
 
@@ -809,7 +809,7 @@ export default function FacilityMap() {
                 {editMode && (
                   <div className="absolute top-3 left-3 px-3 py-1.5 rounded-lg text-[11px] font-bold z-20"
                     style={{ background: 'rgba(6,182,212,0.9)', color: '#fff' }}>
-                    {lang === 'tr' ? 'Duzenleme modu - plana tiklayarak alan ekleyin' : 'Edit mode - click on plan to add zones'}
+                    {lang === 'tr' ? 'Düzenleme modu - plana tıklayarak alan ekleyin' : 'Edit mode - click on plan to add zones'}
                   </div>
                 )}
 
@@ -869,7 +869,7 @@ export default function FacilityMap() {
             {selectedZone.liveData && (
               <div className="p-3 rounded-lg" style={{ background: 'var(--border-subtle)', border: '1px solid var(--border)' }}>
                 <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--accent)' }}>
-                  {lang === 'tr' ? 'Canli Veri' : 'Live Data'}
+                  {lang === 'tr' ? 'Canlı Veri' : 'Live Data'}
                 </p>
                 {selectedZone.liveData.type === 'iot' && (
                   <div className="space-y-1.5">
@@ -1075,7 +1075,7 @@ export default function FacilityMap() {
             <div className="flex justify-end gap-2 pt-2">
               <button type="button" onClick={() => setShowCreateZone(false)} className="btn-secondary">{lang === 'tr' ? 'Iptal' : 'Cancel'}</button>
               <button type="button" onClick={handleCreateZone} disabled={creatingZone || !newZone.name.trim()} className="btn-primary disabled:opacity-40">
-                {creatingZone ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} {lang === 'tr' ? 'Olustur' : 'Create'}
+                {creatingZone ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} {lang === 'tr' ? 'Oluştur' : 'Create'}
               </button>
             </div>
           </div>

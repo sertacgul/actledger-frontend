@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { ClipboardList, FileSpreadsheet, MessageSquare, UserCircle, Bell, RefreshCw, Wifi, WifiOff, Cpu, MapPin, X } from 'lucide-react'
+import { ClipboardList, FileSpreadsheet, MessageSquare, UserCircle, Bell, RefreshCw, Wifi, WifiOff, Cpu, MapPin, X, ScanLine } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import clsx from 'clsx'
 import { useLanguage } from '../../context/LanguageContext'
@@ -66,7 +66,7 @@ export default function MobileLayout() {
 
   const tabs = [
     { to: '/m/gorevler',  icon: ClipboardList,  label: t('m_nav_tasks') },
-    { to: '/m/formlar',   icon: FileSpreadsheet, label: t('m_nav_forms') },
+    { to: '/m/qr-tarama', icon: ScanLine,        label: 'QR',             highlight: false, qr: true },
     { to: '/m/operiq',    icon: Cpu,             label: 'OperIQ',         highlight: true },
     { to: '/m/mesajlar',  icon: MessageSquare,   label: t('m_nav_messages') },
     { to: '/m/profil',    icon: UserCircle,      label: t('m_nav_profile') },
@@ -119,7 +119,7 @@ export default function MobileLayout() {
             <div className="flex-1">
               <p className="text-[11px] font-semibold text-blue-800">Konum Bilgisi</p>
               <p className="text-[10px] text-blue-700 leading-relaxed mt-0.5">
-                Mesai baslangicidan bitisine kadar konum bilginiz acik olacaktir. <strong>Kimlik bilgileriniz kesinlikle takip edilmemektedir.</strong> Bu uygulama emniyeti ve operasyonel verimliligi arttirmak icin kullanilmaktadir.
+                Mesai baslangicidan bitisine kadar konum bilginiz acik olacaktir. <strong>Kimlik bilgileriniz kesinlikle takip edilmemektedir.</strong> Bu uygulama emniyeti ve operasyonel verimliligi arttirmak için kullanilmaktadir.
               </p>
             </div>
           </div>
@@ -139,6 +139,7 @@ export default function MobileLayout() {
       <nav className="flex items-stretch border-t border-slate-200 bg-white safe-area-bottom relative">
         {tabs.map(tab => {
           const isHighlight = (tab as any).highlight
+          const isQr = (tab as any).qr
           return (
             <NavLink
               key={tab.to}
@@ -147,12 +148,14 @@ export default function MobileLayout() {
                 'flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors min-h-[56px]',
                 isHighlight
                   ? 'relative -mt-3'
-                  : clsx(
-                      'py-2.5',
-                      isActive
-                        ? 'text-cyan-600 bg-cyan-50/50'
-                        : 'text-slate-400 active:bg-slate-50'
-                    )
+                  : isQr
+                    ? 'relative -mt-2'
+                    : clsx(
+                        'py-2.5',
+                        isActive
+                          ? 'text-cyan-600 bg-cyan-50/50'
+                          : 'text-slate-400 active:bg-slate-50'
+                      )
               )}
             >
               {isHighlight ? (
@@ -161,6 +164,13 @@ export default function MobileLayout() {
                     <tab.icon size={20} className="text-teal-300" />
                   </div>
                   <span className="text-[9px] font-bold text-teal-600 mt-0.5">{tab.label}</span>
+                </>
+              ) : isQr ? (
+                <>
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center shadow-md border-2 border-cyan-200 bg-white">
+                    <tab.icon size={20} className="text-cyan-600" />
+                  </div>
+                  <span className="text-[9px] font-bold text-cyan-600 mt-0.5">{tab.label}</span>
                 </>
               ) : (
                 <>

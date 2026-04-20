@@ -235,13 +235,13 @@ export default function LiveMap() {
         <div>
           <h2 className="text-[18px] font-bold tracking-tight flex items-center gap-2" style={{ color: 'var(--text-1)' }}>
             <MapPin size={20} className="text-cyan-600" />
-            {lang === 'tr' ? 'Canli Operasyon & Tesis Haritalari' : 'Live Operations & Facility Maps'}
+            {lang === 'tr' ? 'Canlı Operasyon & Tesis Haritalari' : 'Live Operations & Facility Maps'}
           </h2>
         </div>
         <div className="flex gap-2">
           <button type="button" onClick={() => setActiveTab('outdoor')}
             className={clsx('flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-bold transition-all', activeTab === 'outdoor' ? 'bg-cyan-50 text-cyan-700 border-2 border-cyan-200' : 'bg-white border-2 border-zinc-200 text-zinc-600 hover:border-zinc-300')}>
-            <MapPin size={16} /> {lang === 'tr' ? 'Canli Harita' : 'Live Map'}
+            <MapPin size={16} /> {lang === 'tr' ? 'Canlı Harita' : 'Live Map'}
           </button>
           <button type="button" onClick={() => setActiveTab('indoor')}
             className={clsx('flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-bold transition-all', activeTab === 'indoor' ? 'bg-violet-50 text-violet-700 border-2 border-violet-200' : 'bg-white border-2 border-zinc-200 text-zinc-600 hover:border-zinc-300')}>
@@ -259,7 +259,7 @@ export default function LiveMap() {
       <div className="flex gap-3 flex-wrap items-center">
         <div className="flex items-center gap-2">
           <MapPin size={16} className="text-indigo-500" />
-          <h2 className="text-sm font-bold text-slate-900">{lang === 'tr' ? 'Canli Konum Takibi' : 'Live Location Tracking'}</h2>
+          <h2 className="text-sm font-bold text-slate-900">{lang === 'tr' ? 'Canlı Konum Takibi' : 'Live Location Tracking'}</h2>
         </div>
         <select className="select w-44 text-xs" value={filterDept} onChange={e => setFilterDept(e.target.value)}>
           <option value="tumu">Tum Departmanlar</option>
@@ -326,7 +326,7 @@ export default function LiveMap() {
         <div className="card p-4 border-l-4 border-red-400">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs font-bold text-red-700 flex items-center gap-1.5">
-              <Crosshair size={13} /> Yakin Personel ({nearbyResults.length} kisi, 10km icinde)
+              <Crosshair size={13} /> Yakin Personel ({nearbyResults.length} kisi, 10km içinde)
             </p>
             <button type="button" onClick={() => { setNearbyMode(false); setNearbyResults([]) }} className="text-slate-400 hover:text-slate-600"><X size={14} /></button>
           </div>
@@ -534,7 +534,7 @@ export default function LiveMap() {
                 </div>
                 <div>
                   <p className="text-sm font-bold text-slate-900">Acil Gorev Ata</p>
-                  <p className="text-[10px] text-slate-500">Gorev ACIL olarak olusturulacak</p>
+                  <p className="text-[10px] text-slate-500">Gorev ACIL olarak oluşturulacak</p>
                 </div>
               </div>
               <button type="button" onClick={() => setAssignTarget(null)} className="p-1.5 hover:bg-slate-100 rounded-lg">

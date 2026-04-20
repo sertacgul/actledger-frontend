@@ -107,7 +107,7 @@ export default function BulkImportModal({ title, columns, onImport, onClose }: P
 
       // Support CSV-like tab/comma separated with header row
       const lines = text.split('\n').filter(l => l.trim())
-      if (lines.length < 2) { setError('En az 2 satir gerekli (baslik + veri)'); return }
+      if (lines.length < 2) { setError('En az 2 satir gerekli (başlık + veri)'); return }
       const sep = lines[0].includes('\t') ? '\t' : ','
       const hdrs = lines[0].split(sep).map(h => h.trim().replace(/["`]/g, ''))
       const rows = lines.slice(1).map(line => {

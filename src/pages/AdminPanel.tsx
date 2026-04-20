@@ -23,15 +23,15 @@ import { FlagTR, FlagUS } from '../components/ui/Flags'
 type AdminTab = 'company' | 'sector' | 'template' | 'departments' | 'positions' | 'users' | 'mobile' | 'system'
 
 const ROLE_OPTIONS: { key: string; label: string; level: number; descTr: string; descEn: string }[] = [
-  { key: 'platform_admin', label: 'Seviye 9', level: 9, descTr: 'Tam yetki. Sektor, sablon, kullanici yonetimi.', descEn: 'Full access. Sector, template, user management.' },
-  { key: 'genel_mudur', label: 'Seviye 8', level: 8, descTr: 'Tum departman ve verilere erisim. KPI yonetimi.', descEn: 'Access to all departments and data. KPI management.' },
-  { key: 'gm_yardimcisi', label: 'Seviye 7', level: 7, descTr: 'Ust yonetim yetkileri. Departmanlar arasi koordinasyon.', descEn: 'Senior management authority. Cross-department coordination.' },
-  { key: 'direktor', label: 'Seviye 6', level: 6, descTr: 'Birden fazla departmanin stratejik yonetimi.', descEn: 'Strategic management of multiple departments.' },
-  { key: 'mudur', label: 'Seviye 5', level: 5, descTr: 'Departman yonetimi. KPI ekleme/duzenleme/silme yetkisi.', descEn: 'Department management. KPI add/edit/delete authority.' },
-  { key: 'supervizor', label: 'Seviye 4', level: 4, descTr: 'Ekip yonetimi. Gorev atama ve takip.', descEn: 'Team management. Task assignment and tracking.' },
-  { key: 'muhendis', label: 'Seviye 3', level: 3, descTr: 'Teknik gorevler. Rapor olusturma.', descEn: 'Technical tasks. Report creation.' },
+  { key: 'platform_admin', label: 'Seviye 9', level: 9, descTr: 'Tam yetki. Sektor, sablon, kullanici yönetimi.', descEn: 'Full access. Sector, template, user management.' },
+  { key: 'genel_mudur', label: 'Seviye 8', level: 8, descTr: 'Tum departman ve verilere erişim. KPI yönetimi.', descEn: 'Access to all departments and data. KPI management.' },
+  { key: 'gm_yardimcisi', label: 'Seviye 7', level: 7, descTr: 'Ust yönetim yetkileri. Departmanlar arasi koordinasyon.', descEn: 'Senior management authority. Cross-department coordination.' },
+  { key: 'direktor', label: 'Seviye 6', level: 6, descTr: 'Birden fazla departmanin stratejik yönetimi.', descEn: 'Strategic management of multiple departments.' },
+  { key: 'mudur', label: 'Seviye 5', level: 5, descTr: 'Departman yönetimi. KPI ekleme/düzenleme/silme yetkisi.', descEn: 'Department management. KPI add/edit/delete authority.' },
+  { key: 'supervizor', label: 'Seviye 4', level: 4, descTr: 'Ekip yönetimi. Gorev atama ve takip.', descEn: 'Team management. Task assignment and tracking.' },
+  { key: 'muhendis', label: 'Seviye 3', level: 3, descTr: 'Teknik gorevler. Rapor oluşturma.', descEn: 'Technical tasks. Report creation.' },
   { key: 'teknisyen', label: 'Seviye 2', level: 2, descTr: 'Saha gorevleri. Rapor ve checklist doldurma.', descEn: 'Field tasks. Report and checklist completion.' },
-  { key: 'isci', label: 'Seviye 1', level: 1, descTr: 'Temel gorev goruntuleme ve tamamlama.', descEn: 'Basic task viewing and completion.' },
+  { key: 'isci', label: 'Seviye 1', level: 1, descTr: 'Temel gorev görüntüleme ve tamamlama.', descEn: 'Basic task viewing and completion.' },
 ]
 
 function Section({ title, desc, children }: { title: string; desc?: string; children: React.ReactNode }) {
@@ -66,10 +66,10 @@ export default function AdminPanel() {
     { key: 'company',  icon: Building2,     label: lang === 'tr' ? 'Firma Kurulumu' : 'Company Setup' },
     { key: 'sector',   icon: Layers,        label: lang === 'tr' ? 'Sektor Bilgisi' : 'Sector Info' },
     { key: 'template', icon: SettingsIcon,   label: lang === 'tr' ? 'Sablon Uygulama' : 'Apply Template' },
-    { key: 'departments', icon: Building2,  label: lang === 'tr' ? 'Departman Yonetimi' : 'Department Management' },
+    { key: 'departments', icon: Building2,  label: lang === 'tr' ? 'Departman Yönetimi' : 'Department Management' },
     { key: 'positions', icon: Shield,       label: lang === 'tr' ? 'Kadro & Gorev' : 'Positions & Titles' },
-    { key: 'users',    icon: Users,         label: lang === 'tr' ? 'Kullanici Yonetimi' : 'User Management' },
-    { key: 'mobile',   icon: Smartphone,    label: lang === 'tr' ? 'Mobil Kullanici Yonetimi' : 'Mobile User Management' },
+    { key: 'users',    icon: Users,         label: lang === 'tr' ? 'Kullanici Yönetimi' : 'User Management' },
+    { key: 'mobile',   icon: Smartphone,    label: lang === 'tr' ? 'Mobil Kullanici Yönetimi' : 'Mobile User Management' },
     { key: 'system',   icon: Shield,        label: lang === 'tr' ? 'Sistem Bilgileri' : 'System Info' },
   ]
 
@@ -225,7 +225,7 @@ export default function AdminPanel() {
                   </div>
                   <p className="text-[11px] p-3 rounded-lg border border-blue-200 bg-blue-50 text-blue-700 font-medium">
                     {lang === 'tr'
-                      ? 'Sektor degisikligi icin Super Admin ile iletisime gecin.'
+                      ? 'Sektor degisikligi için Super Admin ile iletisime gecin.'
                       : 'Contact Super Admin for sector changes.'}
                   </p>
                 </div>
@@ -265,7 +265,7 @@ export default function AdminPanel() {
 
                   <div className="p-3 rounded-lg border border-blue-200 bg-blue-50 text-[11px] text-blue-800">
                     {lang === 'tr'
-                      ? 'Bu islem mevcut departmanlara dokunmaz; sadece secilenleri ekler. Birden fazla kez calistirilabilir.'
+                      ? 'Bu işlem mevcut departmanlara dokunmaz; sadece secilenleri ekler. Birden fazla kez calistirilabilir.'
                       : 'This operation does not touch existing departments; it only adds the selected ones. Can be run multiple times.'}
                   </div>
                 </div>
@@ -282,14 +282,14 @@ export default function AdminPanel() {
           {tab === 'mobile' && <AdminMobileUsers lang={lang} />}
 
           {tab === 'system' && (
-            <Section title={lang === 'tr' ? 'Sistem Ozellikleri' : 'System Features'} desc={lang === 'tr' ? 'Lisans kapsamindaki platform ozellikleri' : 'Platform features included in the license'}>
+            <Section title={lang === 'tr' ? 'Sistem Ozellikleri' : 'System Features'} desc={lang === 'tr' ? 'Lisans kapsamindaki platform özellikleri' : 'Platform features included in the license'}>
               <div className="space-y-2">
                 {Object.entries(config?.features ?? {}).map(([key, enabled]) => {
                   const labels: Record<string, string> = lang === 'tr' ? {
                     geminiAI: 'OperIQ Analiz Motoru',
                     mobileApp: 'Mobil Uygulama',
                     advancedReports: 'Gelismis Raporlama',
-                    customForms: 'Ozel Form Olusturucu',
+                    customForms: 'Ozel Form Oluşturucu',
                     messaging: 'Saha Mesajlasma',
                   } : {
                     geminiAI: 'OperIQ Analytics Engine',
@@ -365,7 +365,7 @@ function AdminUserManagement({ lang, sectorId }: { lang: 'tr' | 'en'; sectorId: 
           'Departman': dept?.name ?? '-',
           'Telefon': u.phone ?? '-',
           'Durum': u.active ? 'Aktif' : 'Pasif',
-          'Olusturma Tarihi': u.createdAt ? new Date(u.createdAt).toLocaleDateString('tr-TR') : '-',
+          'Oluşturma Tarihi': u.createdAt ? new Date(u.createdAt).toLocaleDateString('tr-TR') : '-',
         })
       }
 
@@ -393,7 +393,7 @@ function AdminUserManagement({ lang, sectorId }: { lang: 'tr' | 'en'; sectorId: 
         })
       }
 
-      // Excel olustur
+      // Excel oluştur
       const wb = XLSX.utils.book_new()
       if (platformRows.length > 0) {
         const ws1 = XLSX.utils.json_to_sheet(platformRows)
@@ -415,7 +415,7 @@ function AdminUserManagement({ lang, sectorId }: { lang: 'tr' | 'en'; sectorId: 
   const handleDeleteUser = async (id: string, name: string) => {
     const confirmed = window.confirm(
       lang === 'tr'
-        ? `"${name}" kullanicisini silmek istediginize emin misiniz? Bu islem geri alinamaz.`
+        ? `"${name}" kullanicisini silmek istediginize emin misiniz? Bu işlem geri alinamaz.`
         : `Are you sure you want to delete "${name}"? This action cannot be undone.`
     )
     if (!confirmed) return
@@ -474,8 +474,8 @@ function AdminUserManagement({ lang, sectorId }: { lang: 'tr' | 'en'; sectorId: 
   return (
     <div className="space-y-5">
       <Section
-        title={lang === 'tr' ? 'Platform Kullanici Yonetimi' : 'Platform User Management'}
-        desc={lang === 'tr' ? 'Sisteme yeni kullanici ekleyin, mevcut kullanicilari goruntuleyin veya cikartin' : 'Add new users, view or remove existing users'}
+        title={lang === 'tr' ? 'Platform Kullanici Yönetimi' : 'Platform User Management'}
+        desc={lang === 'tr' ? 'Sisteme yeni kullanici ekleyin, mevcut kullanicilari görüntüleyin veya cikartin' : 'Add new users, view or remove existing users'}
       >
         <div className="p-4">
           <div className="flex items-center justify-between mb-4">
@@ -632,7 +632,7 @@ function AdminUserManagement({ lang, sectorId }: { lang: 'tr' | 'en'; sectorId: 
                               <DetailRow label={lang === 'tr' ? 'Telefon' : 'Phone'} value={u.phone ?? '-'} />
                               <DetailRow label={lang === 'tr' ? 'Departman' : 'Department'} value={dept?.name ?? '-'} />
                               <DetailRow label={lang === 'tr' ? 'Durum' : 'Status'} value={u.active ? (lang === 'tr' ? 'Aktif' : 'Active') : (lang === 'tr' ? 'Pasif' : 'Inactive')} />
-                              <DetailRow label={lang === 'tr' ? 'Olusturma' : 'Created'} value={u.createdAt ? new Date(u.createdAt).toLocaleDateString('tr-TR') : '-'} />
+                              <DetailRow label={lang === 'tr' ? 'Oluşturma' : 'Created'} value={u.createdAt ? new Date(u.createdAt).toLocaleDateString('tr-TR') : '-'} />
                               <DetailRow label={lang === 'tr' ? 'Son Sifre' : 'Last Password'} value={detail?.lastPassword ?? '-'} mono />
                             </div>
                           )}
@@ -715,7 +715,7 @@ function AdminUserForm({ lang, departments, sectorId, onCreated, onCancel }: {
       setSuccess(true)
       setTimeout(() => onCreated(), 1500)
     } catch (e: any) {
-      setErr(e.message ?? (lang === 'tr' ? 'Kullanici olusturulamadi' : 'Failed to create user'))
+      setErr(e.message ?? (lang === 'tr' ? 'Kullanici oluşturulamadi' : 'Failed to create user'))
     } finally { setSaving(false) }
   }
 
@@ -875,7 +875,7 @@ function AdminUserForm({ lang, departments, sectorId, onCreated, onCancel }: {
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" className="btn-default btn-sm" onClick={onCancel}>{lang === 'tr' ? 'Iptal' : 'Cancel'}</button>
         <button type="button" className="btn-sm font-bold text-white disabled:opacity-40 whitespace-nowrap" style={{ background: '#06b6d4' }} onClick={handleSubmit} disabled={saving}>
-          {saving ? '...' : (lang === 'tr' ? 'Kullanici Olustur' : 'Create User')}
+          {saving ? '...' : (lang === 'tr' ? 'Kullanici Oluştur' : 'Create User')}
         </button>
       </div>
     </div>
@@ -1038,9 +1038,9 @@ function AdminMobileUsers({ lang }: { lang: string }) {
     } catch (e: any) {
       const msg = e.message ?? ''
       if (msg.includes('limit') || msg.includes('Limit') || msg.includes('maksimum') || msg.includes('maximum') || e.status === 403) {
-        setError(lang === 'tr' ? 'Yeni mobil kullanici eklemek icin lutfen ActLedger yetkilisi ile temasa geciniz.' : 'Please contact ActLedger support to add mobile users.')
+        setError(lang === 'tr' ? 'Yeni mobil kullanici eklemek için lutfen ActLedger yetkilisi ile temasa geciniz.' : 'Please contact ActLedger support to add mobile users.')
       } else {
-        setError(msg || (lang === 'tr' ? 'Kullanici olusturulamadi' : 'Failed to create user'))
+        setError(msg || (lang === 'tr' ? 'Kullanici oluşturulamadi' : 'Failed to create user'))
       }
     } finally { setCreating(false) }
   }
@@ -1078,7 +1078,7 @@ function AdminMobileUsers({ lang }: { lang: string }) {
             <div className="text-center">
               <CheckCircle size={36} className="text-green-500 mx-auto mb-2" />
               <p className="text-[14px] font-bold" style={{ color: 'var(--text-1)' }}>
-                {lang === 'tr' ? 'Mobil Kullanici Olusturuldu' : 'Mobile User Created'}
+                {lang === 'tr' ? 'Mobil Kullanici Oluşturuldu' : 'Mobile User Created'}
               </p>
               <p className="text-[12px]" style={{ color: 'var(--text-3)' }}>{createdUser.name}</p>
             </div>
@@ -1124,8 +1124,8 @@ function AdminMobileUsers({ lang }: { lang: string }) {
       )}
 
       <Section
-        title={lang === 'tr' ? 'Mobil Kullanici Yonetimi' : 'Mobile User Management'}
-        desc={lang === 'tr' ? 'Saha personeli icin mobil giris kodlu kullanici yonetimi' : 'Mobile login code user management for field personnel'}
+        title={lang === 'tr' ? 'Mobil Kullanici Yönetimi' : 'Mobile User Management'}
+        desc={lang === 'tr' ? 'Saha personeli için mobil giris kodlu kullanici yönetimi' : 'Mobile login code user management for field personnel'}
       >
         <button type="button" onClick={() => setShowCreate(!showCreate)}
           className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-semibold text-white bg-indigo-600 hover:bg-indigo-500">
@@ -1235,7 +1235,7 @@ function AdminMobileUsers({ lang }: { lang: string }) {
               <button type="button" onClick={handleCreate} disabled={creating || !firstName || !lastName || !phoneNumber || !deptId}
                 className="btn-primary flex-1 justify-center disabled:opacity-40">
                 {creating ? <RefreshCw size={12} className="animate-spin" /> : <Smartphone size={12} />}
-                {lang === 'tr' ? ' Olustur' : ' Create'}
+                {lang === 'tr' ? ' Oluştur' : ' Create'}
               </button>
             </div>
           </div>
@@ -1293,7 +1293,7 @@ function AdminMobileUsers({ lang }: { lang: string }) {
                           <DetailRow label={lang === 'tr' ? 'Kadro' : 'Position'} value={u.title ?? '-'} />
                           <DetailRow label={lang === 'tr' ? 'Gorev' : 'Job Title'} value={u.jobTitle ?? '-'} />
                           <DetailRow label={lang === 'tr' ? 'Durum' : 'Status'} value={u.active ? (lang === 'tr' ? 'Aktif' : 'Active') : (lang === 'tr' ? 'Pasif' : 'Inactive')} />
-                          <DetailRow label={lang === 'tr' ? 'Olusturma' : 'Created'} value={u.createdAt ? new Date(u.createdAt).toLocaleDateString('tr-TR') : '-'} />
+                          <DetailRow label={lang === 'tr' ? 'Oluşturma' : 'Created'} value={u.createdAt ? new Date(u.createdAt).toLocaleDateString('tr-TR') : '-'} />
                         </div>
                       </div>
                     </div>
@@ -1337,9 +1337,9 @@ function AdminDepartmentManager({ lang }: { lang: string }) {
     } catch (e: any) {
       const msg = e.message ?? ''
       if (msg.includes('limit') || msg.includes('Limit') || msg.includes('maximum') || msg.includes('maksimum') || e.status === 403) {
-        setErr(lang === 'tr' ? 'Yeni departman eklemek icin lutfen ActLedger yetkilisi ile temasa geciniz.' : 'Please contact ActLedger support to add new departments.')
+        setErr(lang === 'tr' ? 'Yeni departman eklemek için lutfen ActLedger yetkilisi ile temasa geciniz.' : 'Please contact ActLedger support to add new departments.')
       } else {
-        setErr(msg || (lang === 'tr' ? 'Departman olusturulamadi' : 'Failed to create department'))
+        setErr(msg || (lang === 'tr' ? 'Departman oluşturulamadi' : 'Failed to create department'))
       }
     } finally { setCreating(false) }
   }
@@ -1362,7 +1362,7 @@ function AdminDepartmentManager({ lang }: { lang: string }) {
   return (
     <div className="space-y-5">
       <Section
-        title={lang === 'tr' ? 'Departman Yonetimi' : 'Department Management'}
+        title={lang === 'tr' ? 'Departman Yönetimi' : 'Department Management'}
         desc={lang === 'tr' ? 'Yeni departman ekleyin veya mevcut departmanlari cikartin' : 'Add new departments or remove existing ones'}
       >
         {/* Create form */}

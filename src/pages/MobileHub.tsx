@@ -415,7 +415,7 @@ const FORM_PRESETS: FormPreset[] = [
   { name: 'Musteri Memnuniyet Anketi',            formType: 'soru_cevap',     fields: 10, dept: 'Tum Departmanlar', required: false, description: 'Musteri geri bildirim ve memnuniyet sorulari' },
   { name: 'Olay/Kaza Bildirim Formu',            formType: 'soru_cevap',     fields: 18, dept: 'Tum Departmanlar', required: true,  description: 'Is kazasi veya olay sonrasi detayli bildirim' },
   { name: 'Uretim Hatti Olcum Kaydi',            formType: 'sayisal',        fields: 10, dept: 'Uretim',           required: true,  description: 'Sicaklik, basinc, hiz gibi uretim parametreleri' },
-  { name: 'Enerji Tuketim Takip Formu',          formType: 'sayisal',        fields: 6,  dept: 'Tesis Yonetimi',   required: false, description: 'Gunluk elektrik, su, dogalgaz sayac degerleri' },
+  { name: 'Enerji Tuketim Takip Formu',          formType: 'sayisal',        fields: 6,  dept: 'Tesis Yönetimi',   required: false, description: 'Gunluk elektrik, su, dogalgaz sayac degerleri' },
   { name: 'Kalite Seviye Degerlendirmesi',        formType: 'coktan_secmeli', fields: 12, dept: 'Kalite Kontrol',   required: false, description: 'Urun kalite seviyesi ve siniflandirma formu' },
   { name: 'Personel Gorev Degerlendirmesi',       formType: 'coktan_secmeli', fields: 8,  dept: 'Insan Kaynaklari', required: false, description: 'Performans ve yetkinlik degerlendirme anketi' },
   { name: 'Genel Saha Rapor Formu',              formType: 'serbest',        fields: 10, dept: 'Tum Departmanlar', required: false, description: 'Metin, sayi ve seceneklerin bir arada oldugu rapor' },
@@ -451,9 +451,9 @@ function FormTemplates({ departments }: { departments: Department[] }) {
           type="button"
           className="btn-primary btn-sm"
           onClick={() => setShowCreate(true)}
-          data-help="Yeni form sablonu olustur"
+          data-help="Yeni form sablonu oluştur"
         >
-          <Plus size={13} /> Form Olustur
+          <Plus size={13} /> Form Oluştur
         </button>
       </div>
 
@@ -729,7 +729,7 @@ function CreateFormTemplateModal({
               </button>
               <button type="button" disabled={!canSave} onClick={handleSave}
                 className="btn-primary flex-1 justify-center text-[12px]">
-                <Check size={12} /> Olustur
+                <Check size={12} /> Oluştur
               </button>
             </div>
           </>

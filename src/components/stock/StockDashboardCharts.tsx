@@ -565,7 +565,7 @@ function AddChartModal({
         </div>
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-zinc-600 mb-1">Baslik *</label>
+            <label className="block text-xs font-semibold text-zinc-600 mb-1">Başlık *</label>
             <input
               value={title}
               onChange={e => setTitle(e.target.value)}

@@ -198,7 +198,7 @@ export default function StockManagement() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Bu stok kalemini silmek istediginize emin misiniz? Bu islem geri alinamaz.')) return
+    if (!confirm('Bu stok kalemini silmek istediginize emin misiniz? Bu işlem geri alinamaz.')) return
     await deleteStockItem(id)
     refetch()
     refetchDash()
@@ -251,7 +251,7 @@ export default function StockManagement() {
             <Boxes size={18} className="text-blue-600 flex-shrink-0" />
             <p className="text-xs text-blue-800">
               <span className="font-semibold">Stok verileri Envanter modulunden otomatik senkronize edilir.</span>{' '}
-              Toplu veri yuklemek icin Envanter sayfasindaki "Toplu Aktar" butonunu kullanin.
+              Toplu veri yuklemek için Envanter sayfasindaki "Toplu Aktar" butonunu kullanin.
             </p>
           </div>
         )}
@@ -413,7 +413,7 @@ export default function StockManagement() {
                         </button>
                         <button
                           onClick={() => requireManager(() => setEditing(item))}
-                          title="Duzenle"
+                          title="Düzenle"
                           className="p-1.5 rounded hover:bg-blue-50 text-blue-600 transition-colors"
                         >
                           <Pencil size={15} />
@@ -632,7 +632,7 @@ export default function StockManagement() {
           Iptal
         </button>
         <button type="submit" className="px-5 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors">
-          {defaults ? 'Guncelle' : 'Olustur'}
+          {defaults ? 'Güncelle' : 'Oluştur'}
         </button>
       </div>
     </form>
@@ -686,7 +686,7 @@ export default function StockManagement() {
 
       {/* Edit modal */}
       {editing && (
-        <DraggableModal title="Stok Kalemi Duzenle" onClose={() => setEditing(null)} width={640}>
+        <DraggableModal title="Stok Kalemi Düzenle" onClose={() => setEditing(null)} width={640}>
           {renderForm(handleUpdate, editing)}
         </DraggableModal>
       )}
@@ -721,17 +721,17 @@ export default function StockManagement() {
               <label className="block text-xs font-semibold text-zinc-600 mb-1">Neden / Aciklama *</label>
               <select name="reason" className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm mb-1.5">
                 <option value="">Neden secin veya asagiya yazin...</option>
-                <option value="Uretim icin kullanim">Uretim icin kullanim</option>
-                <option value="Bakim/Onarim icin kullanim">Bakim/Onarim icin kullanim</option>
+                <option value="Uretim için kullanim">Uretim için kullanim</option>
+                <option value="Bakim/Onarim için kullanim">Bakim/Onarim için kullanim</option>
                 <option value="Yeni tedarik / satin alma">Yeni tedarik / satin alma</option>
                 <option value="Iade / geri donus">Iade / geri donus</option>
                 <option value="Sayim farki duzeltmesi">Sayim farki duzeltmesi</option>
                 <option value="Hurda / fire">Hurda / fire</option>
                 <option value="Transfer">Transfer</option>
-                <option value="Proje icin ayirma">Proje icin ayirma</option>
+                <option value="Proje için ayirma">Proje için ayirma</option>
                 <option value="Diger">Diger</option>
               </select>
-              <input name="description" className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm" placeholder="Ek aciklama yazin..." />
+              <input name="description" className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm" placeholder="Ek açıklama yazin..." />
             </div>
             <div className="flex items-center justify-between pt-2 border-t border-zinc-100">
               <span className="text-xs text-zinc-400">Mevcut: <strong>{movementItem.quantity} {movementItem.unit}</strong> | Konum: {movementItem.locationName ?? '-'}</span>
@@ -754,7 +754,7 @@ export default function StockManagement() {
             <div>
               <p className="text-sm font-semibold text-zinc-800">Yetkiniz bulunmuyor</p>
               <p className="text-xs text-zinc-500 mt-2 leading-relaxed">
-                Yeni envanter yuklemesi yapmak veya mevcut envanterde ekleme, cikarma yapmak icin yoneticinize basvurun.
+                Yeni envanter yuklemesi yapmak veya mevcut envanterde ekleme, cikarma yapmak için yöneticinize basvurun.
               </p>
             </div>
             <button

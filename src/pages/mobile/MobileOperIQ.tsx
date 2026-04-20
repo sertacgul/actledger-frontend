@@ -25,7 +25,7 @@ interface StructuredResponse {
   kritikNot?: string | null
   ilgiliGorevId?: string | null
   ilgiliManuel?: string | null
-  checklistOlustur?: boolean
+  checklistOluştur?: boolean
   onerilenSorular?: string[]
   fotografBulgulari?: string[]
   riskSeviyesi?: string

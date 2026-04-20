@@ -163,7 +163,7 @@ export default function SuperAdmin() {
           </div>
           <div>
             <h1 className="text-[14px] font-bold text-white tracking-tight">ActLedger Super Admin</h1>
-            <p className="text-[10px] text-slate-400">Platform Yonetim Konsolu</p>
+            <p className="text-[10px] text-slate-400">Platform Yönetim Konsolu</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -331,7 +331,7 @@ function CompaniesTab() {
         <div className="text-center py-16">
           <Building2 size={40} className="mx-auto text-slate-700 mb-3" />
           <p className="text-[14px] text-slate-400">Henuz sirket yok</p>
-          <p className="text-[11px] text-slate-500 mt-1">Ilk sirketi olusturmak icin "Yeni Sirket" butonunu kullanin</p>
+          <p className="text-[11px] text-slate-500 mt-1">Ilk sirketi oluşturmak için "Yeni Sirket" butonunu kullanin</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -455,7 +455,7 @@ function CompanyCard({ company: c, isEditing, onEdit, onUpdated }: {
       {/* Edit Form */}
       {isEditing && (
         <div className="mt-4 pt-4 border-t border-slate-800 space-y-3">
-          <p className="text-[11px] font-semibold text-cyan-400 mb-2">Limitleri Duzenle</p>
+          <p className="text-[11px] font-semibold text-cyan-400 mb-2">Limitleri Düzenle</p>
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-[9px] uppercase tracking-wider text-slate-500 mb-1">Maks Kullanici</label>
@@ -571,7 +571,7 @@ function CreateCompanyForm({ onCreated, onCancel }: { onCreated: () => void; onC
       setSuccess(result)
       setTimeout(() => onCreated(), 3000)
     } catch (e: any) {
-      setError(e.message ?? 'Sirket olusturulamadi')
+      setError(e.message ?? 'Sirket oluşturulamadi')
     } finally { setSaving(false) }
   }
 
@@ -582,7 +582,7 @@ function CreateCompanyForm({ onCreated, onCancel }: { onCreated: () => void; onC
           <Check size={24} className="text-emerald-400" />
         </div>
         <div>
-          <p className="text-[15px] font-bold text-white">{success.company.name} olusturuldu</p>
+          <p className="text-[15px] font-bold text-white">{success.company.name} oluşturuldu</p>
           <p className="text-[11px] text-slate-400 mt-1">KAM: {success.kam.name} ({success.kam.email})</p>
           <p className="text-[10px] text-slate-500 mt-2 font-mono">Lisans: {success.company.licenseKey}</p>
         </div>
@@ -594,7 +594,7 @@ function CreateCompanyForm({ onCreated, onCancel }: { onCreated: () => void; onC
     <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-6 space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-[14px] font-bold text-white">Yeni Sirket Olustur</h3>
+          <h3 className="text-[14px] font-bold text-white">Yeni Sirket Oluştur</h3>
           <p className="text-[11px] text-slate-400 mt-0.5">Sirket bilgileri ve KAM (Key Account Manager) hesabi</p>
         </div>
         <button type="button" onClick={onCancel} className="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 transition-colors">
@@ -717,7 +717,7 @@ function CreateCompanyForm({ onCreated, onCancel }: { onCreated: () => void; onC
           className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-semibold bg-cyan-600 text-white hover:bg-cyan-500 transition-colors disabled:opacity-50"
         >
           {saving ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />}
-          Sirket + KAM Olustur
+          Sirket + KAM Oluştur
         </button>
       </div>
     </div>
@@ -1094,7 +1094,7 @@ function LogsTab() {
               ) : logs.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="text-center py-12 text-slate-500">
-                    {selectedId ? 'Bu sirket icin log bulunamadi' : 'Bir sirket secin'}
+                    {selectedId ? 'Bu sirket için log bulunamadi' : 'Bir sirket secin'}
                   </td>
                 </tr>
               ) : (

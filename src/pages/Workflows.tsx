@@ -233,7 +233,7 @@ export default function Workflows() {
       refetchWf()
       refetchStats()
     } catch (err: any) {
-      alert(err?.message || 'Is akisi olusturulamadi')
+      alert(err?.message || 'Is akisi oluşturulamadi')
     }
   }
 
@@ -245,7 +245,7 @@ export default function Workflows() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Bu is akisini silmek istediginize emin misiniz? Bu islem geri alinamaz.')) return
+    if (!confirm('Bu is akisini silmek istediginize emin misiniz? Bu işlem geri alinamaz.')) return
     await deleteWorkflow(id)
     if (selectedWorkflowId === id) setSelectedWorkflowId(null)
     refetchWf()
@@ -399,7 +399,7 @@ export default function Workflows() {
             onClick={() => setShowTemplates(true)}
             className="btn-secondary flex items-center gap-1.5 px-3 py-2 text-sm"
           >
-            <Copy size={15} /> Sablondan Olustur
+            <Copy size={15} /> Sablondan Oluştur
           </button>
           <button
             onClick={() => setCreating(true)}
@@ -415,7 +415,7 @@ export default function Workflows() {
         <div className="flex justify-center py-16"><Loader2 className="animate-spin" size={24} style={{ color: 'var(--text-3)' }} /></div>
       ) : workflows.length === 0 ? (
         <div className="text-center py-16 text-sm" style={{ color: 'var(--text-3)' }}>
-          {search || statusFilter ? 'Filtreyle eslesen is akisi bulunamadi' : 'Henuz is akisi olusturulmamis'}
+          {search || statusFilter ? 'Filtreyle eslesen is akisi bulunamadi' : 'Henuz is akisi oluşturulmamis'}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -452,7 +452,7 @@ export default function Workflows() {
                   {wf.steps?.length ?? 0} adim
                 </span>
                 <span className="text-xs" style={{ color: 'var(--text-3)' }}>
-                  {wf._count?.instances ?? 0} calisma
+                  {wf._count?.instances ?? 0} çalışma
                 </span>
               </div>
 
@@ -537,7 +537,7 @@ export default function Workflows() {
                   </span>
                 )}
                 <span className="text-xs font-bold tabular-nums" style={{ color: 'var(--text-2)' }}>
-                  {tw._count?.instances ?? 0} calisma
+                  {tw._count?.instances ?? 0} çalışma
                 </span>
               </div>
             ))}
@@ -557,10 +557,10 @@ export default function Workflows() {
             <GitBranch size={28} className="text-blue-400" />
           </div>
           <p className="text-sm font-medium" style={{ color: 'var(--text-2)' }}>
-            Tasarimcida goruntulemek icin bir is akisi secin
+            Tasarimcida görüntülemek için bir is akisi secin
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--text-3)' }}>
-            Is Akislari sekmesinden bir akisa tiklayarak baslayabilirsiniz
+            Is Akislari sekmesinden bir akisa tıklayarak baslayabilirsiniz
           </p>
           <button
             onClick={() => setTab('list')}
@@ -732,7 +732,7 @@ export default function Workflows() {
                         <div className="absolute top-2 right-2 opacity-0 group-hover/step:opacity-100 transition-opacity flex items-center gap-0.5" onClick={e => e.stopPropagation()}>
                           <button
                             onClick={() => setEditingStep(step)}
-                            title="Duzenle"
+                            title="Düzenle"
                             className="p-1 rounded hover:bg-blue-50 text-blue-600 transition-colors"
                           >
                             <Pencil size={12} />
@@ -805,7 +805,7 @@ export default function Workflows() {
         <div className="flex justify-center py-16"><Loader2 className="animate-spin" size={24} style={{ color: 'var(--text-3)' }} /></div>
       ) : instances.length === 0 ? (
         <div className="text-center py-16 text-sm" style={{ color: 'var(--text-3)' }}>
-          {instanceStatusFilter ? 'Filtreyle eslesen calisma bulunamadi' : 'Henuz calisma yok'}
+          {instanceStatusFilter ? 'Filtreyle eslesen çalışma bulunamadi' : 'Henuz çalışma yok'}
         </div>
       ) : (
         <div className="surface rounded-xl overflow-hidden" style={{ border: '1px solid var(--border)' }}>
@@ -908,7 +908,7 @@ export default function Workflows() {
             </table>
           </div>
           <div className="px-4 py-2.5 text-xs" style={{ borderTop: '1px solid var(--border)', color: 'var(--text-3)' }}>
-            Toplam {instancesData?.meta?.total ?? instances.length} calisma
+            Toplam {instancesData?.meta?.total ?? instances.length} çalışma
           </div>
         </div>
       )}
@@ -987,7 +987,7 @@ export default function Workflows() {
           placeholder='{"key": "value"}'
         />
         <p className="text-[10px] mt-1" style={{ color: 'var(--text-3)' }}>
-          JSON formati: Adim tipine gore degisir (orn. TASK icin title, priority; APPROVAL icin approverRole)
+          JSON formati: Adim tipine gore degisir (orn. TASK için title, priority; APPROVAL için approverRole)
         </p>
       </div>
       {isEdit && defaults && (
@@ -1006,7 +1006,7 @@ export default function Workflows() {
           Iptal
         </button>
         <button type="submit" className="btn-primary px-5 py-2 text-sm">
-          {isEdit ? 'Guncelle' : 'Ekle'}
+          {isEdit ? 'Güncelle' : 'Ekle'}
         </button>
       </div>
     </form>
@@ -1111,7 +1111,7 @@ export default function Workflows() {
                 Iptal
               </button>
               <button type="submit" className="btn-primary px-5 py-2 text-sm">
-                Olustur
+                Oluştur
               </button>
             </div>
           </form>
@@ -1123,7 +1123,7 @@ export default function Workflows() {
         <DraggableModal title="Sablon Kutuphanesi" onClose={() => setShowTemplates(false)} width={640}>
           <div className="px-5 py-4 space-y-3">
             <p className="text-xs" style={{ color: 'var(--text-3)' }}>
-              Hazir bir sablondan is akisi olusturun. Sablonu klonladiktan sonra ihtiyaciniza gore duzenleme yapabilirsiniz.
+              Hazir bir sablondan is akisi oluşturun. Sablonu klonladiktan sonra ihtiyaciniza gore düzenleme yapabilirsiniz.
             </p>
             {templates.length === 0 ? (
               <div className="text-center py-8 text-sm" style={{ color: 'var(--text-3)' }}>
@@ -1191,7 +1191,7 @@ export default function Workflows() {
 
       {/* ── Edit Step Modal ──────────────────────────────────────────────── */}
       {editingStep && (
-        <DraggableModal title={`Adim Duzenle - ${editingStep.name}`} onClose={() => setEditingStep(null)} width={520}>
+        <DraggableModal title={`Adim Düzenle - ${editingStep.name}`} onClose={() => setEditingStep(null)} width={520}>
           {renderStepForm(handleUpdateStep, editingStep, true)}
         </DraggableModal>
       )}

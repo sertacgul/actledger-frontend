@@ -431,7 +431,7 @@ function ScrollGrowIphone({ src }: { src: string }) {
   const videoOpacity = 0.6 + progress * 0.4  // 0.6 -> 1.0
   const glowIntensity = progress * 0.35       // 0 -> 0.35
 
-  // iPhone ekran icerikleri
+  // iPhone ekran içerikleri
   const screens = [
     // 0: Splash
     { bg: 'linear-gradient(160deg, #0a1628 0%, #0f2b3d 40%, #134e5e 100%)', content: 'splash' },
@@ -948,7 +948,7 @@ function OperIQSymbol({ size = 28, color = '#ffffff' }: { size?: number; color?:
    OPERIQ LANDING CHATBOT (draggable, branded)
    -------------------------------------------------------------------------- */
 const CHAT_GREETINGS = {
-  tr: 'Merhaba! Ben OperIQ Asistan. ActLedger hakkinda size nasil yardimci olabilirim? Platform ozellikleri, sektorler, fiyatlandirma veya demo hakkinda sorularinizi yanitlayabilirim.',
+  tr: 'Merhaba! Ben OperIQ Asistan. ActLedger hakkinda size nasil yardimci olabilirim? Platform özellikleri, sektorler, fiyatlandirma veya demo hakkinda sorularinizi yanitlayabilirim.',
   en: 'Hello! I am OperIQ Assistant. How can I help you with ActLedger? I can answer questions about platform features, sectors, pricing, or demos.',
 }
 
@@ -1903,7 +1903,7 @@ export default function Landing() {
 
           {/* Alternating feature blocks */}
           {[
-            /* Temel operasyonel ozellikler */
+            /* Temel operasyonel özellikler */
             { title: t.pf2Title, body: t.pf2Body, benefit: t.pf2Benefit, img: '/images/Dashboard.jpg',      icon: Monitor,       color: '#0d9488' },
             { title: t.pf5Title, body: t.pf5Body, benefit: t.pf5Benefit, img: '/images/OperIQ.jpg',         icon: Zap,           color: '#14b8a6' },
             { title: t.pf7Title, body: t.pf7Body, benefit: t.pf7Benefit, img: '/images/KPI.jpg',            icon: BarChart3,     color: '#6366f1' },
@@ -1914,7 +1914,7 @@ export default function Landing() {
             /* Saha & mobil */
             { title: t.pf1Title, body: t.pf1Body, benefit: t.pf1Benefit, img: '/images/Mobil_saha.jpg',     icon: Smartphone,    color: '#6366f1' },
             { title: t.nf8Title, body: t.nf8Body, benefit: t.nf8Benefit, img: '/images/Mobil.jpg',          icon: Radio,         color: '#0891b2' },
-            { title: t.nf1Title, body: t.nf1Body, benefit: t.nf1Benefit, img: '/images/Canliharita.jpg',    icon: Map,           color: '#2563eb' },
+            { title: t.nf1Title, body: t.nf1Body, benefit: t.nf1Benefit, img: '/images/Canlıharita.jpg',    icon: Map,           color: '#2563eb' },
             { title: t.pf4Title, body: t.pf4Body, benefit: t.pf4Benefit, img: '/images/Fotograf.jpg',       icon: Camera,        color: '#06b6d4' },
             { title: t.nf3Title, body: t.nf3Body, benefit: t.nf3Benefit, img: '/images/OperIQ_mobil.jpg',   icon: Cpu,           color: '#0d9488' },
             /* Stok, dosya, form */
@@ -1924,7 +1924,7 @@ export default function Landing() {
             /* Iletisim & analitik */
             { title: t.pf6Title, body: t.pf6Body, benefit: t.pf6Benefit, img: '/images/Mesajlasma.jpg',     icon: MessageSquare, color: '#0891b2' },
             { title: t.nf2Title, body: t.nf2Body, benefit: t.nf2Benefit, img: '/images/Heatmap.jpg',        icon: Flame,         color: '#dc2626' },
-            /* Guvenlik & yonetim */
+            /* Guvenlik & yönetim */
             { title: t.pf8Title, body: t.pf8Body, benefit: t.pf8Benefit, img: '/images/Emniyet.jpg',        icon: Shield,        color: '#0d9488' },
             { title: t.pf9Title, body: t.pf9Body, benefit: t.pf9Benefit, img: '/images/Departman.jpg',      icon: Building2,     color: '#8b5cf6' },
             { title: t.pf10Title, body: t.pf10Body, benefit: t.pf10Benefit, img: '/images/Rol.jpg',         icon: Lock,          color: '#06b6d4' },

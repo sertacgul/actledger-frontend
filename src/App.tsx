@@ -46,6 +46,7 @@ import MobileMessages from './pages/mobile/MobileMessages'
 import MobileNotifications from './pages/mobile/MobileNotifications'
 import MobileProfile from './pages/mobile/MobileProfile'
 import MobileOperIQ from './pages/mobile/MobileOperIQ'
+import MobileQRScanner from './pages/mobile/MobileQRScanner'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -170,6 +171,7 @@ function AppRoutes() {
           <Route path="bildirimler"      element={<MobileNotifications />} />
           <Route path="profil"           element={<MobileProfile />} />
           <Route path="operiq"           element={<MobileOperIQ />} />
+          <Route path="qr-tarama"       element={<MobileQRScanner />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

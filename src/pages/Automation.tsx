@@ -62,10 +62,10 @@ const INITIAL_WIZARD: WizardState = {
 // ── Trigger config ───────────────────────────────────────────────────────────
 
 const TRIGGERS: Record<TriggerType, { icon: typeof CheckSquare; label: string; color: string; bg: string; desc: string }> = {
-  TASK_CREATED:    { icon: CheckSquare,    label: 'Gorev Olusturuldu',  color: 'text-blue-600',    bg: 'bg-blue-50',    desc: 'Yeni gorev olusturuldugunda tetiklenir' },
+  TASK_CREATED:    { icon: CheckSquare,    label: 'Gorev Oluşturuldu',  color: 'text-blue-600',    bg: 'bg-blue-50',    desc: 'Yeni gorev oluşturuldugunda tetiklenir' },
   TASK_COMPLETED:  { icon: CheckCircle,    label: 'Gorev Tamamlandi',   color: 'text-emerald-600', bg: 'bg-emerald-50', desc: 'Gorev tamamlandiginda tetiklenir' },
   TASK_DELAYED:    { icon: Clock,          label: 'Gorev Gecikti',      color: 'text-amber-600',   bg: 'bg-amber-50',   desc: 'Gorev son teslim tarihini gectiginde tetiklenir' },
-  TASK_STALE:      { icon: AlertTriangle,  label: 'Gorev Guncel Degil', color: 'text-orange-600',  bg: 'bg-orange-50',  desc: 'Gorev belirli suredir guncellenmediginde tetiklenir' },
+  TASK_STALE:      { icon: AlertTriangle,  label: 'Gorev Guncel Degil', color: 'text-orange-600',  bg: 'bg-orange-50',  desc: 'Gorev belirli suredir güncellenmediginde tetiklenir' },
   KPI_DEVIATION:   { icon: TrendingDown,   label: 'KPI Sapmasi',        color: 'text-red-600',     bg: 'bg-red-50',     desc: 'KPI degeri hedeften saptiginda tetiklenir' },
   IOT_ALERT:       { icon: Radio,          label: 'IoT Alarmi',         color: 'text-purple-600',  bg: 'bg-purple-50',  desc: 'IoT sensoru alarm urettiginde tetiklenir' },
   STOCK_BELOW_MIN: { icon: Package,        label: 'Stok Minimum Alti',  color: 'text-amber-600',   bg: 'bg-amber-50',   desc: 'Stok miktari minimum seviyenin altina dustugunde tetiklenir' },
@@ -76,13 +76,13 @@ const TRIGGERS: Record<TriggerType, { icon: typeof CheckSquare; label: string; c
 // ── Action config ────────────────────────────────────────────────────────────
 
 const ACTIONS: Record<ActionType, { icon: typeof Plus; label: string; color: string; bg: string; desc: string }> = {
-  CREATE_TASK:           { icon: Plus,          label: 'Gorev Olustur',            color: 'text-blue-600',    bg: 'bg-blue-50',    desc: 'Otomatik olarak yeni gorev olusturur' },
-  ESCALATE_TASK:         { icon: ArrowUpRight,  label: 'Gorevi Eskale Et',         color: 'text-orange-600',  bg: 'bg-orange-50',  desc: 'Gorevi ust yonetim kademesine iletir' },
+  CREATE_TASK:           { icon: Plus,          label: 'Gorev Oluştur',            color: 'text-blue-600',    bg: 'bg-blue-50',    desc: 'Otomatik olarak yeni gorev oluşturur' },
+  ESCALATE_TASK:         { icon: ArrowUpRight,  label: 'Gorevi Eskale Et',         color: 'text-orange-600',  bg: 'bg-orange-50',  desc: 'Gorevi ust yönetim kademesine iletir' },
   SEND_NOTIFICATION:     { icon: Bell,          label: 'Bildirim Gonder',          color: 'text-purple-600',  bg: 'bg-purple-50',  desc: 'Belirtilen kullanicilara bildirim gonderir' },
-  SEND_MESSAGE:          { icon: MessageSquare, label: 'Mesaj Gonder',             color: 'text-emerald-600', bg: 'bg-emerald-50', desc: 'Dahili mesajlasma uzerinden mesaj gonderir' },
-  TRIGGER_OPERIQ:        { icon: Cpu,           label: 'OperIQ Tetikle',           color: 'text-indigo-600',  bg: 'bg-indigo-50',  desc: 'OperIQ AI asistanini tetikleyerek analiz baslatir' },
-  UPDATE_TASK_STATUS:    { icon: RefreshCw,     label: 'Gorev Durumu Guncelle',    color: 'text-cyan-600',    bg: 'bg-cyan-50',    desc: 'Gorev durumunu otomatik olarak gunceller' },
-  UPDATE_TASK_PRIORITY:  { icon: Flag,          label: 'Gorev Onceligi Guncelle',  color: 'text-red-600',     bg: 'bg-red-50',     desc: 'Gorev onceligini otomatik olarak degistirir' },
+  SEND_MESSAGE:          { icon: MessageSquare, label: 'Mesaj Gonder',             color: 'text-emerald-600', bg: 'bg-emerald-50', desc: 'Dahili mesajlasma üzerinden mesaj gonderir' },
+  TRIGGER_OPERIQ:        { icon: Cpu,           label: 'OperIQ Tetikle',           color: 'text-indigo-600',  bg: 'bg-indigo-50',  desc: 'OperIQ AI asistanini tetikleyerek analiz başlatir' },
+  UPDATE_TASK_STATUS:    { icon: RefreshCw,     label: 'Gorev Durumu Güncelle',    color: 'text-cyan-600',    bg: 'bg-cyan-50',    desc: 'Gorev durumunu otomatik olarak günceller' },
+  UPDATE_TASK_PRIORITY:  { icon: Flag,          label: 'Gorev Onceligi Güncelle',  color: 'text-red-600',     bg: 'bg-red-50',     desc: 'Gorev onceligini otomatik olarak degistirir' },
   SEND_EMAIL:            { icon: Mail,          label: 'E-posta Gonder',           color: 'text-orange-600',  bg: 'bg-orange-50',  desc: 'Otomatik e-posta bildirimi gonder' },
 }
 
@@ -189,7 +189,7 @@ export default function Automation() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Bu otomasyon kuralini silmek istediginize emin misiniz? Bu islem geri alinamaz.')) return
+    if (!confirm('Bu otomasyon kuralini silmek istediginize emin misiniz? Bu işlem geri alinamaz.')) return
     try {
       await deleteAutomationRule(id)
       refetchRules()
@@ -233,7 +233,7 @@ export default function Automation() {
     } catch (err: any) {
       const msg = err?.message ?? ''
       alert(lang === 'tr'
-        ? `Kural olusturulamadi: ${msg || 'Bilinmeyen hata. Lutfen tum alanlari kontrol edin.'}`
+        ? `Kural oluşturulamadi: ${msg || 'Bilinmeyen hata. Lutfen tum alanlari kontrol edin.'}`
         : `Failed to create rule: ${msg || 'Unknown error. Please check all fields.'}`)
     }
     setSaving(false)
@@ -333,12 +333,12 @@ export default function Automation() {
       ) : rules.length === 0 ? (
         <div className="text-center py-16">
           <Zap size={40} className="mx-auto text-zinc-300 mb-3" />
-          <p className="text-sm text-zinc-400">Henuz otomasyon kurali olusturulmamis</p>
+          <p className="text-sm text-zinc-400">Henuz otomasyon kurali oluşturulmamis</p>
           <button
             onClick={openWizard}
             className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
           >
-            <Plus size={16} /> Ilk Kurali Olustur
+            <Plus size={16} /> Ilk Kurali Oluştur
           </button>
         </div>
       ) : (
@@ -489,7 +489,7 @@ export default function Automation() {
       ) : logs.length === 0 ? (
         <div className="text-center py-16">
           <Activity size={40} className="mx-auto text-zinc-300 mb-3" />
-          <p className="text-sm text-zinc-400">Henuz calisma kaydi bulunmuyor</p>
+          <p className="text-sm text-zinc-400">Henuz çalışma kaydi bulunmuyor</p>
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
@@ -774,7 +774,7 @@ export default function Automation() {
         {/* No special config for some types - show a note */}
         {!['TASK_CREATED', 'TASK_COMPLETED', 'TASK_DELAYED', 'TASK_STALE', 'KPI_DEVIATION', 'IOT_ALERT', 'STOCK_BELOW_MIN', 'STOCK_CRITICAL', 'SCHEDULE'].includes(triggerType) && (
           <div className="px-4 py-3 rounded-lg bg-zinc-50 border border-zinc-200 text-xs text-zinc-500">
-            Bu tetikleyici icin ek yapilandirma gerekmiyor. Devam edebilirsiniz.
+            Bu tetikleyici için ek yapılandirma gerekmiyor. Devam edebilirsiniz.
           </div>
         )}
       </div>
@@ -844,7 +844,7 @@ export default function Automation() {
               <input
                 value={wizard.actionConfig.taskTitle ?? ''}
                 onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, taskTitle: e.target.value } }))}
-                placeholder="Otomatik olusturulan gorev basligi"
+                placeholder="Otomatik oluşturulan gorev basligi"
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
@@ -903,7 +903,7 @@ export default function Automation() {
                 rows={2}
                 value={wizard.actionConfig.escalationMessage ?? ''}
                 onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, escalationMessage: e.target.value } }))}
-                placeholder="Ust yoneticiye iletilecek mesaj..."
+                placeholder="Ust yöneticiye iletilecek mesaj..."
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
               />
             </div>
@@ -920,9 +920,9 @@ export default function Automation() {
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               >
                 <option value="ASSIGNEE">Gorev atanani</option>
-                <option value="CREATOR">Gorev olusturucusu</option>
-                <option value="DEPARTMENT_HEAD">Departman yoneticisi</option>
-                <option value="ALL_MANAGERS">Tum yoneticiler</option>
+                <option value="CREATOR">Gorev oluşturucusu</option>
+                <option value="DEPARTMENT_HEAD">Departman yöneticisi</option>
+                <option value="ALL_MANAGERS">Tum yöneticiler</option>
               </select>
             </div>
             <div>
@@ -961,7 +961,7 @@ export default function Automation() {
                 rows={2}
                 value={wizard.actionConfig.operiqPrompt ?? ''}
                 onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, operiqPrompt: e.target.value } }))}
-                placeholder="OperIQ icin ozel yonergeler..."
+                placeholder="OperIQ için ozel yonergeler..."
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
               />
             </div>
@@ -1012,11 +1012,11 @@ export default function Automation() {
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               >
                 <option value="assigned_user">Goreve Atanan Kisi</option>
-                <option value="task_creator">Gorevi Olusturan Kisi</option>
+                <option value="task_creator">Gorevi Oluşturan Kisi</option>
                 <option value="department_manager">Departman Muduru</option>
                 <option value="role_based">Role Gore</option>
                 <option value="specific_email">Belirli E-posta</option>
-                <option value="escalation_chain">Ust Yonetim Zinciri</option>
+                <option value="escalation_chain">Ust Yönetim Zinciri</option>
               </select>
             </div>
 
@@ -1177,13 +1177,13 @@ export default function Automation() {
               onChange={e => setWizard(w => ({ ...w, cooldownMinutes: Number(e.target.value) }))}
               className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
             />
-            <p className="text-[10px] text-zinc-400 mt-1">Ayni olay icin tekrar tetiklenmeden once bekleme suresi</p>
+            <p className="text-[10px] text-zinc-400 mt-1">Ayni olay için tekrar tetiklenmeden once bekleme suresi</p>
           </div>
         </div>
         <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-zinc-50 border border-zinc-200">
           <div>
             <p className="text-sm font-semibold text-zinc-700">Aktif Olarak Baslat</p>
-            <p className="text-xs text-zinc-500">Kural hemen calismaya baslayacaktir</p>
+            <p className="text-xs text-zinc-500">Kural hemen çalışmaya baslayacaktir</p>
           </div>
           <button
             type="button"
@@ -1349,7 +1349,7 @@ export default function Automation() {
                   )}
                 >
                   {saving ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />}
-                  {saving ? 'Kaydediliyor...' : 'Kurali Olustur'}
+                  {saving ? 'Kaydediliyor...' : 'Kurali Oluştur'}
                 </button>
               )}
             </div>
@@ -1443,7 +1443,7 @@ export default function Automation() {
                   <span className="text-xs font-semibold text-zinc-700">{viewRule.cooldownMinutes ?? 0} dakika</span>
                 </div>
                 <div className="flex items-center justify-between py-1">
-                  <span className="text-xs text-zinc-500">Olusturulma</span>
+                  <span className="text-xs text-zinc-500">Oluşturulma</span>
                   <span className="text-xs font-semibold text-zinc-700">{formatDate(viewRule.createdAt)}</span>
                 </div>
                 {viewRule.lastTriggeredAt && (

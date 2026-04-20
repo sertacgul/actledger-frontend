@@ -272,7 +272,7 @@ function TaskDetailModal({
 
         {/* Task management actions */}
         <div className="border-t pt-4" style={{ borderColor: 'var(--border)' }}>
-          <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-1)' }}>Gorev Yonetimi</h3>
+          <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-1)' }}>Gorev Yönetimi</h3>
           <div className="flex flex-wrap gap-2">
             {task.status !== 'tamamlandi' && task.status !== 'iptal' && (
               <>

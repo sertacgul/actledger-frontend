@@ -388,7 +388,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           userSelect: 'none',
         }}
       >
-        Saha Operasyon Yonetim Platformu
+        Operasyonel M\u00fckemmellik Sistemi
       </p>
 
       {/* ---- Loading bar ---- */}

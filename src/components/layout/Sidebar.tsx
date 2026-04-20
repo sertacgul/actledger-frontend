@@ -39,7 +39,7 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
         { to: '/panel',    icon: LayoutDashboard, label: t('nav_dashboard'), desc: t('tooltip_dashboard' as TranslationKey), shortcut: 'g d' },
         { to: '/gorevler',  icon: CheckSquare,     label: t('nav_tasks'),     desc: t('tooltip_tasks' as TranslationKey),     shortcut: 'g t' },
         { to: '/raporlar',  icon: FileText,        label: t('nav_reports'),   desc: t('tooltip_reports' as TranslationKey),   shortcut: 'g r' },
-        { to: '/harita',    icon: MapPin,          label: lang === 'tr' ? 'Operasyon & Tesis' : 'Operations & Facility', desc: lang === 'tr' ? 'Canli harita ve tesis kat planlari' : 'Live map and facility floor plans',    shortcut: 'g h' },
+        { to: '/harita',    icon: MapPin,          label: lang === 'tr' ? 'Operasyon & Tesis' : 'Operations & Facility', desc: lang === 'tr' ? 'Canlı harita ve tesis kat planları' : 'Live map and facility floor plans',    shortcut: 'g h' },
       ],
     },
     {
@@ -51,14 +51,14 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
         { to: '/envanter',     icon: Package,    label: t('nav_inventory'),   desc: t('tooltip_inventory' as TranslationKey),   shortcut: 'g e' },
         { to: '/stok',         icon: Boxes,      label: t('nav_stock' as TranslationKey), desc: t('tooltip_stock' as TranslationKey), shortcut: 'g q' },
         { to: '/iot',          icon: Radio,      label: 'IoT',                desc: 'IoT cihaz ve sensör yönetimi',              shortcut: 'g o' },
-        { to: '/envanter-zeka', icon: ScanLine,  label: 'AssetIQ', desc: lang === 'tr' ? 'QR, batch, lokasyon, stok zekasi' : 'QR, batch, location, stock intelligence', shortcut: 'g z' },
+        { to: '/envanter-zeka', icon: ScanLine,  label: 'AssetIQ', desc: lang === 'tr' ? 'QR, batch, lokasyon, stok zekası' : 'QR, batch, location, stock intelligence', shortcut: 'g z' },
       ],
     },
     {
       label: t('sidebar_section_plat'),
       items: [
         { to: '/mobil',     icon: Smartphone, label: t('nav_mobile'),   desc: t('tooltip_mobile' as TranslationKey),   shortcut: 'g m' },
-        { to: '/kpi-panel', icon: Target,     label: 'KPI',             desc: 'KPI Ajandasi ve Analizi',                shortcut: 'g k' },
+        { to: '/kpi-panel', icon: Target,     label: 'KPI',             desc: 'KPI Ajandası ve Analizi',                shortcut: 'g k' },
         { to: '/otomasyon',   icon: Zap,       label: t('nav_automation' as TranslationKey), desc: t('tooltip_automation' as TranslationKey), shortcut: 'g a' },
         { to: '/is-akislari', icon: GitBranch, label: t('nav_workflows' as TranslationKey),  desc: t('tooltip_workflows' as TranslationKey),  shortcut: 'g w' },
         { to: '/analizler', icon: Cpu,        label: 'OperIQ',          desc: t('tooltip_insights' as TranslationKey), shortcut: 'g i', operiq: true },

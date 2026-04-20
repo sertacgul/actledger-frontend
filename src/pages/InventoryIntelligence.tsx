@@ -334,7 +334,7 @@ export default function InventoryIntelligence() {
     setAnalyzing(true)
     try {
       await analyzeInventoryIntelligence()
-      refetchIntel()
+      await refetchIntel()
     } catch (e: any) {
       alert(e.message || 'Analiz hatası')
     } finally {
@@ -370,8 +370,12 @@ export default function InventoryIntelligence() {
               onClick={() => { setTab(t.key); setSearch('') }}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
                 active
-                  ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200'
-                  : 'text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100'
+                  ? t.key === 'operiq'
+                    ? 'bg-cyan-50 text-cyan-700 ring-1 ring-cyan-200'
+                    : 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200'
+                  : t.key === 'operiq'
+                    ? 'text-cyan-500 hover:text-cyan-700 hover:bg-cyan-50'
+                    : 'text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100'
               }`}
             >
               <Icon size={14} />
@@ -394,7 +398,7 @@ export default function InventoryIntelligence() {
             </div>
           )}
           {analyticsError && (
-            <div className="card p-4 text-center space-y-2">
+            <div className="bg-white rounded-xl border border-zinc-200 p-4 text-center space-y-2">
               <p className="text-sm text-red-400">{analyticsError}</p>
               <button className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-zinc-200 hover:bg-zinc-50 transition-colors flex items-center gap-1 text-xs" onClick={refetchAnalytics}><RefreshCw size={12} /> Tekrar dene</button>
             </div>
@@ -879,7 +883,7 @@ export default function InventoryIntelligence() {
           </div>
 
           {intelligence?.summary && (
-            <div className="card p-4 bg-indigo-50 border-indigo-200">
+            <div className="bg-indigo-50 rounded-xl border border-indigo-200 p-4">
               <p className="text-sm text-zinc-600">{intelligence.summary}</p>
             </div>
           )}

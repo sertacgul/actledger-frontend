@@ -418,15 +418,15 @@ export default function FacilityMap() {
         credentials: 'include',
         body: fd,
       })
-      if (!res.ok) throw new Error('Upload basarisiz')
       const body = await res.json()
+      if (!res.ok) throw new Error(body.message || 'Y\u00fckleme ba\u015far\u0131s\u0131z')
       setShowUpload(false)
       setUploadName('')
       setUploadFloor('')
       setUploadFile(null)
       await loadFloorPlans()
       setSelectedPlanId(body.data.id)
-    } catch {} finally { setUploading(false) }
+    } catch (e: any) { alert(e.message || 'Dosya y\u00fcklenemedi') } finally { setUploading(false) }
   }
 
   // ── Visible zones ──────────────────────────────────────────────────────

@@ -98,10 +98,10 @@ function KpiCard({ label, value, delta, deltaUp, sub, progress, loading }: {
   if (loading) return <div className="surface p-5 animate-pulse h-24" />
   return (
     <div className="surface p-5">
-      <div className="flex items-start justify-between">
-        <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">{label}</p>
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider truncate">{label}</p>
         {delta && (
-          <span className={clsx('flex items-center gap-0.5 text-[11px] font-semibold',
+          <span className={clsx('flex items-center gap-0.5 text-[11px] font-semibold whitespace-nowrap shrink-0',
             deltaUp ? 'text-emerald-600' : 'text-red-500')}>
             {deltaUp ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
             {delta}

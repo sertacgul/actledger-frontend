@@ -9,7 +9,8 @@ import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
 import { useCompany } from '../context/CompanyContext'
 import DraggableModal from '../components/ui/DraggableModal'
-import { QRCodeSVG } from 'qrcode.react'
+import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react'
+import { jsPDF } from 'jspdf'
 import {
   useQrEntities, createQrEntity, deleteQrEntity, scanQrCode, autoGenerateQr,
   useInventoryLocations, createInventoryLocation, updateInventoryLocation, deleteInventoryLocation,
@@ -30,13 +31,13 @@ type Tab = 'dashboard' | 'qr' | 'locations' | 'batches' | 'transactions' | 'rese
 
 const TABS: { key: Tab; label: string; labelEn: string; icon: typeof QrCode }[] = [
   { key: 'dashboard',    label: 'Dashboard',       labelEn: 'Dashboard',       icon: BarChart3 },
-  { key: 'qr',           label: 'QR Yonetimi',     labelEn: 'QR Management',   icon: QrCode },
+  { key: 'qr',           label: 'QR Y\u00f6netimi',     labelEn: 'QR Management',   icon: QrCode },
   { key: 'locations',    label: 'Lokasyonlar',      labelEn: 'Locations',       icon: MapPin },
   { key: 'batches',      label: 'Parti / Lot',      labelEn: 'Batch / Lot',     icon: Layers },
   { key: 'transactions', label: 'Hareketler',       labelEn: 'Transactions',    icon: ArrowRightLeft },
   { key: 'reservations', label: 'Rezervasyonlar',   labelEn: 'Reservations',    icon: BookmarkCheck },
-  { key: 'purchase',     label: 'Satin Alma',       labelEn: 'Purchase',        icon: UserCheck },
-  { key: 'operiq',       label: 'OperIQ Zeka',      labelEn: 'OperIQ Intel',    icon: Cpu },
+  { key: 'purchase',     label: 'Sat\u0131n Alma',       labelEn: 'Purchase',        icon: UserCheck },
+  { key: 'operiq',       label: 'OperIQ Asset',     labelEn: 'OperIQ Asset',    icon: Cpu },
 ]
 
 const ENTITY_TYPES = [
@@ -44,47 +45,52 @@ const ENTITY_TYPES = [
   { value: 'INVENTORY_LOCATION', label: 'Stok Lokasyonu' },
   { value: 'EQUIPMENT', label: 'Ekipman' },
   { value: 'IOT_DEVICE', label: 'IoT Cihaz' },
-  { value: 'FACILITY_ZONE', label: 'Tesis Alani' },
-  { value: 'CUSTOM', label: 'Ozel' },
+  { value: 'FACILITY_ZONE', label: 'Tesis Alanı' },
+  { value: 'CUSTOM', label: 'Özel' },
 ]
 
 const LOCATION_CATEGORIES = [
   { value: 'WAREHOUSE', label: 'Ana Depo' },
   { value: 'SHELF', label: 'Raf' },
-  { value: 'PRODUCTION_LINE', label: 'Uretim Hatti' },
-  { value: 'COLD_STORAGE', label: 'Soguk Depo' },
-  { value: 'MAINTENANCE', label: 'Bakim Deposu' },
-  { value: 'VEHICLE', label: 'Arac' },
-  { value: 'DISTRIBUTION', label: 'Dagitim Noktasi' },
-  { value: 'SERVICE_AREA', label: 'Servis Alani' },
+  { value: 'PRODUCTION_LINE', label: 'Üretim Hattı' },
+  { value: 'COLD_STORAGE', label: 'Soğuk Depo' },
+  { value: 'MAINTENANCE', label: 'Bakım Deposu' },
+  { value: 'VEHICLE', label: 'Ara\u00e7' },
+  { value: 'DISTRIBUTION', label: 'Dağıtım Noktası' },
+  { value: 'SERVICE_AREA', label: 'Servis Alan\u0131' },
   { value: 'LAB', label: 'Laboratuvar' },
-  { value: 'OTHER', label: 'Diger' },
+  { value: 'OTHER', label: 'Diğer' },
 ]
 
 const TX_TYPES = [
-  { value: 'GIRIS', label: 'Stok Girisi', color: 'text-emerald-400' },
-  { value: 'CIKIS', label: 'Stok Cikisi', color: 'text-red-400' },
-  { value: 'KULLANIM', label: 'Tuketim', color: 'text-orange-400' },
-  { value: 'FIRE', label: 'Fire / Kayip', color: 'text-rose-500' },
+  { value: 'GIRIS', label: 'Stok Girişi', color: 'text-emerald-400' },
+  { value: 'CIKIS', label: 'Stok Çıkışı', color: 'text-red-400' },
+  { value: 'KULLANIM', label: 'Tüketim', color: 'text-orange-400' },
+  { value: 'FIRE', label: 'Fire / Kayıp', color: 'text-rose-500' },
   { value: 'TRANSFER', label: 'Transfer', color: 'text-blue-400' },
-  { value: 'SAYIM', label: 'Sayim', color: 'text-violet-400' },
+  { value: 'SAYIM', label: 'Sayım', color: 'text-violet-400' },
   { value: 'REZERVASYON', label: 'Rezervasyon', color: 'text-amber-400' },
 ]
 
 const BATCH_STATUSES: Record<string, { label: string; color: string }> = {
   AKTIF: { label: 'Aktif', color: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
-  TUKENMIS: { label: 'Tukenmis', color: 'bg-zinc-100 text-zinc-600' },
-  SON_KULLANMA_YAKIN: { label: 'SKT Yakin', color: 'bg-amber-50 text-amber-700 border border-amber-200' },
-  SON_KULLANMA_GECMIS: { label: 'SKT Gecmis', color: 'bg-red-50 text-red-700 border border-red-200' },
+  TUKENMIS: { label: 'Tükenmiş', color: 'bg-zinc-100 text-zinc-600' },
+  SON_KULLANMA_YAKIN: { label: 'SKT Yakın', color: 'bg-amber-50 text-amber-700 border border-amber-200' },
+  SON_KULLANMA_GECMIS: { label: 'SKT Geçmiş', color: 'bg-red-50 text-red-700 border border-red-200' },
   KARANTINA: { label: 'Karantina', color: 'bg-orange-50 text-orange-700' },
-  IMHA: { label: 'Imha', color: 'bg-rose-50 text-rose-700' },
+  IMHA: { label: 'İmha', color: 'bg-rose-50 text-rose-700' },
 }
 
 export default function InventoryIntelligence() {
   const { user } = useAuth()
   const { lang } = useLanguage()
   const { sector } = useCompany()
-  const isManager = MANAGER_ROLES.includes(user?.role ?? '')
+  const userRole = user?.role ?? ''
+  const isManager = MANAGER_ROLES.includes(userRole)
+  // KAM (platform_admin) ve GM (genel_mudur): tum sirket genelinde satin alma yetkisi
+  const canManageAllPurchase = ['platform_admin', 'super_admin', 'genel_mudur', 'gm_yardimcisi'].includes(userRole)
+  // Departman muduru: sadece kendi departmanindaki kisileri atayabilir
+  const isDeptManager = ['direktor', 'mudur'].includes(userRole)
 
   const [tab, setTab] = useState<Tab>('dashboard')
   const [search, setSearch] = useState('')
@@ -138,59 +144,190 @@ export default function InventoryIntelligence() {
       alert(`${result.created} yeni QR kodu olusturuldu (toplam: ${result.total}, mevcut: ${result.alreadyExisted})`)
       refetchQr()
     } catch (e: any) {
-      alert(e.message || 'QR olusturma hatasi')
+      alert(e.message || 'QR oluşturma hatası')
     } finally {
       setGenerating(false)
     }
   }
 
-  const downloadQrSvg = (qr: QrEntity) => {
-    const svgEl = document.getElementById(`qr-svg-${qr.id}`)
-    if (!svgEl) return
-    const svgData = new XMLSerializer().serializeToString(svgEl)
-    const blob = new Blob([svgData], { type: 'image/svg+xml' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${qr.code}.svg`
-    a.click()
-    URL.revokeObjectURL(url)
+  // Helper: QR kodunu canvas'a cizip data URL olarak dondur
+  const qrToDataUrl = (code: string, size: number = 200): string => {
+    const canvas = document.createElement('canvas')
+    canvas.width = size
+    canvas.height = size
+    const ctx = canvas.getContext('2d')!
+    // QRCodeCanvas'i gecici DOM'a ekleyerek ciz
+    const tempDiv = document.createElement('div')
+    tempDiv.style.position = 'absolute'
+    tempDiv.style.left = '-9999px'
+    document.body.appendChild(tempDiv)
+    const tempCanvas = document.createElement('canvas')
+    tempDiv.appendChild(tempCanvas)
+    // Basit QR encode - canvas uzerinden
+    // qrcode.react'in internal'ini kullanmak yerine mevcut SVG'den PNG'ye ceviriyoruz
+    document.body.removeChild(tempDiv)
+
+    // Alternatif: mevcut SVG elementini canvas'a cevir
+    const svgEl = document.querySelector(`[data-qr-code="${code}"]`) as SVGElement | null
+    if (svgEl) {
+      const svgData = new XMLSerializer().serializeToString(svgEl)
+      const img = new Image()
+      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
+      return URL.createObjectURL(svgBlob)
+    }
+    return ''
   }
 
-  const downloadAllQrCodes = () => {
-    // Create combined SVG with all QR codes (grid layout)
-    const size = 200
-    const padding = 20
-    const labelHeight = 30
-    const cols = 4
-    const rows = Math.ceil(qrEntities.length / cols)
-    const totalW = cols * (size + padding) + padding
-    const totalH = rows * (size + labelHeight + padding) + padding
+  // Tekli QR PDF indirme
+  const downloadQrPdf = (qr: QrEntity) => {
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+    const pageW = pdf.internal.pageSize.getWidth()
 
-    let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}">`
-    svgContent += `<rect width="100%" height="100%" fill="white"/>`
+    // Baslik
+    pdf.setFontSize(16)
+    pdf.text('ActLedger - QR Kod', pageW / 2, 20, { align: 'center' })
 
-    qrEntities.forEach((qr, i) => {
-      const col = i % cols
-      const row = Math.floor(i / cols)
-      const x = padding + col * (size + padding)
-      const y = padding + row * (size + labelHeight + padding)
+    // QR kodu SVG'den canvas'a cevirip PDF'e ekle
+    const svgEl = document.getElementById(`qr-svg-${qr.id}`) as SVGSVGElement | null
+    if (svgEl) {
+      const svgData = new XMLSerializer().serializeToString(svgEl)
+      const canvas = document.createElement('canvas')
+      canvas.width = 400
+      canvas.height = 400
+      const ctx = canvas.getContext('2d')!
+      const img = new Image()
+      img.onload = () => {
+        ctx.fillStyle = 'white'
+        ctx.fillRect(0, 0, 400, 400)
+        ctx.drawImage(img, 0, 0, 400, 400)
+        const imgData = canvas.toDataURL('image/png')
+        pdf.addImage(imgData, 'PNG', (pageW - 60) / 2, 30, 60, 60)
+        // Etiketler
+        pdf.setFontSize(12)
+        pdf.text(qr.code, pageW / 2, 100, { align: 'center' })
+        pdf.setFontSize(10)
+        if (qr.label) pdf.text(qr.label, pageW / 2, 108, { align: 'center' })
+        pdf.text(`Tip: ${ENTITY_TYPES.find(t => t.value === qr.entityType)?.label || qr.entityType}`, pageW / 2, 116, { align: 'center' })
+        pdf.save(`${qr.code}.pdf`)
+      }
+      img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)))
+    }
+  }
 
-      // Placeholder rect for QR
-      svgContent += `<rect x="${x}" y="${y}" width="${size}" height="${size}" fill="#f4f4f5" stroke="#e4e4e7" rx="8"/>`
-      svgContent += `<text x="${x + size/2}" y="${y + size/2}" text-anchor="middle" dominant-baseline="middle" font-family="monospace" font-size="10" fill="#71717a">${qr.code}</text>`
-      // Label below
-      svgContent += `<text x="${x + size/2}" y="${y + size + 18}" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#3f3f46">${qr.label || qr.code}</text>`
-    })
+  // Toplu QR PDF indirme - tum QR kodlari tek PDF'de
+  const downloadAllQrPdf = () => {
+    if (qrEntities.length === 0) return
 
-    svgContent += '</svg>'
-    const blob = new Blob([svgContent], { type: 'image/svg+xml' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'actledger-qr-codes.svg'
-    a.click()
-    URL.revokeObjectURL(url)
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+    const pageW = pdf.internal.pageSize.getWidth()
+    const pageH = pdf.internal.pageSize.getHeight()
+
+    // Grid ayarlari: 3 sutun x 4 satir = 12 QR per sayfa
+    const cols = 3
+    const rows = 4
+    const qrSize = 45 // mm
+    const cellW = (pageW - 20) / cols
+    const cellH = (pageH - 30) / rows
+    const marginX = 10
+    const marginY = 15
+
+    // Baslik sayfasi
+    pdf.setFontSize(18)
+    pdf.text('ActLedger - QR Kod Listesi', pageW / 2, 15, { align: 'center' })
+    pdf.setFontSize(10)
+    pdf.text(`Toplam ${qrEntities.length} QR kod`, pageW / 2, 22, { align: 'center' })
+
+    let rendered = 0
+    const perPage = cols * rows
+    const totalPages = Math.ceil(qrEntities.length / perPage)
+
+    // Her QR kodu icin SVG'yi canvas'a cevir
+    const svgElements = qrEntities.map(qr => {
+      const el = document.getElementById(`qr-svg-${qr.id}`) as SVGSVGElement | null
+      if (!el) return null
+      return { qr, svgData: new XMLSerializer().serializeToString(el) }
+    }).filter(Boolean) as { qr: QrEntity; svgData: string }[]
+
+    // Tum QR'lari sirayla isle
+    let loadedCount = 0
+    const images: { qr: QrEntity; dataUrl: string }[] = []
+
+    if (svgElements.length === 0) {
+      // SVG element yok - sadece metin olarak olustur
+      qrEntities.forEach((qr, i) => {
+        if (i > 0 && i % perPage === 0) pdf.addPage()
+        const pageIdx = i % perPage
+        const col = pageIdx % cols
+        const row = Math.floor(pageIdx / cols)
+        const x = marginX + col * cellW
+        const y = marginY + 15 + row * cellH
+
+        // Cerceve
+        pdf.setDrawColor(200)
+        pdf.roundedRect(x + 2, y, cellW - 4, cellH - 5, 3, 3)
+        // Kod
+        pdf.setFontSize(8)
+        pdf.text(qr.code, x + cellW / 2, y + cellH / 2, { align: 'center' })
+        pdf.setFontSize(7)
+        if (qr.label) pdf.text(qr.label.substring(0, 25), x + cellW / 2, y + cellH / 2 + 5, { align: 'center' })
+      })
+      pdf.save('actledger-qr-codes.pdf')
+      return
+    }
+
+    // SVG -> PNG -> PDF (async chain)
+    const processNext = (idx: number) => {
+      if (idx >= svgElements.length) {
+        // Tum resimler yuklendi, PDF'i olustur
+        images.forEach((item, i) => {
+          if (i > 0 && i % perPage === 0) pdf.addPage()
+          const pageIdx = i % perPage
+          const col = pageIdx % cols
+          const row = Math.floor(pageIdx / cols)
+          const x = marginX + col * cellW
+          const y = marginY + 15 + row * cellH
+          const qrX = x + (cellW - qrSize) / 2
+          const qrY = y + 2
+
+          // QR gorsel
+          pdf.addImage(item.dataUrl, 'PNG', qrX, qrY, qrSize, qrSize)
+          // Kod etiketi
+          pdf.setFontSize(7)
+          pdf.setTextColor(60)
+          pdf.text(item.qr.code, x + cellW / 2, qrY + qrSize + 4, { align: 'center' })
+          // Label
+          if (item.qr.label) {
+            pdf.setFontSize(6)
+            pdf.setTextColor(120)
+            pdf.text(item.qr.label.substring(0, 30), x + cellW / 2, qrY + qrSize + 8, { align: 'center' })
+          }
+          pdf.setTextColor(0)
+        })
+        pdf.save('actledger-qr-codes.pdf')
+        return
+      }
+
+      const { qr, svgData } = svgElements[idx]
+      const canvas = document.createElement('canvas')
+      canvas.width = 400
+      canvas.height = 400
+      const ctx = canvas.getContext('2d')!
+      const img = new Image()
+      img.onload = () => {
+        ctx.fillStyle = 'white'
+        ctx.fillRect(0, 0, 400, 400)
+        ctx.drawImage(img, 0, 0, 400, 400)
+        images.push({ qr, dataUrl: canvas.toDataURL('image/png') })
+        processNext(idx + 1)
+      }
+      img.onerror = () => {
+        // Hata durumunda atla
+        processNext(idx + 1)
+      }
+      img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)))
+    }
+
+    processNext(0)
   }
 
   const handleAnalyze = async () => {
@@ -199,7 +336,7 @@ export default function InventoryIntelligence() {
       await analyzeInventoryIntelligence()
       refetchIntel()
     } catch (e: any) {
-      alert(e.message || 'Analiz hatasi')
+      alert(e.message || 'Analiz hatası')
     } finally {
       setAnalyzing(false)
     }
@@ -240,7 +377,7 @@ export default function InventoryIntelligence() {
               <Icon size={14} />
               {lang === 'tr' ? t.label : t.labelEn}
               {t.key === 'operiq' && (
-                <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded uppercase tracking-wide bg-teal-50 text-teal-700 border border-teal-200">AI</span>
+                <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded uppercase tracking-wide bg-cyan-50 text-cyan-700 border border-cyan-200">AI</span>
               )}
             </button>
           )
@@ -253,7 +390,7 @@ export default function InventoryIntelligence() {
           {/* Loading / Error */}
           {analyticsLoading && (
             <div className="flex items-center justify-center py-12 text-zinc-400 text-sm gap-2">
-              <RefreshCw size={14} className="animate-spin" /> Veriler yukleniyor...
+              <RefreshCw size={14} className="animate-spin" /> Veriler yükleniyor...
             </div>
           )}
           {analyticsError && (
@@ -269,8 +406,8 @@ export default function InventoryIntelligence() {
               {[
                 { label: 'Toplam Kalem', value: analytics?.summary?.totalItems ?? 0, icon: Package, color: 'text-blue-400' },
                 { label: 'Kritik Stok', value: analytics?.summary?.criticalCount ?? 0, icon: AlertTriangle, color: 'text-red-400' },
-                { label: 'Min Alti', value: analytics?.summary?.belowMinCount ?? 0, icon: TrendingDown, color: 'text-amber-400' },
-                { label: 'Devir Hizi', value: analytics?.summary?.turnoverRate ?? 0, icon: TrendingUp, color: 'text-emerald-400' },
+                { label: 'Min Altı', value: analytics?.summary?.belowMinCount ?? 0, icon: TrendingDown, color: 'text-amber-400' },
+                { label: 'Devir Hızı', value: analytics?.summary?.turnoverRate ?? 0, icon: TrendingUp, color: 'text-emerald-400' },
                 { label: 'Aktif Rezervasyon', value: analytics?.summary?.activeReservations ?? 0, icon: BookmarkCheck, color: 'text-violet-400' },
                 { label: 'Fire Adedi', value: analytics?.fireStats?.totalFired ?? 0, icon: ShieldAlert, color: 'text-rose-400' },
               ].map((c, i) => (
@@ -310,7 +447,7 @@ export default function InventoryIntelligence() {
             <div className="bg-white rounded-xl border border-zinc-200 p-4">
               <h3 className="text-sm font-semibold text-zinc-800 mb-3 flex items-center gap-2">
                 <Timer size={14} className="text-amber-400" />
-                Son Kullanma Tarihi Yaklasan Partiler
+                Son Kullanma Tarihi Yaklaşan Partiler
               </h3>
               <div className="space-y-2">
                 {analytics.expiringBatches.slice(0, 8).map((b: any) => (
@@ -328,7 +465,7 @@ export default function InventoryIntelligence() {
             <div className="bg-white rounded-xl border border-zinc-200 p-4">
               <h3 className="text-sm font-semibold text-zinc-800 mb-3 flex items-center gap-2">
                 <Activity size={14} className="text-indigo-400" />
-                Gunluk Hareket Trendi
+                Günlük Hareket Trendi
               </h3>
               <div className="overflow-x-auto">
                 <div className="flex gap-1 min-w-[600px]">
@@ -414,12 +551,12 @@ export default function InventoryIntelligence() {
               {isManager && (
                 <button className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-zinc-200 hover:bg-zinc-50 transition-colors flex items-center gap-1 text-xs" onClick={handleAutoGenerate} disabled={generating}>
                   {generating ? <RefreshCw size={13} className="animate-spin" /> : <Zap size={13} />}
-                  {lang === 'tr' ? 'Tum Stoklar Icin QR Olustur' : 'Generate QR for All Stock'}
+                  {lang === 'tr' ? 'Tum Stoklar Icin QR Oluştur' : 'Generate QR for All Stock'}
                 </button>
               )}
               {qrEntities.length > 0 && (
-                <button className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-zinc-200 hover:bg-zinc-50 transition-colors flex items-center gap-1 text-xs" onClick={downloadAllQrCodes}>
-                  <Download size={13} /> {lang === 'tr' ? 'Toplu Indir' : 'Download All'}
+                <button className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-zinc-200 hover:bg-zinc-50 transition-colors flex items-center gap-1 text-xs" onClick={downloadAllQrPdf}>
+                  <Download size={13} /> {lang === 'tr' ? 'Toplu PDF' : 'PDF All'}
                 </button>
               )}
               {isManager && (
@@ -445,7 +582,7 @@ export default function InventoryIntelligence() {
                 <div className="flex items-center gap-2">
                   <button
                     className="text-zinc-400 hover:text-indigo-600 transition p-1"
-                    onClick={() => downloadQrSvg(qr)}
+                    onClick={() => downloadQrPdf(qr)}
                     title="QR kodu indir"
                   ><Download size={14} /></button>
                   <span className={`text-[10px] px-2 py-0.5 rounded ${qr.active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-zinc-100 text-zinc-600'}`}>
@@ -463,10 +600,10 @@ export default function InventoryIntelligence() {
             {qrEntities.length === 0 && (
               <div className="text-center py-8 space-y-3">
                 <QrCode size={32} className="mx-auto text-zinc-300" />
-                <p className="text-sm text-zinc-400">Henuz QR kodu yok</p>
+                <p className="text-sm text-zinc-400">Henüz QR kodu yok</p>
                 {isManager && (
                   <button className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 text-white hover:bg-zinc-800 transition-colors flex items-center gap-1 text-xs mx-auto" onClick={handleAutoGenerate} disabled={generating}>
-                    <Zap size={13} /> Tum Stoklar Icin QR Olustur
+                    <Zap size={13} /> Tum Stoklar Icin QR Oluştur
                   </button>
                 )}
               </div>
@@ -481,8 +618,8 @@ export default function InventoryIntelligence() {
                 <p className="text-lg font-mono font-bold text-zinc-800 mt-4">{qrPreview.code}</p>
                 {qrPreview.label && <p className="text-sm text-zinc-500 mt-1">{qrPreview.label}</p>}
                 <div className="flex gap-2 justify-center mt-6">
-                  <button className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 text-white hover:bg-zinc-800 transition-colors flex items-center gap-1 text-xs" onClick={() => downloadQrSvg(qrPreview)}>
-                    <Download size={13} /> SVG Indir
+                  <button className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 text-white hover:bg-zinc-800 transition-colors flex items-center gap-1 text-xs" onClick={() => downloadQrPdf(qrPreview)}>
+                    <Download size={13} /> PDF Indir
                   </button>
                   <button className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-zinc-200 hover:bg-zinc-50 transition-colors flex items-center gap-1 text-xs" onClick={() => setQrPreview(null)}>Kapat</button>
                 </div>
@@ -523,7 +660,7 @@ export default function InventoryIntelligence() {
                 </div>
               </div>
             ))}
-            {locations.length === 0 && <div className="text-center text-zinc-400 py-8 text-sm">Henuz lokasyon yok</div>}
+            {locations.length === 0 && <div className="text-center text-zinc-400 py-8 text-sm">Henüz lokasyon yok</div>}
           </div>
         </div>
       )}
@@ -562,7 +699,7 @@ export default function InventoryIntelligence() {
                 </div>
               )
             })}
-            {batches.length === 0 && <div className="text-center text-zinc-400 py-8 text-sm">Henuz parti/lot yok</div>}
+            {batches.length === 0 && <div className="text-center text-zinc-400 py-8 text-sm">Henüz parti/lot yok</div>}
           </div>
         </div>
       )}
@@ -609,7 +746,7 @@ export default function InventoryIntelligence() {
                 </div>
               )
             })}
-            {transactions.length === 0 && <div className="text-center text-zinc-400 py-8 text-sm">Henuz hareket yok</div>}
+            {transactions.length === 0 && <div className="text-center text-zinc-400 py-8 text-sm">Henüz hareket yok</div>}
           </div>
         </div>
       )}
@@ -633,7 +770,7 @@ export default function InventoryIntelligence() {
                   <div>
                     <div className="text-sm text-zinc-800">{r.stockItem?.name}</div>
                     <div className="text-xs text-zinc-400">
-                      {r.description || 'Gorev rezervasyonu'}
+                      {r.description || 'Görev rezervasyonu'}
                       {r.expiresAt && <span className="ml-2">Son: {new Date(r.expiresAt).toLocaleDateString('tr-TR')}</span>}
                     </div>
                   </div>
@@ -655,7 +792,7 @@ export default function InventoryIntelligence() {
                 </div>
               </div>
             ))}
-            {reservations.length === 0 && <div className="text-center text-zinc-400 py-8 text-sm">Henuz rezervasyon yok</div>}
+            {reservations.length === 0 && <div className="text-center text-zinc-400 py-8 text-sm">Henüz rezervasyon yok</div>}
           </div>
         </div>
       )}
@@ -665,10 +802,16 @@ export default function InventoryIntelligence() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-zinc-800">Satin Alma Sorumlusu Yonetimi</h3>
-              <p className="text-xs text-zinc-400 mt-1">Kritik ve risk gosteren stok uyarilarinda bildirim alacak kisiler</p>
+              <h3 className="text-sm font-semibold text-zinc-800">Satın Alma Sorumlusu Yönetimi</h3>
+              <p className="text-xs text-zinc-400 mt-1">
+                {canManageAllPurchase
+                  ? 'Tüm departmanlar için satın alma sorumlusu atayabilirsiniz.'
+                  : isDeptManager
+                    ? `Departmanınız için satın alma sorumlusu atayabilirsiniz.`
+                    : 'Satın alma sorumluları listesi.'}
+              </p>
             </div>
-            {isManager && (
+            {(canManageAllPurchase || isDeptManager) && (
               <button className="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center gap-1.5 text-xs" onClick={() => setCreating('purchaseResp')}>
                 <Plus size={14} /> Sorumlu Ekle
               </button>
@@ -676,35 +819,35 @@ export default function InventoryIntelligence() {
           </div>
           <div className="grid gap-2">
             {(purchaseResps as PurchaseResponsible[] || []).map(pr => (
-              <div key={pr.id} className="card p-4 flex items-center justify-between">
+              <div key={pr.id} className="bg-white rounded-xl border border-zinc-200 p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <UserCheck size={16} className="text-indigo-400" />
+                  <UserCheck size={16} className="text-indigo-600" />
                   <div>
                     <div className="text-sm text-zinc-800">{pr.user?.name}</div>
                     <div className="text-xs text-zinc-400 flex items-center gap-2">
                       <span>{pr.user?.email}</span>
-                      <span className="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700">{pr.roleType}</span>
+                      <span className="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700">{pr.roleType === 'PRIMARY' ? 'Ana Sorumlu' : pr.roleType === 'KEY_ACCOUNT' ? 'Key Account' : 'Yedek'}</span>
                       {pr.departmentIds.length > 0 && (
                         <span>{pr.departmentIds.length} departman</span>
                       )}
                       {pr.departmentIds.length === 0 && (
-                        <span className="text-emerald-400">Tum sirket</span>
+                        <span className="text-emerald-600">Tüm şirket</span>
                       )}
                     </div>
                   </div>
                 </div>
-                {isManager && (
+                {(canManageAllPurchase || isDeptManager) && (
                   <button
                     className="text-zinc-300 hover:text-red-600 transition"
-                    onClick={async () => { if (confirm('Sorumlu kaldirilsin mi?')) { await deletePurchaseResponsible(pr.id); refetchPR() } }}
+                    onClick={async () => { if (confirm('Sorumlu kaldırılsın mı?')) { await deletePurchaseResponsible(pr.id); refetchPR() } }}
                   ><Trash2 size={14} /></button>
                 )}
               </div>
             ))}
             {(!purchaseResps || (purchaseResps as any[]).length === 0) && (
               <div className="text-center text-zinc-400 py-8 text-sm">
-                Henuz satin alma sorumlusu tanimlanmamis.<br />
-                <span className="text-zinc-300">Kritik stok bildirimlerinin dogru kisilere ulasmasi icin sorumlu ekleyin.</span>
+                Henüz satın alma sorumlusu tanımlanmamış.<br />
+                <span className="text-zinc-300">Kritik stok bildirimlerinin doğru kişilere ulaşması için sorumlu ekleyin.</span>
               </div>
             )}
           </div>
@@ -717,13 +860,13 @@ export default function InventoryIntelligence() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-semibold text-zinc-800 flex items-center gap-2">
-                <Cpu size={14} className="text-teal-600" />
-                AssetIQ - OperIQ Stok Zekasi
+                <Cpu size={14} className="text-cyan-600" />
+                <span className="text-cyan-700">OperIQ</span> Asset
               </h3>
               {intelligence?.analyzedAt && (
                 <p className="text-xs text-zinc-400 mt-1">
                   Son analiz: {new Date(intelligence.analyzedAt).toLocaleString('tr-TR')}
-                  {intelligence.isStale && <span className="ml-2 text-amber-400">(Eski - yeniden analiz oneriliyor)</span>}
+                  {intelligence.isStale && <span className="ml-2 text-amber-400">(Eski - yeniden analiz öneriliyor)</span>}
                 </p>
               )}
             </div>
@@ -775,7 +918,7 @@ export default function InventoryIntelligence() {
             ))}
             {(!intelligence?.insights || intelligence.insights.length === 0) && !analyzing && (
               <div className="text-center text-zinc-400 py-8 text-sm">
-                Henuz analiz yapilmamis. "Analiz Et" butonuna tiklayin.
+                Henüz analiz yapılmamış. "Analiz Et" butonuna tiklayin.
               </div>
             )}
           </div>
@@ -827,6 +970,8 @@ export default function InventoryIntelligence() {
           departments={departments}
           onClose={() => setCreating(null)}
           onCreated={() => { setCreating(null); refetchPR() }}
+          canManageAll={canManageAllPurchase}
+          userDepartmentId={user?.departmentId}
         />
       )}
     </div>
@@ -868,7 +1013,7 @@ function CreateQrModal({ stockItems, onClose, onCreated }: { stockItems: any[]; 
           catch (e: any) { alert(e.message) }
           finally { setSaving(false) }
         }}>
-          {saving ? 'Olusturuluyor...' : 'QR Olustur'}
+          {saving ? 'Oluşturuluyor...' : 'QR Oluştur'}
         </button>
       </div>
     </DraggableModal>
@@ -898,9 +1043,9 @@ function CreateLocationModal({ departments, locations, onClose, onCreated }: { d
           </select>
         </div>
         <div>
-          <label className="block text-xs font-medium text-zinc-600 mb-1">Ust Lokasyon</label>
+          <label className="block text-xs font-medium text-zinc-600 mb-1">Üst Lokasyon</label>
           <select className="input w-full" value={form.parentId} onChange={e => set('parentId', e.target.value)}>
-            <option value="">Yok (Kok)</option>
+            <option value="">Yok (Kök)</option>
             {locations.map((l: any) => <option key={l.id} value={l.id}>{l.name}</option>)}
           </select>
         </div>
@@ -914,7 +1059,7 @@ function CreateLocationModal({ departments, locations, onClose, onCreated }: { d
           } catch (e: any) { alert(e.message) }
           finally { setSaving(false) }
         }}>
-          {saving ? 'Kaydediliyor...' : 'Lokasyon Olustur'}
+          {saving ? 'Kaydediliyor...' : 'Lokasyon Oluştur'}
         </button>
       </div>
     </DraggableModal>
@@ -945,9 +1090,9 @@ function CreateBatchModal({ stockItems, locations, onClose, onCreated }: { stock
             {locations.map((l: any) => <option key={l.id} value={l.id}>{l.name}</option>)}
           </select>
         </div>
-        <div><label className="block text-xs font-medium text-zinc-600 mb-1">Tedarikci</label><input className="input w-full" value={form.supplier} onChange={e => set('supplier', e.target.value)} /></div>
+        <div><label className="block text-xs font-medium text-zinc-600 mb-1">Tedarikçi</label><input className="input w-full" value={form.supplier} onChange={e => set('supplier', e.target.value)} /></div>
         <button className="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center gap-1.5 w-full" disabled={saving} onClick={async () => {
-          if (!form.stockItemId || !form.batchNumber.trim()) return alert('Stok kalemi ve parti numarasi zorunlu')
+          if (!form.stockItemId || !form.batchNumber.trim()) return alert('Stok kalemi ve parti numarası zorunlu')
           setSaving(true)
           try {
             await createInventoryBatch({
@@ -959,7 +1104,7 @@ function CreateBatchModal({ stockItems, locations, onClose, onCreated }: { stock
           } catch (e: any) { alert(e.message) }
           finally { setSaving(false) }
         }}>
-          {saving ? 'Kaydediliyor...' : 'Parti Olustur'}
+          {saving ? 'Kaydediliyor...' : 'Parti Oluştur'}
         </button>
       </div>
     </DraggableModal>
@@ -1041,8 +1186,8 @@ function CreateReservationModal({ stockItems, onClose, onCreated }: { stockItems
           </select>
         </div>
         <div><label className="block text-xs font-medium text-zinc-600 mb-1">Miktar *</label><input className="input w-full" type="number" min="1" value={form.quantity} onChange={e => set('quantity', e.target.value)} /></div>
-        <div><label className="block text-xs font-medium text-zinc-600 mb-1">Aciklama</label><input className="input w-full" value={form.description} onChange={e => set('description', e.target.value)} placeholder="Hangi gorev icin..." /></div>
-        <div><label className="block text-xs font-medium text-zinc-600 mb-1">Son Gecerlilik</label><input className="input w-full" type="date" value={form.expiresAt} onChange={e => set('expiresAt', e.target.value)} /></div>
+        <div><label className="block text-xs font-medium text-zinc-600 mb-1">Aciklama</label><input className="input w-full" value={form.description} onChange={e => set('description', e.target.value)} placeholder="Hangi görev için..." /></div>
+        <div><label className="block text-xs font-medium text-zinc-600 mb-1">Son Geçerlilik</label><input className="input w-full" type="date" value={form.expiresAt} onChange={e => set('expiresAt', e.target.value)} /></div>
         <button className="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center gap-1.5 w-full" disabled={saving} onClick={async () => {
           if (!form.stockItemId || !form.quantity) return alert('Stok kalemi ve miktar zorunlu')
           setSaving(true)
@@ -1056,59 +1201,79 @@ function CreateReservationModal({ stockItems, onClose, onCreated }: { stockItems
           } catch (e: any) { alert(e.message) }
           finally { setSaving(false) }
         }}>
-          {saving ? 'Kaydediliyor...' : 'Rezervasyon Olustur'}
+          {saving ? 'Kaydediliyor...' : 'Rezervasyon Oluştur'}
         </button>
       </div>
     </DraggableModal>
   )
 }
 
-function CreatePurchaseRespModal({ users, departments, onClose, onCreated }: { users: any[]; departments: any[]; onClose: () => void; onCreated: () => void }) {
+function CreatePurchaseRespModal({ users, departments, onClose, onCreated, canManageAll, userDepartmentId }: {
+  users: any[]; departments: any[]; onClose: () => void; onCreated: () => void
+  canManageAll: boolean; userDepartmentId?: string
+}) {
   const [userId, setUserId] = useState('')
   const [roleType, setRoleType] = useState('PRIMARY')
   const [selectedDepts, setSelectedDepts] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
+
+  // Dept muduru sadece kendi departmanindaki kullanicilari gorur
+  const filteredUsers = canManageAll
+    ? users
+    : users.filter((u: any) => u.departmentId === userDepartmentId || u.departments?.some((d: any) => d.id === userDepartmentId))
+  const filteredDepts = canManageAll
+    ? departments
+    : departments.filter((d: any) => d.id === userDepartmentId)
+
   return (
-    <DraggableModal title="Satin Alma Sorumlusu Ekle" onClose={onClose}>
+    <DraggableModal title="Satın Alma Sorumlusu Ekle" onClose={onClose}>
       <div className="space-y-3 p-4">
+        {!canManageAll && (
+          <div className="px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-xs text-blue-700">
+            Sadece kendi departmanınızdaki çalışanları satin alma sorumlusu olarak atayabilirsiniz.
+          </div>
+        )}
         <div>
           <label className="block text-xs font-medium text-zinc-600 mb-1">Kullanici *</label>
           <select className="input w-full" value={userId} onChange={e => setUserId(e.target.value)}>
             <option value="">Secin...</option>
-            {users.map((u: any) => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
+            {filteredUsers.map((u: any) => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
           </select>
         </div>
         <div>
           <label className="block text-xs font-medium text-zinc-600 mb-1">Sorumluluk Tipi</label>
           <select className="input w-full" value={roleType} onChange={e => setRoleType(e.target.value)}>
-            <option value="PRIMARY">Ana Satin Alma Sorumlusu</option>
+            <option value="PRIMARY">Ana Satın Alma Sorumlusu</option>
             <option value="BACKUP">Yedek Sorumlu</option>
-            <option value="KEY_ACCOUNT">Key Account Manager</option>
+            {canManageAll && <option value="KEY_ACCOUNT">Key Account Manager</option>}
           </select>
         </div>
-        <div>
-          <label className="block text-xs font-medium text-zinc-600 mb-1">Sorumlu Departmanlar (bos = tum sirket)</label>
-          <div className="max-h-32 overflow-y-auto space-y-1 border border-zinc-200 rounded p-2">
-            {departments.map((d: any) => (
-              <label key={d.id} className="flex items-center gap-2 text-xs text-zinc-600 cursor-pointer hover:text-zinc-700">
-                <input
-                  type="checkbox"
-                  checked={selectedDepts.includes(d.id)}
-                  onChange={e => {
-                    if (e.target.checked) setSelectedDepts(p => [...p, d.id])
-                    else setSelectedDepts(p => p.filter(x => x !== d.id))
-                  }}
-                />
-                {d.name}
-              </label>
-            ))}
+        {canManageAll && (
+          <div>
+            <label className="block text-xs font-medium text-zinc-600 mb-1">Sorumlu Departmanlar (boş = tüm şirket)</label>
+            <div className="max-h-32 overflow-y-auto space-y-1 border border-zinc-200 rounded p-2">
+              {filteredDepts.map((d: any) => (
+                <label key={d.id} className="flex items-center gap-2 text-xs text-zinc-600 cursor-pointer hover:text-zinc-700">
+                  <input
+                    type="checkbox"
+                    checked={selectedDepts.includes(d.id)}
+                    onChange={e => {
+                      if (e.target.checked) setSelectedDepts(p => [...p, d.id])
+                      else setSelectedDepts(p => p.filter(x => x !== d.id))
+                    }}
+                  />
+                  {d.name}
+                </label>
+              ))}
+            </div>
           </div>
-        </div>
-        <button className="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center gap-1.5 w-full" disabled={saving} onClick={async () => {
-          if (!userId) return alert('Kullanici secin')
+        )}
+        <button className="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center gap-1.5 w-full justify-center" disabled={saving} onClick={async () => {
+          if (!userId) return alert('Kullanıcı seçin')
           setSaving(true)
           try {
-            await createPurchaseResponsible({ userId, roleType, departmentIds: selectedDepts })
+            const deptIds = canManageAll ? selectedDepts : (userDepartmentId ? [userDepartmentId] : [])
+            await createPurchaseResponsible({ userId, roleType, departmentIds: deptIds })
             onCreated()
           } catch (e: any) { alert(e.message) }
           finally { setSaving(false) }

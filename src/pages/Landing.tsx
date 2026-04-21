@@ -1914,7 +1914,7 @@ export default function Landing() {
             /* Saha & mobil */
             { title: t.pf1Title, body: t.pf1Body, benefit: t.pf1Benefit, img: '/images/Mobil_saha.jpg',     icon: Smartphone,    color: '#6366f1' },
             { title: t.nf8Title, body: t.nf8Body, benefit: t.nf8Benefit, img: '/images/Mobil.jpg',          icon: Radio,         color: '#0891b2' },
-            { title: t.nf1Title, body: t.nf1Body, benefit: t.nf1Benefit, img: '/images/Canlıharita.jpg',    icon: Map,           color: '#2563eb' },
+            { title: t.nf1Title, body: t.nf1Body, benefit: t.nf1Benefit, img: '/images/Canliharita.jpg',    icon: Map,           color: '#2563eb' },
             { title: t.pf4Title, body: t.pf4Body, benefit: t.pf4Benefit, img: '/images/Fotograf.jpg',       icon: Camera,        color: '#06b6d4' },
             { title: t.nf3Title, body: t.nf3Body, benefit: t.nf3Benefit, img: '/images/OperIQ_mobil.jpg',   icon: Cpu,           color: '#0d9488' },
             /* Stok, dosya, form */

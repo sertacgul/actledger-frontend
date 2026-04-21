@@ -31,6 +31,7 @@ import Automation from './pages/Automation'
 import Workflows from './pages/Workflows'
 import InventoryIntelligence from './pages/InventoryIntelligence'
 import UserGuide from './pages/UserGuide'
+import PlatformMessages from './pages/PlatformMessages'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfUse from './pages/TermsOfUse'
 
@@ -155,6 +156,7 @@ function AppRoutes() {
           <Route path="envanter-zeka" element={<InventoryIntelligence />} />
           <Route path="otomasyon"    element={<Automation />}  />
           <Route path="is-akislari"  element={<Workflows />}   />
+          <Route path="mesajlar"     element={<PlatformMessages />} />
           <Route path="ayarlar"      element={<Settings />}    />
           <Route path="manuel"       element={<UserGuide />}   />
         </Route>

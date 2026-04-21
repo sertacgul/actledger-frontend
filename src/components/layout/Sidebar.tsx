@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, CheckSquare, FileText, Building2,
   Users, Smartphone, Settings, LogOut, Cpu, FolderOpen, Package, Radio, MapPin,
-  ZoomIn, ZoomOut, RotateCcw, Target, Boxes, Zap, GitBranch, ScanLine,
+  ZoomIn, ZoomOut, RotateCcw, Target, Boxes, Zap, GitBranch, ScanLine, MessageSquare,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useAuth } from '../../context/AuthContext'
@@ -39,7 +39,8 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
         { to: '/panel',    icon: LayoutDashboard, label: t('nav_dashboard'), desc: t('tooltip_dashboard' as TranslationKey), shortcut: 'g d' },
         { to: '/gorevler',  icon: CheckSquare,     label: t('nav_tasks'),     desc: t('tooltip_tasks' as TranslationKey),     shortcut: 'g t' },
         { to: '/raporlar',  icon: FileText,        label: t('nav_reports'),   desc: t('tooltip_reports' as TranslationKey),   shortcut: 'g r' },
-        { to: '/harita',    icon: MapPin,          label: lang === 'tr' ? 'Operasyon & Tesis' : 'Operations & Facility', desc: lang === 'tr' ? 'Canlı harita ve tesis kat planları' : 'Live map and facility floor plans',    shortcut: 'g h' },
+        { to: '/harita',    icon: MapPin,          label: lang === 'tr' ? 'Operasyon & Tesis' : 'Operations & Facility', desc: lang === 'tr' ? 'Canl\u0131 harita ve tesis kat planlar\u0131' : 'Live map and facility floor plans',    shortcut: 'g h' },
+        { to: '/mesajlar',  icon: MessageSquare,   label: lang === 'tr' ? 'Mesajlar' : 'Messages', desc: lang === 'tr' ? 'WhatsApp tarz\u0131 mesajla\u015fma' : 'WhatsApp-style messaging', shortcut: 'g j' },
       ],
     },
     {

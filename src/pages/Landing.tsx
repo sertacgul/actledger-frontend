@@ -2232,12 +2232,12 @@ export default function Landing() {
             </div>
           </Reveal>
 
-          <div className="relative max-w-5xl mx-auto">
+          <div className="relative max-w-6xl mx-auto">
             {/* Animated connecting SVG line */}
-            <div className="hidden md:block absolute top-24 left-[16%] right-[16%] h-20 pointer-events-none" style={{ zIndex: 0 }}>
-              <svg viewBox="0 0 800 40" fill="none" preserveAspectRatio="none" className="w-full h-full">
+            <div className="hidden lg:block absolute top-24 left-[10%] right-[10%] h-20 pointer-events-none" style={{ zIndex: 0 }}>
+              <svg viewBox="0 0 1000 40" fill="none" preserveAspectRatio="none" className="w-full h-full">
                 <path
-                  d="M 0 20 C 100 20, 150 5, 200 20 S 350 35, 400 20 S 550 5, 600 20 S 750 35, 800 20"
+                  d="M 0 20 C 80 20, 120 5, 166 20 S 280 35, 333 20 S 450 5, 500 20 S 610 35, 666 20 S 790 5, 833 20 S 950 35, 1000 20"
                   stroke="url(#howGradient)"
                   strokeWidth="2"
                   fill="none"
@@ -2258,15 +2258,15 @@ export default function Landing() {
 
             {/* Progress indicator */}
             <div className="hidden md:flex justify-between max-w-md mx-auto mb-12">
-              {[0, 1, 2].map((idx) => (
+              {[0, 1, 2, 3].map((idx) => (
                 <div key={idx} className="flex items-center">
-                  <div className="w-3 h-3 rounded-full" style={{ background: ['#06b6d4', '#22d3ee', '#14b8a6'][idx], boxShadow: `0 0 10px ${['#06b6d4', '#22d3ee', '#14b8a6'][idx]}50` }} />
+                  <div className="w-3 h-3 rounded-full" style={{ background: ['#06b6d4', '#22d3ee', '#14b8a6', '#059669'][idx], boxShadow: `0 0 10px ${['#06b6d4', '#22d3ee', '#14b8a6', '#059669'][idx]}50` }} />
                   {idx < 2 && <div className="w-24 h-0.5 mx-2" style={{ background: `linear-gradient(90deg, ${['#06b6d4', '#22d3ee'][idx]}, ${['#22d3ee', '#14b8a6'][idx]})`, opacity: 0.3 }} />}
                 </div>
               ))}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative" style={{ zIndex: 1 }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative" style={{ zIndex: 1 }}>
               {[
                 { num: '01', icon: Users, title: t.step1Title, body: t.step1Body, color: '#06b6d4', illustration: (
                   <svg viewBox="0 0 80 60" fill="none" className="w-16 h-12 mb-3 opacity-50">
@@ -2308,26 +2308,26 @@ export default function Landing() {
               ].map((step, i) => (
                 <Reveal key={i} delay={i * 200}>
                   <div
-                    className="relative text-center rounded-2xl p-10 lg:p-12 transition-all duration-500 hover:-translate-y-2"
+                    className="relative text-center rounded-2xl p-8 lg:p-10 transition-all duration-500 hover:-translate-y-2"
                     style={{ background: 'rgba(255,255,255,0.6)', border: `1px solid ${step.color}20`, backdropFilter: 'blur(8px)' }}
                   >
                     {/* Illustration */}
                     <div className="flex justify-center">{step.illustration}</div>
                     {/* Step dot */}
                     <div
-                      className="w-24 h-24 rounded-full mx-auto mb-8 flex items-center justify-center relative"
+                      className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center relative"
                       style={{ background: `${step.color}15`, border: `2px solid ${step.color}40`, boxShadow: `0 0 40px ${step.color}20` }}
                     >
-                      <step.icon size={36} style={{ color: step.color }} />
+                      <step.icon size={30} style={{ color: step.color }} />
                       <span
-                        className="absolute -top-2 -right-2 w-10 h-10 rounded-full flex items-center justify-center text-lg font-extrabold"
+                        className="absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center text-sm font-extrabold"
                         style={{ background: step.color, color: '#111d2e' }}
                       >
                         {step.num}
                       </span>
                     </div>
-                    <h3 className="text-3xl font-bold mb-4" style={{ color: '#0f2b3d' }}>{step.title}</h3>
-                    <p className="text-xl leading-relaxed" style={{ color: 'rgba(15,43,61,0.55)' }}>{step.body}</p>
+                    <h3 className="text-2xl font-bold mb-3" style={{ color: '#0f2b3d' }}>{step.title}</h3>
+                    <p className="text-base leading-relaxed" style={{ color: 'rgba(15,43,61,0.55)' }}>{step.body}</p>
                   </div>
                 </Reveal>
               ))}

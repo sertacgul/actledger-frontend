@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { MessageSquare, Send, Check, CheckCheck, Users, Building2, Search, Plus, X, Loader2, ArrowLeft, Circle } from 'lucide-react'
+import { MessageSquare, Send, Check, CheckCheck, Users, Building2, Search, Plus, X, Loader2, ArrowLeft, Circle, Pencil, Trash2, MoreVertical } from 'lucide-react'
 import clsx from 'clsx'
 import { useLanguage } from '../context/LanguageContext'
 import { useAuth } from '../context/AuthContext'
@@ -58,6 +58,9 @@ export default function PlatformMessages() {
   const [storyContent, setStoryContent] = useState('')
   const [storyColor, setStoryColor] = useState('#0891b2')
 
+  // Unread count
+  const [unreadCount, setUnreadCount] = useState(0)
+
   // Load
   const loadAll = useCallback(async () => {
     try {
@@ -86,6 +89,7 @@ export default function PlatformMessages() {
       })))
     }).catch(() => {})
     api.get<any>('/messages/stories').then((r: any) => setStories(Array.isArray(r) ? r : (r?.data ?? []))).catch(() => {})
+    api.get<any>('/messages/unread-count').then((r: any) => setUnreadCount(r?.total ?? 0)).catch(() => {})
   }, [])
 
   // Conversations
@@ -132,6 +136,8 @@ export default function PlatformMessages() {
       }
     } catch {}
     setChatLoading(false)
+    // Refresh unread count after marking messages as read
+    api.get<any>('/messages/unread-count').then((r: any) => setUnreadCount(r?.total ?? 0)).catch(() => {})
   }
 
   useEffect(() => { if (activeConv) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [chatMessages.length])
@@ -168,7 +174,10 @@ export default function PlatformMessages() {
       <div className="w-[360px] flex flex-col border-r border-zinc-200 flex-shrink-0">
         {/* Header */}
         <div className="px-4 py-3 border-b border-zinc-200 flex items-center justify-between">
-          <h2 className="text-base font-bold text-zinc-800">{tr ? 'Mesajlar' : 'Messages'}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-bold text-zinc-800">{tr ? 'Mesajlar' : 'Messages'}</h2>
+            {unreadCount > 0 && <span className="px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-[9px] font-bold min-w-[18px] text-center">{unreadCount}</span>}
+          </div>
           <div className="flex items-center gap-1.5">
             <button onClick={() => setStoryForm(true)} className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100">Story</button>
             <button onClick={() => setShowNewChat(true)} className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center hover:bg-zinc-200"><Plus size={16} className="text-zinc-600" /></button>
@@ -255,14 +264,25 @@ export default function PlatformMessages() {
                 chatMessages.map(msg => {
                   const isMe = msg.senderId === user?.id
                   return (
-                    <div key={msg.id} className={clsx('flex', isMe ? 'justify-end' : 'justify-start')}>
-                      <div className={clsx('max-w-[55%] rounded-xl px-4 py-2.5 shadow-sm', isMe ? 'bg-emerald-100 rounded-br-sm' : 'bg-white rounded-bl-sm')}>
-                        {!isMe && activeConv.type !== 'direct' && <p className="text-[10px] font-bold text-emerald-700 mb-0.5">{msg.senderName}</p>}
-                        <p className="text-[13px] text-zinc-800 leading-relaxed">{msg.content}</p>
-                        <div className={clsx('flex items-center gap-1 mt-1', isMe ? 'justify-end' : 'justify-start')}>
-                          <span className="text-[9px] text-zinc-400">{tf(msg.createdAt, lang)}</span>
-                          {isMe && (msg.readAt ? <CheckCheck size={13} className="text-blue-500" /> : <Check size={13} className="text-zinc-400" />)}
+                    <div key={msg.id} className={clsx('flex group', isMe ? 'justify-end' : 'justify-start')}>
+                      <div className="relative">
+                        <div className={clsx('max-w-[420px] rounded-xl px-4 py-2.5 shadow-sm', isMe ? 'bg-emerald-100 rounded-br-sm' : 'bg-white rounded-bl-sm')}>
+                          {!isMe && activeConv?.type !== 'direct' && <p className="text-[10px] font-bold text-emerald-700 mb-0.5">{msg.senderName}</p>}
+                          <p className="text-[13px] text-zinc-800 leading-relaxed">{msg.content}</p>
+                          <div className={clsx('flex items-center gap-1 mt-1', isMe ? 'justify-end' : 'justify-start')}>
+                            <span className="text-[9px] text-zinc-400">{tf(msg.createdAt, lang)}</span>
+                            {isMe && (msg.readAt ? <CheckCheck size={13} className="text-blue-500" /> : <Check size={13} className="text-zinc-400" />)}
+                          </div>
                         </div>
+                        {/* Edit/Delete actions on hover */}
+                        {isMe && (
+                          <div className="absolute top-0.5 right-1 hidden group-hover:flex items-center gap-0.5 bg-white/90 rounded-lg shadow-sm border border-zinc-100 px-1 py-0.5">
+                            <button onClick={() => { const newText = prompt(tr ? 'Mesaj\u0131 d\u00fczenle:' : 'Edit message:', msg.content); if (newText && newText !== msg.content) { api.patch(`/messages/${msg.id}/edit`, { content: newText }).then(() => openConv(activeConv!)).catch(() => {}) } }}
+                              className="p-1 rounded hover:bg-zinc-100" title={tr ? 'D\u00fczenle' : 'Edit'}><Pencil size={12} className="text-zinc-500" /></button>
+                            <button onClick={() => { if (confirm(tr ? 'Mesaj silinsin mi?' : 'Delete message?')) { api.delete(`/messages/${msg.id}`).then(() => openConv(activeConv!)).catch(() => {}) } }}
+                              className="p-1 rounded hover:bg-red-50" title={tr ? 'Sil' : 'Delete'}><Trash2 size={12} className="text-red-400" /></button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )

@@ -278,10 +278,22 @@ export default function MobileMessages() {
               const isMe = msg.senderId === user?.id
               return (
                 <div key={msg.id} className={clsx('flex', isMe ? 'justify-end' : 'justify-start')}>
-                  <div className={clsx('max-w-[80%] rounded-2xl px-3.5 py-2 shadow-sm',
-                    isMe ? 'bg-emerald-100 rounded-br-md' : 'bg-white rounded-bl-md'
-                  )}>
-                    {!isMe && chatTarget.type !== 'direct' && (
+                  <div
+                    className={clsx('max-w-[80%] rounded-2xl px-3.5 py-2 shadow-sm relative',
+                      isMe ? 'bg-emerald-100 rounded-br-md' : 'bg-white rounded-bl-md'
+                    )}
+                    onContextMenu={isMe ? (e) => {
+                      e.preventDefault()
+                      const action = window.confirm(tr ? 'Mesaj\u0131 d\u00fczenlemek i\u00e7in Tamam, silmek i\u00e7in \u0130ptal' : 'OK to edit, Cancel to delete')
+                      if (action) {
+                        const newText = prompt(tr ? 'Yeni mesaj:' : 'New message:', msg.content)
+                        if (newText && newText !== msg.content) api.patch(`/messages/${msg.id}/edit`, { content: newText }).then(() => openChat(chatTarget!)).catch(() => {})
+                      } else {
+                        api.delete(`/messages/${msg.id}`).then(() => openChat(chatTarget!)).catch(() => {})
+                      }
+                    } : undefined}
+                  >
+                    {!isMe && chatTarget?.type !== 'direct' && (
                       <p className="text-[10px] font-bold text-emerald-700 mb-0.5">{msg.senderName}</p>
                     )}
                     <p className="text-[13px] text-slate-800 leading-relaxed">{msg.content}</p>

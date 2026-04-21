@@ -73,29 +73,44 @@ export default function MobileMessages() {
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  useEffect(() => {
-    api.get<any>(`/messages?pageSize=50`)
-      .then((res: any) => {
-        const data = res.data ?? res
-        const items = Array.isArray(data) ? data : []
-        const mapped = items.map((m: any) => ({
-          id: m.id,
-          senderId: m.senderId ?? m.sender?.id,
-          senderName: m.sender?.name ?? 'Bilinmeyen',
-          senderJobTitle: m.sender?.jobTitle ?? m.senderJobTitle ?? undefined,
-          content: m.content,
-          isBroadcast: m.isBroadcast,
-          departmentName: m.department?.name,
-          createdAt: m.createdAt,
-          readAt: m.readAt ?? null,
-          receiverId: m.receiverId ?? null,
-        }))
-        setMessages(mapped)
-        saveCachedMessages(mapped)
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
+  const mapMsg = (m: any): Message => ({
+    id: m.id,
+    senderId: m.senderId ?? m.sender?.id,
+    senderName: m.sender?.name ?? 'Bilinmeyen',
+    senderJobTitle: m.sender?.jobTitle ?? m.senderJobTitle ?? undefined,
+    content: m.content,
+    isBroadcast: m.isBroadcast,
+    departmentName: m.department?.name,
+    createdAt: m.createdAt,
+    readAt: m.readAt ?? null,
+    receiverId: m.receiverId ?? null,
+  })
+
+  const loadAllMessages = useCallback(async () => {
+    try {
+      // Fetch all 3 types in parallel: direct, broadcast, department
+      const deptId = user?.departmentId
+      const [directRes, broadcastRes, deptRes] = await Promise.all([
+        api.get<any>('/messages?pageSize=50'),
+        api.get<any>('/messages?pageSize=50&isBroadcast=true'),
+        deptId ? api.get<any>(`/messages?pageSize=50&departmentId=${deptId}`) : Promise.resolve({ data: [] }),
+      ])
+
+      const toArr = (res: any) => { const d = res?.data ?? res; return Array.isArray(d) ? d : [] }
+      const all = [...toArr(directRes), ...toArr(broadcastRes), ...toArr(deptRes)]
+
+      // Deduplicate by id
+      const seen = new Set<string>()
+      const unique = all.filter(m => { if (seen.has(m.id)) return false; seen.add(m.id); return true })
+
+      const mapped = unique.map(mapMsg).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      setMessages(mapped)
+      saveCachedMessages(mapped)
+    } catch {}
+    setLoading(false)
+  }, [user?.departmentId])
+
+  useEffect(() => { loadAllMessages() }, [loadAllMessages])
 
   // Mark unread messages as read when they appear on screen
   useEffect(() => {
@@ -149,24 +164,13 @@ export default function MobileMessages() {
       if (tab === 'direct' && directReceiverId) {
         payload.receiverId = directReceiverId
       }
+      if (tab === 'department' && user?.departmentId) {
+        payload.departmentId = user.departmentId
+        payload.isBroadcast = false
+      }
       await api.post('/messages', payload)
       setReply('')
-      // Refetch messages
-      const res: any = await api.get<any>('/messages?pageSize=50')
-      const data = res.data ?? res
-      const items = Array.isArray(data) ? data : []
-      setMessages(items.map((m: any) => ({
-        id: m.id,
-        senderId: m.senderId ?? m.sender?.id,
-        senderName: m.sender?.name ?? 'Bilinmeyen',
-        senderJobTitle: m.sender?.jobTitle ?? m.senderJobTitle ?? undefined,
-        content: m.content,
-        isBroadcast: m.isBroadcast,
-        departmentName: m.department?.name,
-        createdAt: m.createdAt,
-        readAt: m.readAt ?? null,
-        receiverId: m.receiverId ?? null,
-      })))
+      await loadAllMessages()
     } catch {}
   }
 

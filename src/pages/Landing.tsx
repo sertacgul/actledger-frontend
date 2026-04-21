@@ -1080,17 +1080,22 @@ function OperIQChatbot({ lang }: { lang: 'tr' | 'en' }) {
         onMouseDown={onMouseDown}
       >
         <span
-          className="text-sm font-extrabold tracking-[0.12em] px-4 py-1.5 rounded-full"
+          className="text-sm font-extrabold tracking-[0.12em] px-4 py-1.5 rounded-full relative"
           style={{
-            color: '#fbbf24',
-            background: 'rgba(234,179,8,0.1)',
-            border: '1px solid rgba(234,179,8,0.3)',
-            textShadow: '0 0 20px rgba(234,179,8,0.5)',
+            color: '#22d3ee',
+            background: 'rgba(6,182,212,0.12)',
+            border: '1px solid rgba(6,182,212,0.3)',
+            textShadow: '0 0 16px rgba(6,182,212,0.6)',
             backdropFilter: 'blur(8px)',
-            boxShadow: '0 0 30px rgba(234,179,8,0.15)',
-            animation: 'operiqGlow 2s ease-in-out infinite',
+            zIndex: 2,
           }}
         >
+          {/* Gold fog around badge */}
+          <span className="absolute inset-0 rounded-full" style={{
+            boxShadow: '0 0 25px rgba(234,179,8,0.35), 0 0 50px rgba(234,179,8,0.15), 0 0 80px rgba(234,179,8,0.08)',
+            animation: 'operiqGlow 2s ease-in-out infinite',
+            zIndex: -1,
+          }} />
           OperIQ Asistan
         </span>
       </div>
@@ -1239,23 +1244,23 @@ function OperIQChatbot({ lang }: { lang: 'tr' | 'en' }) {
 
         {/* Input */}
         <div className="px-4 pb-4 pt-2" style={{ borderTop: '1px solid rgba(6,182,212,0.15)' }}>
-          <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(6,182,212,0.2)' }}>
-            <input
-              ref={inputRef}
-              type="text"
+          <div className="flex items-end gap-2 rounded-xl px-3 py-2" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(6,182,212,0.2)' }}>
+            <textarea
+              ref={inputRef as any}
               value={input}
               onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && sendMessage()}
+              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
               placeholder={lang === 'tr' ? 'ATAOL AI Techs ad\u0131nda, 200 ki\u015finin \u00e7al\u0131\u015ft\u0131\u011f\u0131, 10 departman\u0131 olan bir yapay zek\u00e2 firmas\u0131y\u0131z. Bize hangi kapsamda, nas\u0131l bir destek sa\u011flayabilirsiniz?' : 'We are an AI company called ATAOL AI Techs with 200 employees and 10 departments. In what scope and how can you support us?'}
-              className="flex-1 bg-transparent outline-none text-sm"
-              style={{ color: '#e2e8f0' }}
+              className="flex-1 bg-transparent outline-none text-sm resize-none"
+              style={{ color: '#e2e8f0', minHeight: '60px', maxHeight: '80px' }}
+              rows={3}
               maxLength={500}
             />
             <button
               type="button"
               onClick={sendMessage}
               disabled={!input.trim() || loading}
-              className="p-2 rounded-lg transition-all duration-200 hover:scale-110 disabled:opacity-30"
+              className="p-2 rounded-lg transition-all duration-200 hover:scale-110 disabled:opacity-30 flex-shrink-0 mb-1"
               style={{ background: 'linear-gradient(135deg, #06b6d4, #0891b2)' }}
             >
               <Send size={14} className="text-white" />

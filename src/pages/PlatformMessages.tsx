@@ -169,37 +169,37 @@ export default function PlatformMessages() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-120px)] bg-white rounded-xl border border-zinc-200 overflow-hidden">
+    <div className="flex h-[calc(100vh-120px)] bg-[var(--surface)] rounded-xl border border-[color:var(--border)] overflow-hidden">
       {/* Left Panel - Conversations */}
-      <div className="w-[360px] flex flex-col border-r border-zinc-200 flex-shrink-0">
+      <div className="w-[360px] flex flex-col border-r border-[color:var(--border)] flex-shrink-0">
         {/* Header */}
-        <div className="px-4 py-3 border-b border-zinc-200 flex items-center justify-between">
+        <div className="px-4 py-3 border-b border-[color:var(--border)] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h2 className="text-base font-bold text-zinc-800">{tr ? 'Mesajlar' : 'Messages'}</h2>
+            <h2 className="text-base font-bold text-[color:var(--text-1)]">{tr ? 'Mesajlar' : 'Messages'}</h2>
             {unreadCount > 0 && <span className="px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-[9px] font-bold min-w-[18px] text-center">{unreadCount}</span>}
           </div>
           <div className="flex items-center gap-1.5">
             <button onClick={() => setStoryForm(true)} className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100">Story</button>
-            <button onClick={() => setShowNewChat(true)} className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center hover:bg-zinc-200"><Plus size={16} className="text-zinc-600" /></button>
+            <button onClick={() => setShowNewChat(true)} className="w-8 h-8 rounded-lg bg-[color:var(--border-subtle)] flex items-center justify-center hover:bg-[var(--border-subtle)]"><Plus size={16} className="text-[color:var(--text-2)]" /></button>
           </div>
         </div>
         {/* Search */}
         <div className="px-3 py-2">
-          <div className="flex items-center gap-2 bg-zinc-100 rounded-lg px-3 py-1.5">
-            <Search size={14} className="text-zinc-400" />
+          <div className="flex items-center gap-2 bg-[color:var(--border-subtle)] rounded-lg px-3 py-1.5">
+            <Search size={14} className="text-[color:var(--text-3)]" />
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder={tr ? 'Ara...' : 'Search...'}
-              className="flex-1 bg-transparent outline-none text-sm text-zinc-700" />
+              className="flex-1 bg-transparent outline-none text-sm text-[color:var(--text-1)]" />
           </div>
         </div>
         {/* Stories bar */}
         {stories.length > 0 && (
-          <div className="flex gap-2 px-3 py-2 border-b border-zinc-100 overflow-x-auto flex-shrink-0">
+          <div className="flex gap-2 px-3 py-2 border-b border-[color:var(--border-subtle)] overflow-x-auto flex-shrink-0">
             {stories.map(s => (
               <div key={s.id} className="flex flex-col items-center gap-0.5 cursor-pointer flex-shrink-0" onClick={() => alert(s.content)}>
                 <div className="w-11 h-11 rounded-full p-0.5" style={{ background: 'linear-gradient(135deg, #06b6d4, #14b8a6)' }}>
-                  <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-[10px] font-bold text-zinc-600">{s.createdBy?.name?.charAt(0)}</div>
+                  <div className="w-full h-full rounded-full bg-[var(--surface)] flex items-center justify-center text-[10px] font-bold text-[color:var(--text-2)]">{s.createdBy?.name?.charAt(0)}</div>
                 </div>
-                <span className="text-[8px] text-zinc-400 truncate max-w-[44px]">{s.createdBy?.name?.split(' ')[0]}</span>
+                <span className="text-[8px] text-[color:var(--text-3)] truncate max-w-[44px]">{s.createdBy?.name?.split(' ')[0]}</span>
               </div>
             ))}
           </div>
@@ -208,8 +208,8 @@ export default function PlatformMessages() {
         <div className="flex-1 overflow-y-auto">
           {filtered.map((conv, i) => (
             <button key={i} onClick={() => openConv(conv)}
-              className={clsx('w-full flex items-center gap-3 px-4 py-3 border-b border-zinc-50 hover:bg-zinc-50 transition-colors text-left',
-                activeConv?.type === conv.type && activeConv?.id === conv.id && 'bg-zinc-100'
+              className={clsx('w-full flex items-center gap-3 px-4 py-3 border-b border-[color:var(--border-subtle)] hover:bg-[var(--surface)] transition-colors text-left',
+                activeConv?.type === conv.type && activeConv?.id === conv.id && 'bg-[color:var(--border-subtle)]'
               )}>
               <div className={clsx('w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0',
                 conv.type === 'broadcast' ? 'bg-emerald-500' : conv.type === 'department' ? 'bg-blue-500' : 'bg-cyan-600'
@@ -218,12 +218,12 @@ export default function PlatformMessages() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <p className="text-[13px] font-semibold text-zinc-800 truncate">{conv.name}</p>
-                  <span className="text-[9px] text-zinc-400 flex-shrink-0">{conv.lastMsg?.createdAt ? tf(conv.lastMsg.createdAt, lang) : ''}</span>
+                  <p className="text-[13px] font-semibold text-[color:var(--text-1)] truncate">{conv.name}</p>
+                  <span className="text-[9px] text-[color:var(--text-3)] flex-shrink-0">{conv.lastMsg?.createdAt ? tf(conv.lastMsg.createdAt, lang) : ''}</span>
                 </div>
                 <div className="flex items-center justify-between mt-0.5">
-                  <p className="text-[11px] text-zinc-500 truncate pr-2">
-                    {conv.lastMsg?.senderId === user?.id && (conv.lastMsg?.readAt ? <CheckCheck size={12} className="inline text-blue-500 mr-0.5" /> : <Check size={12} className="inline text-zinc-400 mr-0.5" />)}
+                  <p className="text-[11px] text-[color:var(--text-2)] truncate pr-2">
+                    {conv.lastMsg?.senderId === user?.id && (conv.lastMsg?.readAt ? <CheckCheck size={12} className="inline text-blue-500 mr-0.5" /> : <Check size={12} className="inline text-[color:var(--text-3)] mr-0.5" />)}
                     {conv.lastMsg?.senderId !== user?.id && conv.type !== 'direct' && conv.lastMsg?.senderName && <span className="font-semibold">{conv.lastMsg.senderName}: </span>}
                     {conv.lastMsg?.content || ''}
                   </p>
@@ -236,51 +236,51 @@ export default function PlatformMessages() {
       </div>
 
       {/* Right Panel - Chat Area */}
-      <div className="flex-1 flex flex-col bg-zinc-50">
+      <div className="flex-1 flex flex-col bg-[var(--surface)]">
         {!activeConv ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <MessageSquare size={48} className="mx-auto text-zinc-300 mb-4" />
-              <p className="text-sm text-zinc-400">{tr ? 'Bir sohbet se\u00e7in' : 'Select a chat'}</p>
+              <p className="text-sm text-[color:var(--text-3)]">{tr ? 'Bir sohbet se\u00e7in' : 'Select a chat'}</p>
             </div>
           </div>
         ) : (
           <>
             {/* Chat header */}
-            <div className="px-5 py-3 border-b border-zinc-200 bg-white flex items-center gap-3">
+            <div className="px-5 py-3 border-b border-[color:var(--border)] bg-[var(--surface)] flex items-center gap-3">
               <div className={clsx('w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold',
                 activeConv.type === 'broadcast' ? 'bg-emerald-500' : activeConv.type === 'department' ? 'bg-blue-500' : 'bg-cyan-600'
               )}>
                 {activeConv.type === 'broadcast' ? <Users size={18} /> : activeConv.type === 'department' ? <Building2 size={18} /> : activeConv.name.charAt(0)}
               </div>
               <div>
-                <p className="text-sm font-bold text-zinc-800">{activeConv.name}</p>
-                <p className="text-[10px] text-zinc-400">{activeConv.subtitle || (activeConv.type === 'direct' ? (tr ? 'Direkt mesaj' : 'Direct') : '')}</p>
+                <p className="text-sm font-bold text-[color:var(--text-1)]">{activeConv.name}</p>
+                <p className="text-[10px] text-[color:var(--text-3)]">{activeConv.subtitle || (activeConv.type === 'direct' ? (tr ? 'Direkt mesaj' : 'Direct') : '')}</p>
               </div>
             </div>
             {/* Messages */}
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-2" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%2394a3b8\' fill-opacity=\'0.03\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}>
-              {chatLoading ? <div className="flex justify-center py-8"><Loader2 size={20} className="animate-spin text-zinc-400" /></div> : (
+              {chatLoading ? <div className="flex justify-center py-8"><Loader2 size={20} className="animate-spin text-[color:var(--text-3)]" /></div> : (
                 chatMessages.map(msg => {
                   const isMe = msg.senderId === user?.id
                   return (
                     <div key={msg.id} className={clsx('flex group', isMe ? 'justify-end' : 'justify-start')}>
                       <div className="relative">
-                        <div className={clsx('max-w-[420px] rounded-xl px-4 py-2.5 shadow-sm', isMe ? 'bg-emerald-100 rounded-br-sm' : 'bg-white rounded-bl-sm')}>
+                        <div className={clsx('max-w-[420px] rounded-xl px-4 py-2.5 shadow-sm', isMe ? 'bg-emerald-100 rounded-br-sm' : 'bg-[var(--surface)] border border-[color:var(--border)] rounded-bl-sm')}>
                           {!isMe && activeConv?.type !== 'direct' && <p className="text-[10px] font-bold text-emerald-700 mb-0.5">{msg.senderName}</p>}
-                          <p className="text-[13px] text-zinc-800 leading-relaxed">{msg.content}</p>
+                          <p className="text-[13px] text-[color:var(--text-1)] leading-relaxed">{msg.content}</p>
                           <div className={clsx('flex items-center gap-1 mt-1', isMe ? 'justify-end' : 'justify-start')}>
-                            <span className="text-[9px] text-zinc-400">{tf(msg.createdAt, lang)}</span>
-                            {isMe && (msg.readAt ? <CheckCheck size={13} className="text-blue-500" /> : <Check size={13} className="text-zinc-400" />)}
+                            <span className="text-[9px] text-[color:var(--text-3)]">{tf(msg.createdAt, lang)}</span>
+                            {isMe && (msg.readAt ? <CheckCheck size={13} className="text-blue-500" /> : <Check size={13} className="text-[color:var(--text-3)]" />)}
                           </div>
                         </div>
                         {/* Edit/Delete actions on hover */}
                         {isMe && (
-                          <div className="absolute top-0.5 right-1 hidden group-hover:flex items-center gap-0.5 bg-white/90 rounded-lg shadow-sm border border-zinc-100 px-1 py-0.5">
+                          <div className="absolute top-0.5 right-1 hidden group-hover:flex items-center gap-0.5 bg-white/90 rounded-lg shadow-sm border border-[color:var(--border-subtle)] px-1 py-0.5">
                             <button onClick={() => { const newText = prompt(tr ? 'Mesaj\u0131 d\u00fczenle:' : 'Edit message:', msg.content); if (newText && newText !== msg.content) { api.patch(`/messages/${msg.id}/edit`, { content: newText }).then(() => openConv(activeConv!)).catch(() => {}) } }}
-                              className="p-1 rounded hover:bg-zinc-100" title={tr ? 'D\u00fczenle' : 'Edit'}><Pencil size={12} className="text-zinc-500" /></button>
+                              className="p-1 rounded hover:bg-[color:var(--border-subtle)]" title={tr ? 'D\u00fczenle' : 'Edit'}><Pencil size={12} className="text-[color:var(--text-2)]" /></button>
                             <button onClick={() => { if (confirm(tr ? 'Mesaj silinsin mi?' : 'Delete message?')) { api.delete(`/messages/${msg.id}`).then(() => openConv(activeConv!)).catch(() => {}) } }}
-                              className="p-1 rounded hover:bg-red-50" title={tr ? 'Sil' : 'Delete'}><Trash2 size={12} className="text-red-400" /></button>
+                              className="p-1 rounded hover:bg-red-500/10" title={tr ? 'Sil' : 'Delete'}><Trash2 size={12} className="text-red-400" /></button>
                           </div>
                         )}
                       </div>
@@ -291,11 +291,11 @@ export default function PlatformMessages() {
               <div ref={chatEndRef} />
             </div>
             {/* Input */}
-            <div className="px-5 py-3 border-t border-zinc-200 bg-white flex items-center gap-3">
-              <div className="flex-1 bg-zinc-100 rounded-xl px-4 py-2.5">
+            <div className="px-5 py-3 border-t border-[color:var(--border)] bg-[var(--surface)] flex items-center gap-3">
+              <div className="flex-1 bg-[color:var(--border-subtle)] rounded-xl px-4 py-2.5">
                 <input value={reply} onChange={e => setReply(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMsg()}
                   placeholder={tr ? 'Mesaj yaz\u0131n...' : 'Type a message...'}
-                  className="w-full bg-transparent outline-none text-sm text-zinc-800" />
+                  className="w-full bg-transparent outline-none text-sm text-[color:var(--text-1)]" />
               </div>
               <button onClick={sendMsg} disabled={!reply.trim() || sending}
                 className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center disabled:opacity-40 hover:bg-emerald-600 transition-colors">
@@ -308,19 +308,19 @@ export default function PlatformMessages() {
 
       {/* New chat contacts panel */}
       {showNewChat && (
-        <div className="absolute inset-y-0 left-0 w-[360px] bg-white z-10 flex flex-col shadow-xl" style={{ maxHeight: '100%' }}>
-          <div className="px-4 py-3 border-b border-zinc-200 flex items-center gap-3">
-            <button onClick={() => setShowNewChat(false)}><ArrowLeft size={18} className="text-zinc-600" /></button>
-            <h3 className="text-sm font-bold text-zinc-800">{tr ? 'Yeni Sohbet' : 'New Chat'}</h3>
+        <div className="absolute inset-y-0 left-0 w-[360px] bg-[var(--surface)] z-10 flex flex-col shadow-xl" style={{ maxHeight: '100%' }}>
+          <div className="px-4 py-3 border-b border-[color:var(--border)] flex items-center gap-3">
+            <button onClick={() => setShowNewChat(false)}><ArrowLeft size={18} className="text-[color:var(--text-2)]" /></button>
+            <h3 className="text-sm font-bold text-[color:var(--text-1)]">{tr ? 'Yeni Sohbet' : 'New Chat'}</h3>
           </div>
           <div className="flex-1 overflow-y-auto">
             {contacts.filter(c => c.id !== user?.id).map(c => (
               <button key={c.id} onClick={() => { openConv({ type: 'direct', id: c.id, name: c.name, lastMsg: {} as any, unread: 0, subtitle: c.jobTitle }); setShowNewChat(false) }}
-                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-zinc-50 text-left border-b border-zinc-50">
+                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[var(--surface)] text-left border-b border-[color:var(--border-subtle)]">
                 <div className="w-9 h-9 rounded-full bg-cyan-600 flex items-center justify-center text-white text-xs font-bold">{c.name.charAt(0).toUpperCase()}</div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[12px] font-semibold text-zinc-800">{c.name}</p>
-                  <p className="text-[10px] text-zinc-400">{c.jobTitle} - {c.department}</p>
+                  <p className="text-[12px] font-semibold text-[color:var(--text-1)]">{c.name}</p>
+                  <p className="text-[10px] text-[color:var(--text-3)]">{c.jobTitle} - {c.department}</p>
                 </div>
               </button>
             ))}
@@ -331,11 +331,11 @@ export default function PlatformMessages() {
       {/* Story creation modal */}
       {storyForm && (
         <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center" onClick={() => setStoryForm(false)}>
-          <div className="bg-white rounded-2xl w-[400px] p-6 shadow-xl" onClick={e => e.stopPropagation()}>
-            <h3 className="text-sm font-bold text-zinc-800 mb-4">{tr ? 'Story Olu\u015ftur' : 'Create Story'}</h3>
+          <div className="bg-[var(--surface)] rounded-2xl w-[400px] p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+            <h3 className="text-sm font-bold text-[color:var(--text-1)] mb-4">{tr ? 'Story Olu\u015ftur' : 'Create Story'}</h3>
             <textarea value={storyContent} onChange={e => setStoryContent(e.target.value)} rows={3}
               placeholder={tr ? 'Story i\u00e7eri\u011fi...' : 'Story content...'}
-              className="w-full px-3 py-2 border border-zinc-200 rounded-xl text-sm text-zinc-800 resize-none outline-none focus:ring-2 focus:ring-emerald-200" />
+              className="w-full px-3 py-2 border border-[color:var(--border)] rounded-xl text-sm text-[color:var(--text-1)] resize-none outline-none focus:ring-2 focus:ring-emerald-200" />
             <div className="flex gap-2 mt-3">
               {['#0891b2', '#059669', '#2563eb', '#7c3aed', '#dc2626', '#ea580c'].map(c => (
                 <button key={c} onClick={() => setStoryColor(c)}
@@ -344,7 +344,7 @@ export default function PlatformMessages() {
               ))}
             </div>
             <div className="flex justify-end gap-2 mt-4">
-              <button onClick={() => setStoryForm(false)} className="px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-100 rounded-lg">{tr ? '\u0130ptal' : 'Cancel'}</button>
+              <button onClick={() => setStoryForm(false)} className="px-4 py-2 text-sm text-[color:var(--text-2)] hover:bg-[color:var(--border-subtle)] rounded-lg">{tr ? '\u0130ptal' : 'Cancel'}</button>
               <button onClick={createStory} disabled={!storyContent.trim()}
                 className="px-4 py-2 text-sm font-semibold bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:opacity-40">{tr ? 'Payla\u015f' : 'Share'}</button>
             </div>

@@ -1022,13 +1022,11 @@ function OperIQChatbot({ lang }: { lang: 'tr' | 'en' }) {
     if (open && messages.length === 0) {
       setMessages([{ role: 'assistant', text: CHAT_GREETINGS[lang] }])
     }
-  }, [open])
+  }, [open, lang])
 
-  // Update greeting language when lang changes
+  // Update greeting language when lang changes - reset conversation
   useEffect(() => {
-    if (messages.length === 1 && messages[0].role === 'assistant') {
-      setMessages([{ role: 'assistant', text: CHAT_GREETINGS[lang] }])
-    }
+    setMessages([{ role: 'assistant', text: CHAT_GREETINGS[lang] }])
   }, [lang])
 
   // Auto-scroll to bottom

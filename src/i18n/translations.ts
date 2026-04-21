@@ -230,7 +230,7 @@ export const translations = {
     dept_search_placeholder:     'Departman ara...',
 
     // ── OperIQ (dashboard panel) ─────────────────────────────────────────
-    operiq_badge:                'Çanlık Analiz',
+    operiq_badge:                'Anl\u0131k Analiz',
     operiq_floating:             'Yüzen',
     operiq_subtitle:             'Operasyonel verilerden otomatik içgörüler',
     operiq_anchor_title:         'Yerine sabitle',

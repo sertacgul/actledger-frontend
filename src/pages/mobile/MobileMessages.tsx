@@ -27,10 +27,29 @@ interface Contact {
   departmentId: string
 }
 
+const MSG_CACHE_KEY = 'actledger:mobile_messages'
+const THREAD_CACHE_PREFIX = 'actledger:mobile_thread_'
+
+function loadCachedMessages(): Message[] {
+  try { return JSON.parse(localStorage.getItem(MSG_CACHE_KEY) || '[]') } catch { return [] }
+}
+
+function saveCachedMessages(msgs: Message[]) {
+  try { localStorage.setItem(MSG_CACHE_KEY, JSON.stringify(msgs.slice(0, 200))) } catch {}
+}
+
+function loadCachedThread(partnerId: string): Message[] {
+  try { return JSON.parse(localStorage.getItem(THREAD_CACHE_PREFIX + partnerId) || '[]') } catch { return [] }
+}
+
+function saveCachedThread(partnerId: string, msgs: Message[]) {
+  try { localStorage.setItem(THREAD_CACHE_PREFIX + partnerId, JSON.stringify(msgs.slice(0, 100))) } catch {}
+}
+
 export default function MobileMessages() {
   const { t, lang } = useLanguage()
   const { user } = useAuth()
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<Message[]>(() => loadCachedMessages())
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<'broadcast' | 'department' | 'direct'>('broadcast')
   const [reply, setReply] = useState('')
@@ -59,7 +78,7 @@ export default function MobileMessages() {
       .then((res: any) => {
         const data = res.data ?? res
         const items = Array.isArray(data) ? data : []
-        setMessages(items.map((m: any) => ({
+        const mapped = items.map((m: any) => ({
           id: m.id,
           senderId: m.senderId ?? m.sender?.id,
           senderName: m.sender?.name ?? 'Bilinmeyen',
@@ -70,7 +89,9 @@ export default function MobileMessages() {
           createdAt: m.createdAt,
           readAt: m.readAt ?? null,
           receiverId: m.receiverId ?? null,
-        })))
+        }))
+        setMessages(mapped)
+        saveCachedMessages(mapped)
       })
       .catch(() => {})
       .finally(() => setLoading(false))
@@ -363,7 +384,11 @@ export default function MobileMessages() {
         ) : (
           filtered.map(msg => {
             const isMe = msg.senderId === user?.id
-            const timeStr = new Date(msg.createdAt).toLocaleTimeString(
+            const msgDate = new Date(msg.createdAt)
+            const today = new Date()
+            const isToday = msgDate.toDateString() === today.toDateString()
+            const dateStr = isToday ? '' : msgDate.toLocaleDateString(lang === 'tr' ? 'tr-TR' : 'en-US', { day: '2-digit', month: '2-digit' })
+            const timeStr = msgDate.toLocaleTimeString(
               lang === 'tr' ? 'tr-TR' : 'en-US',
               { hour: '2-digit', minute: '2-digit' }
             )
@@ -398,16 +423,17 @@ export default function MobileMessages() {
                   )}
                   <p className="text-sm">{msg.content}</p>
                   <div className={clsx('flex items-center gap-1 mt-1', isMe ? 'justify-end' : 'justify-start')}>
+                    {dateStr && <span className={clsx('text-[8px]', isMe ? 'text-white/40' : 'text-slate-300')}>{dateStr}</span>}
                     <span className={clsx('text-[9px]', isMe ? 'text-white/60' : 'text-slate-400')}>
                       {timeStr}
                     </span>
                     {isMe && (
                       msg.readAt
-                        ? <CheckCheck size={12} className="text-blue-200" />
-                        : <Check size={12} className="text-blue-200" />
+                        ? <CheckCheck size={12} className="text-cyan-200" />
+                        : <Check size={12} className="text-white/50" />
                     )}
                     {canReply && (
-                      <span className="text-[9px] text-cyan-500 ml-1">Yanitla</span>
+                      <span className="text-[9px] text-cyan-500 ml-1">{lang === 'tr' ? 'Yan\u0131tla' : 'Reply'}</span>
                     )}
                   </div>
                 </div>
@@ -568,7 +594,11 @@ export default function MobileMessages() {
             ) : (
               threadMessages.map(msg => {
                 const isMe = msg.senderId === user?.id
-                const timeStr = new Date(msg.createdAt).toLocaleTimeString(
+                const msgDate = new Date(msg.createdAt)
+                const todayT = new Date()
+                const isTodayT = msgDate.toDateString() === todayT.toDateString()
+                const dateStrT = isTodayT ? '' : msgDate.toLocaleDateString(lang === 'tr' ? 'tr-TR' : 'en-US', { day: '2-digit', month: '2-digit' })
+                const timeStr = msgDate.toLocaleTimeString(
                   lang === 'tr' ? 'tr-TR' : 'en-US',
                   { hour: '2-digit', minute: '2-digit' }
                 )
@@ -596,13 +626,14 @@ export default function MobileMessages() {
                       )}
                       <p className="text-sm">{msg.content}</p>
                       <div className={clsx('flex items-center gap-1 mt-1', isMe ? 'justify-end' : 'justify-start')}>
+                        {dateStrT && <span className={clsx('text-[8px]', isMe ? 'text-white/40' : 'text-slate-300')}>{dateStrT}</span>}
                         <span className={clsx('text-[9px]', isMe ? 'text-white/60' : 'text-slate-400')}>
                           {timeStr}
                         </span>
                         {isMe && (
                           msg.readAt
-                            ? <CheckCheck size={12} className="text-blue-200" />
-                            : <Check size={12} className="text-blue-200" />
+                            ? <CheckCheck size={12} className="text-cyan-200" />
+                            : <Check size={12} className="text-white/50" />
                         )}
                       </div>
                     </div>

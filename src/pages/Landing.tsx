@@ -1080,13 +1080,15 @@ function OperIQChatbot({ lang }: { lang: 'tr' | 'en' }) {
         onMouseDown={onMouseDown}
       >
         <span
-          className="text-sm font-extrabold tracking-[0.12em] px-3 py-1 rounded-full"
+          className="text-sm font-extrabold tracking-[0.12em] px-4 py-1.5 rounded-full"
           style={{
-            color: '#22d3ee',
-            background: 'rgba(6,182,212,0.12)',
-            border: '1px solid rgba(6,182,212,0.25)',
-            textShadow: '0 0 16px rgba(6,182,212,0.6)',
+            color: '#fbbf24',
+            background: 'rgba(234,179,8,0.1)',
+            border: '1px solid rgba(234,179,8,0.3)',
+            textShadow: '0 0 20px rgba(234,179,8,0.5)',
             backdropFilter: 'blur(8px)',
+            boxShadow: '0 0 30px rgba(234,179,8,0.15)',
+            animation: 'operiqGlow 2s ease-in-out infinite',
           }}
         >
           OperIQ Asistan
@@ -1095,22 +1097,50 @@ function OperIQChatbot({ lang }: { lang: 'tr' | 'en' }) {
 
       {/* Floating button with OperIQ symbol */}
       <div className="relative flex items-center justify-center" style={{ margin: '0 auto', width: '72px', height: '72px' }}>
-        {/* Pulsing ring */}
+        {/* Gold heartbeat wave 1 */}
         <div
-          className="absolute inset-0 rounded-full animate-ping"
+          className="absolute rounded-full"
           style={{
-            background: 'rgba(6,182,212,0.2)',
-            animationDuration: '2.5s',
+            inset: '-20px',
+            background: 'radial-gradient(circle, rgba(234,179,8,0.15) 0%, rgba(234,179,8,0) 70%)',
+            animation: 'operiqHeartbeat 2s ease-in-out infinite',
           }}
         />
-        {/* Outer glow ring */}
+        {/* Gold heartbeat wave 2 */}
+        <div
+          className="absolute rounded-full"
+          style={{
+            inset: '-35px',
+            background: 'radial-gradient(circle, rgba(234,179,8,0.08) 0%, rgba(234,179,8,0) 70%)',
+            animation: 'operiqHeartbeat 2s ease-in-out infinite 0.5s',
+          }}
+        />
+        {/* Gold heartbeat wave 3 - fog effect */}
+        <div
+          className="absolute rounded-full"
+          style={{
+            inset: '-55px',
+            background: 'radial-gradient(circle, rgba(251,191,36,0.06) 0%, transparent 60%)',
+            animation: 'operiqFog 3s ease-in-out infinite',
+            filter: 'blur(8px)',
+          }}
+        />
+        {/* Gold pulsing ring */}
+        <div
+          className="absolute inset-0 rounded-full"
+          style={{
+            boxShadow: '0 0 20px rgba(234,179,8,0.4), 0 0 40px rgba(234,179,8,0.2), 0 0 60px rgba(234,179,8,0.1)',
+            animation: 'operiqGlow 2s ease-in-out infinite',
+          }}
+        />
+        {/* Outer ring */}
         <div
           className="absolute rounded-full"
           style={{
             inset: '-4px',
-            border: '2px solid rgba(34,211,238,0.35)',
+            border: '2px solid rgba(234,179,8,0.4)',
             borderRadius: '50%',
-            animation: 'pulsingBorder 2.5s ease-in-out infinite',
+            animation: 'operiqHeartbeat 2s ease-in-out infinite',
           }}
         />
         <button
@@ -1122,7 +1152,7 @@ function OperIQChatbot({ lang }: { lang: 'tr' | 'en' }) {
             height: '72px',
             borderRadius: '50%',
             background: 'linear-gradient(135deg, #06b6d4, #0891b2, #0e7490)',
-            boxShadow: '0 8px 40px rgba(6,182,212,0.5), 0 0 60px rgba(6,182,212,0.2), inset 0 1px 0 rgba(255,255,255,0.2)',
+            boxShadow: '0 8px 40px rgba(6,182,212,0.4), 0 0 40px rgba(234,179,8,0.2), 0 0 80px rgba(234,179,8,0.1), inset 0 1px 0 rgba(255,255,255,0.2)',
           }}
         >
           {open ? (
@@ -1216,7 +1246,7 @@ function OperIQChatbot({ lang }: { lang: 'tr' | 'en' }) {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && sendMessage()}
-              placeholder={lang === 'tr' ? 'Sorunuzu yazin...' : 'Type your question...'}
+              placeholder={lang === 'tr' ? 'ATAOL AI Techs ad\u0131nda, 200 ki\u015finin \u00e7al\u0131\u015ft\u0131\u011f\u0131, 10 departman\u0131 olan bir yapay zek\u00e2 firmas\u0131y\u0131z. Bize hangi kapsamda, nas\u0131l bir destek sa\u011flayabilirsiniz?' : 'We are an AI company called ATAOL AI Techs with 200 employees and 10 departments. In what scope and how can you support us?'}
               className="flex-1 bg-transparent outline-none text-sm"
               style={{ color: '#e2e8f0' }}
               maxLength={500}
@@ -1364,6 +1394,22 @@ export default function Landing() {
         @keyframes pulsingBorder {
           0%, 100% { border-color: rgba(6,182,212,0.4); box-shadow: 0 0 20px rgba(6,182,212,0.15); }
           50% { border-color: rgba(6,182,212,0.7); box-shadow: 0 0 40px rgba(6,182,212,0.25); }
+        }
+        @keyframes operiqHeartbeat {
+          0%, 100% { transform: scale(1); opacity: 0.6; }
+          25% { transform: scale(1.15); opacity: 1; }
+          40% { transform: scale(1.05); opacity: 0.8; }
+          55% { transform: scale(1.12); opacity: 0.9; }
+          70% { transform: scale(1); opacity: 0.6; }
+        }
+        @keyframes operiqFog {
+          0%, 100% { opacity: 0.3; transform: scale(1); }
+          50% { opacity: 0.7; transform: scale(1.2); }
+        }
+        @keyframes operiqGlow {
+          0%, 100% { box-shadow: 0 0 15px rgba(234,179,8,0.3), 0 0 30px rgba(234,179,8,0.15); }
+          30% { box-shadow: 0 0 25px rgba(234,179,8,0.5), 0 0 50px rgba(234,179,8,0.25), 0 0 80px rgba(234,179,8,0.1); }
+          60% { box-shadow: 0 0 18px rgba(234,179,8,0.35), 0 0 35px rgba(234,179,8,0.18); }
         }
         @keyframes testimonialScroll {
           0% { transform: translateX(0); }

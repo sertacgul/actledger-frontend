@@ -6,7 +6,7 @@ import {
   Cookie, Smartphone, Monitor, ClipboardList, Camera, MessageSquare,
   Upload, Building2, Lock, Languages, FileSpreadsheet, Eye, EyeOff, X, Loader2,
   Map, Flame, Cpu, Package, Send, MinusCircle,
-  Workflow, FolderOpen, Radio, ListChecks, Boxes, GitBranch,
+  Workflow, FolderOpen, Radio, ListChecks, Boxes, GitBranch, ScanLine,
 } from 'lucide-react'
 import BrandMark from '../components/ui/BrandMark'
 import { SECTORS } from '../data/sectors'
@@ -64,6 +64,8 @@ const T = {
     step2Body: 'KPI \u015fablonlar\u0131 otomatik da\u011f\u0131t\u0131l\u0131r, ekipler hemen \u00e7al\u0131\u015fmaya ba\u015flar.',
     step3Title: 'AI \u0130\u00e7g\u00f6r\u00fcler',
     step3Body: 'OperIQ aksiyona d\u00f6n\u00fc\u015ft\u00fcr\u00fclebilir i\u00e7g\u00f6r\u00fcler \u00fcretir, y\u00f6neticiler karar verir.',
+    step4Title: 'Saha & Envanter',
+    step4Body: 'Mobil QR tarama ile stok i\u015flemleri, hiyerar\u015fik onay ak\u0131\u015f\u0131, canl\u0131 tesis haritas\u0131 ve IoT izleme.',
     guideTitle: 'Platform Rehberi',
     guideSubtitle: 'Platformun temel mod\u00fcllerini ke\u015ffet.',
     guide1Title: 'Kokpit & Dashboard',
@@ -74,6 +76,10 @@ const T = {
     guide3Body: 'Departman bazl\u0131 hedef belirleme, ger\u00e7ek zamanl\u0131 ilerleme izleme, sapma uyar\u0131lar\u0131.',
     guide4Title: 'OperIQ Asistan\u0131',
     guide4Body: 'AI destekli analiz, do\u011fal dil sorgusu, otomatik rapor \u00fcretimi.',
+    guide5Title: 'AssetIQ & Envanter Zekas\u0131',
+    guide5Body: 'QR kod ile anl\u0131k stok hareketi, parti/lot takibi, hiyerar\u015fik onay ak\u0131\u015f\u0131, sat\u0131n alma bildirimi.',
+    guide6Title: 'Canl\u0131 Harita & Tesis',
+    guide6Body: 'GPS takip, 2D/3D tesis plan\u0131, d\u00f6nd\u00fcrme, IoT cihaz yerlestirme, acil durum y\u00f6netimi.',
     quoteText: '\u201cActLedger, 23 departman\u0131m\u0131z\u0131n operasyonel verisini tek ekranda birle\u015ftirdi. Karar alma s\u00fcrecimiz %40 h\u0131zland\u0131.\u201d',
     quoteName: 'Mehmet Kaya',
     quoteRole: 'Operasyon Direkt\u00f6r\u00fc, Y\u0131ld\u0131z Metal A.\u015e.',
@@ -155,6 +161,15 @@ const T = {
     nf9Title: '\u00c7ok Tipli Form \u015eablonlar\u0131',
     nf9Body: 'Kontrol listesi, soru-cevap, denetim/muayene, say\u0131sal veri giri\u015fi ve \u00e7oktan se\u00e7meli form tipleri. 11+ haz\u0131r \u015fablon ile an\u0131nda ba\u015flay\u0131n veya s\u0131f\u0131rdan \u00f6zelle\u015ftirin.',
     nf9Benefit: 'Form olu\u015fturma s\u00fcresini %90 k\u0131salt\u0131n',
+    nf10Title: 'AssetIQ - Envanter Zekas\u0131',
+    nf10Body: 'QR kod ile anl\u0131k stok hareketi, parti/lot y\u00f6netimi, son kullanma takibi. Hiyerar\u015fik onay ak\u0131\u015f\u0131 ile saha \u00e7al\u0131\u015fan\u0131ndan departman m\u00fcd\u00fcr\u00fcne stok i\u015flem onay\u0131. 10 sekt\u00f6re uyarlanabilir terminoloji ve OperIQ destekli t\u00fckenme tahmini.',
+    nf10Benefit: 'Stok kay\u0131plar\u0131n\u0131 %50 azalt\u0131n, onay s\u00fcresini %70 k\u0131salt\u0131n',
+    nf11Title: 'Mobil QR Tarama & Onay',
+    nf11Body: 'Saha personeli kamera ile QR okutarak stok bilgisine ula\u015f\u0131r, ekleme/\u00e7\u0131karma/transfer i\u015flemi ba\u015flat\u0131r. \u0130\u015flem hiyerar\u015fik onay zincirine g\u00f6nderilir ve onayland\u0131\u011f\u0131nda otomatik uygulan\u0131r.',
+    nf11Benefit: 'Saha stok i\u015flem s\u00fcresini %80 k\u0131salt\u0131n',
+    nf12Title: 'IoT Cihaz Sorumlusu & Bildirim',
+    nf12Body: 'Her IoT cihaz\u0131na sorumlu personel atay\u0131n. Alarm, kritik durum ve \u00e7evrimd\u0131\u015f\u0131 bildirimleri otomatik g\u00f6nderilir. G\u00fcnde 2 kere rutin durum raporu ile proaktif takip.',
+    nf12Benefit: 'Cihaz ar\u0131za tepki s\u00fcresini %60 k\u0131salt\u0131n',
     tryFree: 'ActLedger Platformu ve ActLedger Mobil\'i \u00dccretsiz Deneyin',
     platformVideoTitle: 'Platformu Ke\u015ffedin',
     platformVideoSubtitle: 'ActLedger\'in g\u00fcc\u00fcn\u00fc tek bir ekranda deneyimleyin.',
@@ -228,6 +243,8 @@ const T = {
     step2Body: 'KPI templates are auto-deployed, teams start working immediately.',
     step3Title: 'AI Insights',
     step3Body: 'OperIQ generates actionable insights, managers make informed decisions.',
+    step4Title: 'Field & Inventory',
+    step4Body: 'Mobile QR scanning for stock actions, hierarchical approval flow, live facility map and IoT monitoring.',
     guideTitle: 'Platform Guide',
     guideSubtitle: 'Discover the core modules of the platform.',
     guide1Title: 'Cockpit & Dashboard',
@@ -238,6 +255,10 @@ const T = {
     guide3Body: 'Department-level goal setting, real-time progress monitoring, deviation alerts.',
     guide4Title: 'OperIQ Assistant',
     guide4Body: 'AI-powered analysis, natural language queries, automatic report generation.',
+    guide5Title: 'AssetIQ & Inventory Intelligence',
+    guide5Body: 'QR code instant stock actions, batch/lot tracking, hierarchical approval flow, purchase alerts.',
+    guide6Title: 'Live Map & Facility',
+    guide6Body: 'GPS tracking, 2D/3D facility plans with rotate, IoT device placement, emergency management.',
     quoteText: '"ActLedger unified operational data from our 23 departments into a single screen. Our decision-making process accelerated by 40%."',
     quoteName: 'Mehmet Kaya',
     quoteRole: 'Operations Director, Yildiz Metal Inc.',
@@ -321,6 +342,15 @@ const T = {
     nf9Title: 'Multi-type Form Templates',
     nf9Body: 'Checklist, Q&A, inspection, numeric data entry, and multiple-choice form types. Start instantly with 11+ ready templates or customize from scratch.',
     nf9Benefit: 'Cut form creation time by 90%',
+    nf10Title: 'AssetIQ - Inventory Intelligence',
+    nf10Body: 'QR code instant stock actions, batch/lot management, expiry tracking. Hierarchical approval from field worker to department manager. Adaptable terminology for 10 sectors and OperIQ-powered depletion forecasting.',
+    nf10Benefit: 'Reduce stock losses by 50%, cut approval time by 70%',
+    nf11Title: 'Mobile QR Scan & Approval',
+    nf11Body: 'Field personnel scan QR with camera to access stock info, initiate add/remove/transfer actions. Actions are sent through hierarchical approval chain and auto-applied when approved.',
+    nf11Benefit: 'Cut field stock operation time by 80%',
+    nf12Title: 'IoT Device Responsible & Alerts',
+    nf12Body: 'Assign responsible personnel to each IoT device. Alert, critical, and offline notifications sent automatically. Twice-daily routine status reports for proactive monitoring.',
+    nf12Benefit: 'Cut device failure response time by 60%',
     tryFree: 'Try ActLedger Platform & ActLedger Mobile for Free',
     platformVideoTitle: 'Explore the Platform',
     platformVideoSubtitle: 'Experience the power of ActLedger on a single screen.',
@@ -1921,6 +1951,10 @@ export default function Landing() {
             { title: t.nf4Title, body: t.nf4Body, benefit: t.nf4Benefit, img: '/images/Envanter.jpg',       icon: Boxes,         color: '#7c3aed' },
             { title: t.nf7Title, body: t.nf7Body, benefit: t.nf7Benefit, img: '/images/File_management.jpg', icon: FolderOpen,   color: '#0369a1' },
             { title: t.nf9Title, body: t.nf9Body, benefit: t.nf9Benefit, img: '/images/Form.PNG',           icon: ListChecks,    color: '#c026d3' },
+            /* AssetIQ, Mobil QR, IoT Sorumlu */
+            { title: t.nf10Title, body: t.nf10Body, benefit: t.nf10Benefit, img: '/images/Envanter.jpg',       icon: ScanLine,      color: '#059669' },
+            { title: t.nf11Title, body: t.nf11Body, benefit: t.nf11Benefit, img: '/images/Act_mobil.jpg',      icon: Camera,        color: '#0d9488' },
+            { title: t.nf12Title, body: t.nf12Body, benefit: t.nf12Benefit, img: '/images/OperIQ.jpg',         icon: Radio,         color: '#dc2626' },
             /* Iletisim & analitik */
             { title: t.pf6Title, body: t.pf6Body, benefit: t.pf6Benefit, img: '/images/Mesajlasma.jpg',     icon: MessageSquare, color: '#0891b2' },
             { title: t.nf2Title, body: t.nf2Body, benefit: t.nf2Benefit, img: '/images/Heatmap.jpg',        icon: Flame,         color: '#dc2626' },
@@ -2260,6 +2294,17 @@ export default function Landing() {
                     <path d="M50 20 L55 15 L60 20" stroke="#14b8a6" strokeWidth="1" fill="none" opacity="0.4" />
                   </svg>
                 )},
+                { num: '04', icon: ScanLine, title: t.step4Title, body: t.step4Body, color: '#059669', illustration: (
+                  <svg viewBox="0 0 80 60" fill="none" className="w-16 h-12 mb-3 opacity-50">
+                    <rect x="20" y="8" width="40" height="40" rx="5" stroke="#059669" strokeWidth="1.5" fill="none" />
+                    <rect x="28" y="16" width="8" height="8" fill="#059669" opacity="0.3" />
+                    <rect x="44" y="16" width="8" height="8" fill="#059669" opacity="0.2" />
+                    <rect x="28" y="32" width="8" height="8" fill="#059669" opacity="0.2" />
+                    <rect x="44" y="32" width="8" height="8" fill="#059669" opacity="0.3" />
+                    <path d="M40 52 L40 58" stroke="#059669" strokeWidth="1" opacity="0.3" />
+                    <circle cx="40" cy="58" r="2" fill="#059669" opacity="0.4" />
+                  </svg>
+                )},
               ].map((step, i) => (
                 <Reveal key={i} delay={i * 200}>
                   <div
@@ -2368,6 +2413,40 @@ export default function Landing() {
                     <circle cx="155" cy="20" r="4" fill="#0891b2" opacity="0.2" />
                     <circle cx="160" cy="60" r="4" fill="#0891b2" opacity="0.2" />
                     <path d="M96 35 L100 28 L104 35" fill="#0891b2" opacity="0.5" />
+                  </svg>
+                ),
+              },
+              {
+                icon: ScanLine, title: t.guide5Title, body: t.guide5Body, color: '#059669',
+                visual: (
+                  <svg viewBox="0 0 200 80" fill="none" className="w-full h-full">
+                    <rect x="65" y="10" width="70" height="60" rx="6" stroke="#059669" strokeWidth="1.5" fill="none" opacity="0.2" />
+                    <rect x="75" y="20" width="12" height="12" fill="#059669" opacity="0.3" />
+                    <rect x="90" y="20" width="12" height="12" fill="#059669" opacity="0.15" />
+                    <rect x="105" y="20" width="12" height="12" fill="#059669" opacity="0.3" />
+                    <rect x="75" y="35" width="12" height="12" fill="#059669" opacity="0.15" />
+                    <rect x="90" y="35" width="12" height="12" fill="#059669" opacity="0.3" />
+                    <rect x="105" y="35" width="12" height="12" fill="#059669" opacity="0.15" />
+                    <rect x="75" y="50" width="12" height="12" fill="#059669" opacity="0.3" />
+                    <rect x="90" y="50" width="12" height="12" fill="#059669" opacity="0.15" />
+                    <rect x="105" y="50" width="12" height="12" fill="#059669" opacity="0.3" />
+                    <line x1="30" y1="40" x2="60" y2="40" stroke="#059669" strokeWidth="1" opacity="0.3" strokeDasharray="3 3" />
+                    <line x1="140" y1="40" x2="170" y2="40" stroke="#059669" strokeWidth="1" opacity="0.3" strokeDasharray="3 3" />
+                  </svg>
+                ),
+              },
+              {
+                icon: Map, title: t.guide6Title, body: t.guide6Body, color: '#2563eb',
+                visual: (
+                  <svg viewBox="0 0 200 80" fill="none" className="w-full h-full">
+                    <rect x="20" y="10" width="160" height="55" rx="6" stroke="#2563eb" strokeWidth="1" fill="none" opacity="0.15" />
+                    <rect x="30" y="18" width="40" height="20" rx="3" fill="#2563eb" opacity="0.1" />
+                    <rect x="80" y="18" width="50" height="38" rx="3" fill="#2563eb" opacity="0.08" />
+                    <rect x="140" y="18" width="30" height="15" rx="3" fill="#2563eb" opacity="0.12" />
+                    <circle cx="50" cy="50" r="4" fill="#2563eb" opacity="0.3" />
+                    <circle cx="105" cy="50" r="3" fill="#ef4444" opacity="0.4" />
+                    <circle cx="155" cy="45" r="3" fill="#22c55e" opacity="0.4" />
+                    <path d="M50 50 L105 50" stroke="#2563eb" strokeWidth="0.5" opacity="0.2" strokeDasharray="2 2" />
                   </svg>
                 ),
               },
@@ -2680,6 +2759,13 @@ export default function Landing() {
                 ['Fiyatland\u0131rma', '\u20ba5.900 / departman + \u20ba180 / mobil kullan\u0131c\u0131', 'Y\u00fcksek maliyetli'],
                 ['Kullan\u0131m kolayl\u0131\u011f\u0131', '\u00c7ok kolay', '\u00d6\u011frenmesi zor'],
                 ['Esneklik', '\u00c7ok y\u00fcksek', 'D\u00fc\u015f\u00fck veya s\u0131n\u0131rl\u0131'],
+                ['QR kod stok y\u00f6netimi', 'Var (AssetIQ - mobil QR tarama)', 'Yok'],
+                ['Parti/Lot & SKT takibi', 'Var (otomatik kontrol + uyar\u0131)', 'S\u0131n\u0131rl\u0131 veya yok'],
+                ['Hiyerar\u015fik stok onay\u0131', 'Var (saha \u2192 m\u00fcd\u00fcr zinciri)', 'Yok'],
+                ['Sat\u0131n alma bildirimi', 'Otomatik (dept m\u00fcd\u00fcr\u00fc + sat\u0131n alma)', 'Manuel'],
+                ['IoT cihaz sorumlusu', 'Var (bildirim + rutin rapor)', 'Yok'],
+                ['Tesis plan\u0131 2D/3D', 'Var (rotate, zoom, IoT yerle\u015ftirme)', 'Yok'],
+                ['Mobil QR tarama & onay', 'Var (kamera + hiyerar\u015fik onay)', 'Yok'],
               ] : [
                 ['System type', 'Operational OS', 'Fragmented systems (ERP / maintenance / IT separate)'],
                 ['Field management', 'Powerful and real-time', 'Limited or none'],
@@ -2706,6 +2792,13 @@ export default function Landing() {
                 ['Pricing', '\u20ba5,900 / dept + \u20ba180 / mobile user', 'High cost'],
                 ['Ease of use', 'Very easy', 'Hard to learn'],
                 ['Flexibility', 'Very high', 'Low or limited'],
+                ['QR code stock management', 'Yes (AssetIQ - mobile QR scan)', 'No'],
+                ['Batch/Lot & expiry tracking', 'Yes (auto check + alerts)', 'Limited or none'],
+                ['Hierarchical stock approval', 'Yes (field to manager chain)', 'No'],
+                ['Purchase alerts', 'Automatic (dept manager + purchasing)', 'Manual'],
+                ['IoT device responsible', 'Yes (alerts + routine reports)', 'No'],
+                ['Facility plan 2D/3D', 'Yes (rotate, zoom, IoT placement)', 'No'],
+                ['Mobile QR scan & approval', 'Yes (camera + hierarchical approval)', 'No'],
               ]).map((row, i) => {
                 const isPrice = i === 22
                 const actHas = !['Sinirli', 'Yok', 'Limited', 'No', 'None'].some(w => row[1].startsWith(w))

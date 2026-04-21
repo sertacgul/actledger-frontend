@@ -2308,14 +2308,14 @@ export default function Landing() {
               ].map((step, i) => (
                 <Reveal key={i} delay={i * 200}>
                   <div
-                    className="relative text-center rounded-2xl p-8 lg:p-10 transition-all duration-500 hover:-translate-y-2"
+                    className="relative text-center rounded-2xl p-8 lg:p-10 transition-all duration-500 hover:-translate-y-2 h-full flex flex-col items-center justify-start"
                     style={{ background: 'rgba(255,255,255,0.6)', border: `1px solid ${step.color}20`, backdropFilter: 'blur(8px)' }}
                   >
                     {/* Illustration */}
                     <div className="flex justify-center">{step.illustration}</div>
                     {/* Step dot */}
                     <div
-                      className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center relative"
+                      className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center relative flex-shrink-0"
                       style={{ background: `${step.color}15`, border: `2px solid ${step.color}40`, boxShadow: `0 0 40px ${step.color}20` }}
                     >
                       <step.icon size={30} style={{ color: step.color }} />
@@ -2327,7 +2327,7 @@ export default function Landing() {
                       </span>
                     </div>
                     <h3 className="text-2xl font-bold mb-3" style={{ color: '#0f2b3d' }}>{step.title}</h3>
-                    <p className="text-base leading-relaxed" style={{ color: 'rgba(15,43,61,0.55)' }}>{step.body}</p>
+                    <p className="text-base leading-relaxed flex-1" style={{ color: 'rgba(15,43,61,0.55)' }}>{step.body}</p>
                   </div>
                 </Reveal>
               ))}
@@ -2352,7 +2352,7 @@ export default function Landing() {
             </div>
           </Reveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {[
               {
                 icon: Activity, title: t.guide1Title, body: t.guide1Body, color: '#6366f1',
@@ -2453,7 +2453,7 @@ export default function Landing() {
             ].map((module, i) => (
               <Reveal key={i} delay={i * 120}>
                 <div
-                  className="guide-card group rounded-2xl overflow-hidden transition-all duration-400"
+                  className="guide-card group rounded-2xl overflow-hidden transition-all duration-400 h-full flex flex-col"
                   style={{
                     background: 'rgba(255,255,255,0.85)',
                     border: `1px solid ${module.color}20`,
@@ -2461,21 +2461,21 @@ export default function Landing() {
                   }}
                 >
                   {/* Visual header area */}
-                  <div className="h-40 px-8 pt-6" style={{ background: `linear-gradient(135deg, ${module.color}08, ${module.color}04)` }}>
+                  <div className="h-36 px-6 pt-5" style={{ background: `linear-gradient(135deg, ${module.color}08, ${module.color}04)` }}>
                     {module.visual}
                   </div>
                   {/* Content */}
-                  <div className="p-8 pt-6">
-                    <div className="flex items-start gap-5">
+                  <div className="p-6 pt-5 flex-1 flex flex-col">
+                    <div className="flex items-start gap-4">
                       <div
-                        className="w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0"
+                        className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                         style={{ background: `${module.color}12`, border: `1px solid ${module.color}25` }}
                       >
-                        <module.icon size={30} style={{ color: module.color }} />
+                        <module.icon size={22} style={{ color: module.color }} />
                       </div>
-                      <div>
-                        <h3 className="text-2xl font-bold mb-3" style={{ color: '#0f2b3d' }}>{module.title}</h3>
-                        <p className="text-xl leading-relaxed" style={{ color: 'rgba(15,43,61,0.55)' }}>{module.body}</p>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold mb-2" style={{ color: '#0f2b3d' }}>{module.title}</h3>
+                        <p className="text-sm leading-relaxed" style={{ color: 'rgba(15,43,61,0.55)' }}>{module.body}</p>
                       </div>
                     </div>
                   </div>

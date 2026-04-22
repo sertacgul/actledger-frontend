@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
-import { Plus, Search, CheckSquare, Calendar, Tag, AlertCircle, Layers, Sparkles, FileSpreadsheet, Camera, MessageSquare, Zap, Loader2 } from 'lucide-react'
+import { Plus, Search, CheckSquare, Calendar, Tag, AlertCircle, Layers, Sparkles, FileSpreadsheet, Camera, MessageSquare, Zap, Loader2, X, Cpu } from 'lucide-react'
 import { api, API_BASE } from '../lib/api'
 import clsx from 'clsx'
 import { useTasks, useDepartments, useUsers, createTask, updateTaskStatus, updateChecklistItem } from '../lib/hooks'
 import type { Task, TaskStatus, TaskPriority, CustomAttribute } from '../types'
 import { TASK_STATUS_LABELS, TASK_PRIORITY_LABELS, TASK_TYPE_LABELS } from '../types'
 import DraggableModal from '../components/ui/DraggableModal'
+import { useLanguage } from '../context/LanguageContext'
 import TaskGroupsManager from '../components/tasks/TaskGroupsManager'
 import AttributesManager from '../components/tasks/AttributesManager'
 import { listAttributes, evaluateAttribute } from '../lib/attributesStore'
@@ -138,10 +139,15 @@ function TaskDetailModal({
   task: Task; deptName?: string; assigneeName?: string; createdByName?: string
   onClose: () => void; onRefetch: () => void
 }) {
+  const { lang } = useLanguage()
+  const selectedTask = task
   const [updatingItem, setUpdatingItem] = useState<string | null>(null)
   const [statusUpdating, setStatusUpdating] = useState(false)
   const [comments, setComments] = useState<any[]>([])
   const [attachments, setAttachments] = useState<any[]>([])
+  const [photoPreview, setPhotoPreview] = useState<any>(null)
+  const [photoAnalysis, setPhotoAnalysis] = useState<string | null>(null)
+  const [photoAnalyzing, setPhotoAnalyzing] = useState(false)
   const [operiqResult, setOperiqResult] = useState<any>(null)
   const [operiqLoading, setOperiqLoading] = useState(false)
 
@@ -309,7 +315,7 @@ function TaskDetailModal({
         {attachments.length > 0 && (
           <div>
             <h3 className="text-sm font-semibold mb-2 flex items-center gap-1.5" style={{ color: 'var(--text-1)' }}>
-              <Camera size={14} /> Fotograflar ({attachments.length})
+              <Camera size={14} /> {lang === 'tr' ? 'Foto\u011fraflar' : 'Photos'} ({attachments.length})
             </h3>
             <div className="flex flex-wrap gap-2">
               {attachments.map((att: any) => (
@@ -319,13 +325,73 @@ function TaskDetailModal({
                     alt={att.originalName}
                     className="w-20 h-20 rounded-lg object-cover border cursor-pointer hover:shadow-lg transition-shadow"
                     style={{ borderColor: 'var(--border)' }}
-                    onClick={() => window.open(`${API_BASE.replace('/api/v1', '')}${att.url}`, '_blank')}
+                    onClick={() => setPhotoPreview(att)}
                   />
                   <p className="text-[9px] mt-0.5 truncate max-w-[80px]" style={{ color: 'var(--text-3)' }}>
                     {att.uploaderName} - {new Date(att.createdAt).toLocaleDateString('tr-TR')}
                   </p>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Photo Preview + OperIQ Analysis Modal */}
+        {photoPreview && (
+          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => { setPhotoPreview(null); setPhotoAnalysis(null) }}>
+            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+              <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
+                <p className="text-sm font-bold" style={{ color: 'var(--text-1)' }}>{photoPreview.originalName}</p>
+                <button onClick={() => { setPhotoPreview(null); setPhotoAnalysis(null) }} className="p-1 rounded hover:bg-zinc-100">
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="p-4">
+                <img src={`${API_BASE.replace('/api/v1', '')}${photoPreview.url}`} alt="" className="w-full rounded-xl" />
+              </div>
+              <div className="p-4 border-t flex items-center gap-2" style={{ borderColor: 'var(--border)' }}>
+                <button
+                  onClick={async () => {
+                    setPhotoAnalyzing(true)
+                    try {
+                      const imgUrl = `${API_BASE.replace('/api/v1', '')}${photoPreview.url}`
+                      const resp = await fetch(imgUrl)
+                      const blob = await resp.blob()
+                      const reader = new FileReader()
+                      reader.onload = async () => {
+                        const base64 = (reader.result as string).split(',')[1]
+                        const mimeType = blob.type || 'image/jpeg'
+                        const res = await api.post<any>('/gemini/analyze-image', { image: base64, mimeType, context: `G\u00f6rev: ${selectedTask?.title}. ${selectedTask?.description || ''}` })
+                        setPhotoAnalysis(res?.analysis || res?.data?.analysis || JSON.stringify(res))
+                        setPhotoAnalyzing(false)
+                      }
+                      reader.readAsDataURL(blob)
+                    } catch (e: any) {
+                      setPhotoAnalysis(lang === 'tr' ? 'Analiz yap\u0131lamad\u0131: ' + e.message : 'Analysis failed: ' + e.message)
+                      setPhotoAnalyzing(false)
+                    }
+                  }}
+                  disabled={photoAnalyzing}
+                  className="px-4 py-2 rounded-lg text-sm font-semibold bg-teal-600 text-white hover:bg-teal-700 flex items-center gap-2 disabled:opacity-50"
+                >
+                  {photoAnalyzing ? <Loader2 size={14} className="animate-spin" /> : <Cpu size={14} />}
+                  OperIQ Guided AI {lang === 'tr' ? 'ile Analiz Et' : 'Analysis'}
+                </button>
+                <a href={`${API_BASE.replace('/api/v1', '')}${photoPreview.url}`} target="_blank" rel="noreferrer"
+                  className="px-4 py-2 rounded-lg text-sm font-semibold border hover:bg-zinc-50" style={{ borderColor: 'var(--border)', color: 'var(--text-2)' }}>
+                  {lang === 'tr' ? 'Orijinal A\u00e7' : 'Open Original'}
+                </a>
+              </div>
+              {photoAnalysis && (
+                <div className="p-4 border-t" style={{ borderColor: 'var(--border)' }}>
+                  <h4 className="text-xs font-bold text-teal-700 mb-2 flex items-center gap-1.5">
+                    <Cpu size={12} /> OperIQ Guided AI {lang === 'tr' ? 'Analiz Sonucu' : 'Analysis Result'}
+                  </h4>
+                  <div className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--text-2)' }}>
+                    {photoAnalysis}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

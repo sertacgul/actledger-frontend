@@ -4,6 +4,7 @@ import clsx from 'clsx'
 import { useLanguage } from '../context/LanguageContext'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/api'
+import { playMessageSound } from '../lib/notification-sound'
 
 interface Message {
   id: string; senderId: string; senderName: string; senderAvatar?: string | null; senderJobTitle?: string
@@ -80,6 +81,22 @@ export default function PlatformMessages() {
   }, [user?.departmentId])
 
   useEffect(() => { loadAll() }, [loadAll])
+
+  // Poll for new messages every 5s + play sound
+  const prevCountRef = useRef(messages.length)
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const prevLen = prevCountRef.current
+      await loadAll()
+      // If new messages arrived that we didn't send, play sound
+      if (messages.length > prevLen) {
+        const newMsgs = messages.slice(0, messages.length - prevLen)
+        if (newMsgs.some(m => m.senderId !== user?.id)) playMessageSound()
+      }
+      prevCountRef.current = messages.length
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [messages.length, user?.id])
   useEffect(() => {
     api.get<any>('/messages/contacts').then((r: any) => {
       const d = r?.data ?? r

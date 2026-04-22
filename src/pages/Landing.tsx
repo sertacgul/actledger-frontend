@@ -2001,7 +2001,7 @@ export default function Landing() {
             { title: t.nf7Title, body: t.nf7Body, benefit: t.nf7Benefit, img: '/images/File_management.jpg', icon: FolderOpen,   color: '#0369a1' },
             { title: t.nf9Title, body: t.nf9Body, benefit: t.nf9Benefit, img: '/images/Form.PNG',           icon: ListChecks,    color: '#c026d3' },
             /* AssetIQ, Mobil QR, IoT Sorumlu */
-            { title: t.nf10Title, body: t.nf10Body, benefit: t.nf10Benefit, img: '/images/Envanter.jpg',       icon: ScanLine,      color: '#059669' },
+            { title: t.nf10Title, body: t.nf10Body, benefit: t.nf10Benefit, img: '/images/Asset.jpg',          icon: ScanLine,      color: '#059669' },
             { title: t.nf11Title, body: t.nf11Body, benefit: t.nf11Benefit, img: '/images/Act_mobil.jpg',      icon: Camera,        color: '#0d9488' },
             { title: t.nf12Title, body: t.nf12Body, benefit: t.nf12Benefit, img: '/images/OperIQ.jpg',         icon: Radio,         color: '#dc2626' },
             /* Iletisim & analitik */
@@ -2641,6 +2641,14 @@ export default function Landing() {
               { tag: 'Operat\u00f6r', title: 'Operat\u00f6r Performans Fark\u0131', body: 'Ayn\u0131 makine grubunda operat\u00f6r bazl\u0131 performans fark\u0131 tespit edildi.', action: 'Operat\u00f6r e\u011fitim program\u0131 ba\u015flat\u0131n.' },
               { tag: 'Acil', title: 'Standart D\u0131\u015f\u0131 Sapmalar', body: 'Acil durum SOP\u0027lerinde standart d\u0131\u015f\u0131 sapmalar g\u00f6zlemlendi.', action: 'SOP uyumlulu\u011funu denetleyin.' },
               { tag: 'Harita', title: 'A\u015f\u0131r\u0131 Y\u00fcklenme B\u00f6lgesi', body: 'Operasyonel yo\u011funluk haritas\u0131nda belirli b\u00f6lgelerde a\u015f\u0131r\u0131 y\u00fcklenme g\u00f6r\u00fcld\u00fc.', action: 'Kaynak da\u011f\u0131l\u0131m\u0131n\u0131 optimize edin.' },
+              { tag: 'AssetIQ', title: 'Stok T\u00fckenme Tahmini', body: 'Rulman sto\u011fu mevcut t\u00fcketim h\u0131z\u0131na g\u00f6re 5 g\u00fcn i\u00e7inde t\u00fckenecek.', action: 'Sat\u0131n alma talebi olu\u015fturun.' },
+              { tag: 'QR', title: 'Anormal QR Hareket Yo\u011funlu\u011fu', body: 'Depo-3\'te son 24 saatte normalin 3 kat\u0131 stok \u00e7\u0131k\u0131\u015f\u0131 tespit edildi.', action: 'Depo sorumlusunu uyar\u0131n.' },
+              { tag: 'Parti/Lot', title: 'SKT Yakla\u015fan Partiler', body: '12 parti/lot\u0027un son kullanma tarihi 7 g\u00fcn i\u00e7inde dolacak.', action: '\u00d6ncelikli kullan\u0131m plan\u0131 olu\u015fturun.' },
+              { tag: 'Onay', title: 'Bekleyen Stok Onaylar\u0131', body: '8 stok i\u015flem talebi 24 saatten fazlad\u0131r onay bekliyor.', action: 'Onay zincirini h\u0131zland\u0131r\u0131n.' },
+              { tag: 'IoT Cihaz', title: 'Cihaz Sorumlusu Uyar\u0131s\u0131', body: '3 IoT cihaz\u0131 kritik durumda ve sorumlu personel hen\u00fcz yan\u0131t vermedi.', action: 'Yedek sorumluyu devreye al\u0131n.' },
+              { tag: 'Foto Analiz', title: 'Saha G\u00f6rsel Anomalisi', body: 'OperIQ foto\u011fraf analizi sahada potansiyel g\u00fcvenlik riski tespit etti.', action: 'Acil saha denetimi ba\u015flat\u0131n.' },
+              { tag: 'Mesaj', title: 'Yan\u0131ts\u0131z Kritik Mesajlar', body: '5 kritik departman mesaj\u0131 24 saatten fazlad\u0131r yan\u0131ts\u0131z.', action: '\u0130lgili y\u00f6neticileri bilgilendirin.' },
+              { tag: 'Tesis', title: 'Tesis Plan\u0131 Anomalisi', body: '2D/3D tesis haritas\u0131nda B\u00f6lge-7\u0027de anormal s\u0131cakl\u0131k da\u011f\u0131l\u0131m\u0131 tespit edildi.', action: 'HVAC sistemini kontrol edin.' },
             ] : [
               { tag: 'Maintenance', title: 'Line 3 - Unplanned Downtime', body: 'Unplanned downtime on Line 3 increased 18% in the last 7 days.', action: 'Review maintenance frequency.' },
               { tag: 'Production', title: 'Scrap Rate Above Target', body: 'Production line scrap rate exceeded target value.', action: 'Investigate operator-driven deviations.' },
@@ -2662,6 +2670,14 @@ export default function Landing() {
               { tag: 'Operator', title: 'Operator Performance Gap', body: 'Operator-level performance gap detected on same machine group.', action: 'Launch operator training program.' },
               { tag: 'Emergency', title: 'Non-Standard Deviations', body: 'Non-standard deviations observed in emergency procedures.', action: 'Audit procedure compliance.' },
               { tag: 'Heatmap', title: 'Overloaded Zone Detected', body: 'Operational density heatmap shows overloading in certain zones.', action: 'Optimize resource allocation.' },
+              { tag: 'AssetIQ', title: 'Stock Depletion Forecast', body: 'Bearing stock will run out in 5 days at current consumption rate.', action: 'Create purchase request.' },
+              { tag: 'QR', title: 'Abnormal QR Movement', body: '3x normal stock exits detected in Warehouse-3 in last 24 hours.', action: 'Alert warehouse manager.' },
+              { tag: 'Batch/Lot', title: 'Expiring Batches', body: '12 batches/lots expiring within 7 days.', action: 'Create priority usage plan.' },
+              { tag: 'Approval', title: 'Pending Stock Approvals', body: '8 stock action requests pending for over 24 hours.', action: 'Expedite approval chain.' },
+              { tag: 'IoT Device', title: 'Device Responsible Alert', body: '3 IoT devices critical and responsible personnel not yet responded.', action: 'Activate backup responsible.' },
+              { tag: 'Photo AI', title: 'Field Visual Anomaly', body: 'OperIQ photo analysis detected potential safety risk in field.', action: 'Initiate emergency field inspection.' },
+              { tag: 'Message', title: 'Unanswered Critical Messages', body: '5 critical department messages unanswered for over 24 hours.', action: 'Notify relevant managers.' },
+              { tag: 'Facility', title: 'Facility Plan Anomaly', body: 'Abnormal temperature distribution detected in Zone-7 on 2D/3D map.', action: 'Check HVAC system.' },
             ]).map((insight, i) => {
               const colors: Record<string, string> = {
                 'Bak\u0131m': '#f59e0b', Maintenance: '#f59e0b',
@@ -2678,6 +2694,10 @@ export default function Landing() {
                 Risk: '#dc2626', 'S\u00fcre\u00e7': '#0891b2', Process: '#0891b2',
                 'Operat\u00f6r': '#8b5cf6', Acil: '#ef4444', Emergency: '#ef4444',
                 Harita: '#06b6d4', Heatmap: '#06b6d4',
+                AssetIQ: '#059669', QR: '#0d9488', 'Parti/Lot': '#7c3aed', 'Batch/Lot': '#7c3aed',
+                Onay: '#f59e0b', Approval: '#f59e0b', 'IoT Cihaz': '#6366f1', 'IoT Device': '#6366f1',
+                'Foto Analiz': '#e11d48', 'Photo AI': '#e11d48', Mesaj: '#0891b2', Message: '#0891b2',
+                Tesis: '#2563eb', Facility: '#2563eb',
               }
               const c = colors[insight.tag] || '#06b6d4'
               return (

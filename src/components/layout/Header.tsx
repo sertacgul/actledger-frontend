@@ -175,10 +175,20 @@ export default function Header({ title, subtitle, onMenuClick }: HeaderProps) {
           </div>
 
           {/* Language toggle with flags */}
-          {/* Language indicator (set at login, not changeable after) */}
-          <div className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold" style={{ background: 'var(--surface-secondary, rgba(0,0,0,0.04))', color: 'var(--text-2)' }}>
-            {lang === 'tr' ? <FlagTR size={14} /> : lang === 'ru' ? <FlagRU size={14} /> : lang === 'de' ? <FlagDE size={14} /> : <FlagUS size={14} />}
-            <span>{lang.toUpperCase()}</span>
+          {/* Language toggle TR / EN */}
+          <div className="flex items-center gap-0.5 p-0.5 rounded-md" style={{ background: 'var(--surface-secondary, rgba(0,0,0,0.04))' }}>
+            <button type="button" onClick={() => setLang('tr')}
+              className={clsx('flex items-center gap-1 px-1.5 py-1 rounded text-[10px] font-bold transition-all',
+                lang === 'tr' ? 'bg-white shadow-sm text-slate-900 dark:bg-slate-700 dark:text-white' : 'text-slate-400 hover:text-slate-600'
+              )} aria-label="Turkce">
+              <FlagTR size={16} /><span>TR</span>
+            </button>
+            <button type="button" onClick={() => setLang('en')}
+              className={clsx('flex items-center gap-1 px-1.5 py-1 rounded text-[10px] font-bold transition-all',
+                lang === 'en' ? 'bg-white shadow-sm text-slate-900 dark:bg-slate-700 dark:text-white' : 'text-slate-400 hover:text-slate-600'
+              )} aria-label="English">
+              <FlagUS size={16} /><span>EN</span>
+            </button>
           </div>
 
           {/* Theme toggle */}

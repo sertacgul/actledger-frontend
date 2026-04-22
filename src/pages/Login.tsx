@@ -156,8 +156,6 @@ function DashboardMockup() {
 const LANG_OPTIONS: { code: Lang; label: string; Flag: typeof FlagTR }[] = [
   { code: 'tr', label: 'T\u00fcrk\u00e7e', Flag: FlagTR },
   { code: 'en', label: 'English', Flag: FlagUS },
-  { code: 'ru', label: '\u0420\u0443\u0441\u0441\u043a\u0438\u0439', Flag: FlagRU },
-  { code: 'de', label: 'Deutsch', Flag: FlagDE },
 ]
 
 export default function Login() {

@@ -1276,15 +1276,14 @@ function OperIQChatbot({ lang }: { lang: 'tr' | 'en' }) {
 export default function Landing() {
   const navigate = useNavigate()
   const { user, login } = useAuth()
-  const [lang, setLang] = useState<'tr' | 'en' | 'ru' | 'de'>('tr')
+  const [lang, setLang] = useState<'tr' | 'en'>('tr')
   const [scrolled, setScrolled] = useState(false)
   const [cookieConsent, setCookieConsent] = useState<boolean | null>(() => {
     const stored = localStorage.getItem('actledger_cookies')
     return stored !== null ? stored === 'true' : null
   })
 
-  const effectiveLang = (lang === 'tr' ? 'tr' : 'en') as 'tr' | 'en'
-  const t = T[effectiveLang]
+  const t = T[lang]
 
   useEffect(() => {
     if (user) navigate(user.role === 'super_admin' ? '/super-admin' : '/panel', { replace: true })
@@ -1654,18 +1653,6 @@ export default function Landing() {
               >
                 <FlagUS size={20} />
                 <span className="text-sm font-bold" style={{ color: lang === 'en' ? '#22d3ee' : 'rgba(255,255,255,0.4)' }}>EN</span>
-              </button>
-              <button type="button" onClick={() => setLang('ru')}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-all duration-300"
-                style={{ background: lang === 'ru' ? 'rgba(6,182,212,0.25)' : 'transparent', boxShadow: lang === 'ru' ? '0 1px 4px rgba(0,0,0,0.15)' : 'none' }}>
-                <FlagRU size={20} />
-                <span className="text-sm font-bold" style={{ color: lang === 'ru' ? '#22d3ee' : 'rgba(255,255,255,0.4)' }}>RU</span>
-              </button>
-              <button type="button" onClick={() => setLang('de')}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-all duration-300"
-                style={{ background: lang === 'de' ? 'rgba(6,182,212,0.25)' : 'transparent', boxShadow: lang === 'de' ? '0 1px 4px rgba(0,0,0,0.15)' : 'none' }}>
-                <FlagDE size={20} />
-                <span className="text-sm font-bold" style={{ color: lang === 'de' ? '#22d3ee' : 'rgba(255,255,255,0.4)' }}>DE</span>
               </button>
             </div>
             <Link
@@ -3379,7 +3366,7 @@ export default function Landing() {
       </footer>
 
       {/* OperIQ Landing Chatbot */}
-      <OperIQChatbot lang={effectiveLang} />
+      <OperIQChatbot lang={lang} />
     </div>
   )
 }

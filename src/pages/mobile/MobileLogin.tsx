@@ -146,14 +146,6 @@ export default function MobileLogin() {
           <FlagUS size={18} />
           <span className="text-sm font-bold">EN</span>
         </button>
-        <button type="button" onClick={() => setLang('ru')}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all ${lang === 'ru' ? 'bg-slate-700 text-white' : 'text-slate-500'}`}>
-          <FlagRU size={18} /><span className="text-sm font-bold">RU</span>
-        </button>
-        <button type="button" onClick={() => setLang('de')}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all ${lang === 'de' ? 'bg-slate-700 text-white' : 'text-slate-500'}`}>
-          <FlagDE size={18} /><span className="text-sm font-bold">DE</span>
-        </button>
       </div>
     </div>
   )

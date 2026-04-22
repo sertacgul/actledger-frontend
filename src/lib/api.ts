@@ -240,6 +240,8 @@ const INSIGHT_TYPE_MAP: Record<string, GeminiInsight['type']> = {
   GOREV_ONCELIKLENDIRME:  'oneri',
   DEPARTMAN_PERFORMANSI:  'bilgi',
   ANORMALLIK_TESPITI:     'uyari',
+  INVENTORY_INTELLIGENCE: 'oneri',
+  STOCK_ANALYSIS:         'oneri',
 }
 
 const INSIGHT_PRIORITY_MAP: Record<string, GeminiInsight['priority']> = {
@@ -254,6 +256,18 @@ const INSIGHT_PRIORITY_MAP: Record<string, GeminiInsight['priority']> = {
 function formatInsightContent(data: any): string {
   if (!data || typeof data !== 'object') return String(data ?? '-')
   if (data.raw) return data.raw
+
+  // Handle INVENTORY_INTELLIGENCE / STOCK_ANALYSIS format
+  if (data.summary) {
+    const parts: string[] = [data.summary]
+    if (Array.isArray(data.insights)) {
+      for (const ins of data.insights) {
+        const severity = ins.severity ? `[${ins.severity}]` : ''
+        parts.push(`${severity} ${ins.title || ''}\n${ins.message || ''}\n${ins.recommendation ? '> ' + ins.recommendation : ''}`)
+      }
+    }
+    return parts.join('\n\n')
+  }
 
   const parts: string[] = []
   if (data.ozet) parts.push(data.ozet)
@@ -290,7 +304,7 @@ export function mapGeminiInsight(g: any): GeminiInsight {
   const contentData = typeof g.content === 'string' ? JSON.parse(g.content) : g.content
   return {
     id:           g.id,
-    title:        contentData?.baslik ?? g.type,
+    title:        contentData?.baslik ?? (g.type === 'INVENTORY_INTELLIGENCE' ? 'AssetIQ Envanter Analizi' : g.type === 'STOCK_ANALYSIS' ? 'Stok Analizi' : g.type),
     content:      formatInsightContent(contentData),
     type:         INSIGHT_TYPE_MAP[g.type] ?? 'bilgi',
     departmentId: g.departmentId ?? undefined,

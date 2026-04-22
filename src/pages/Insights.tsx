@@ -21,11 +21,26 @@ const ANALYSIS_KEYS: { key: InsightAnalysisType; labelKey: TranslationKey; descK
   { key: 'ANORMALLIK_TESPITI',    labelKey: 'operiq_at_anomaly',    descKey: 'operiq_at_anomaly_desc'    },
 ]
 
+const SEVERITY_BADGE: Record<string, { bg: string; text: string; label: string }> = {
+  KRITIK: { bg: 'bg-red-100 border-red-200', text: 'text-red-700', label: 'Kritik' },
+  YUKSEK: { bg: 'bg-amber-100 border-amber-200', text: 'text-amber-700', label: 'Y\u00fcksek' },
+  ORTA: { bg: 'bg-blue-100 border-blue-200', text: 'text-blue-700', label: 'Orta' },
+  DUSUK: { bg: 'bg-zinc-100 border-zinc-200', text: 'text-zinc-600', label: 'D\u00fc\u015f\u00fck' },
+}
+
 function renderBold(text: string) {
-  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
-    part.startsWith('**') ? <strong key={i} className="font-semibold text-slate-800">{part.slice(2, -2)}</strong>
-                           : <span key={i}>{part}</span>
-  )
+  // Split by severity tags [KRITIK], [YUKSEK], [ORTA], [DUSUK] and bold **text**
+  return text.split(/(\[(?:KRITIK|YUKSEK|ORTA|DUSUK)\]|\*\*[^*]+\*\*)/g).map((part, i) => {
+    // Severity badge
+    const sevMatch = part.match(/^\[(KRITIK|YUKSEK|ORTA|DUSUK)\]$/)
+    if (sevMatch) {
+      const s = SEVERITY_BADGE[sevMatch[1]]
+      return <span key={i} className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border mr-1.5 ${s.bg} ${s.text}`}>{s.label}</span>
+    }
+    // Bold
+    if (part.startsWith('**')) return <strong key={i} className="font-semibold text-slate-800">{part.slice(2, -2)}</strong>
+    return <span key={i}>{part}</span>
+  })
 }
 
 export default function Insights() {

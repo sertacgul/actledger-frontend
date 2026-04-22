@@ -92,19 +92,35 @@ export default function MobileMessages() {
 
   useEffect(() => { loadAllMessages() }, [loadAllMessages])
 
-  // Poll for new messages + sound
-  const prevMsgCount = useRef(messages.length)
+  // Poll for new messages + refresh active chat
+  const chatTargetRef = useRef(chatTarget)
+  chatTargetRef.current = chatTarget
   useEffect(() => {
     const interval = setInterval(async () => {
-      const prev = prevMsgCount.current
       await loadAllMessages()
-      if (messages.length > prev && messages.some(m => m.senderId !== user?.id && new Date(m.createdAt).getTime() > Date.now() - 10000)) {
-        playMessageSound()
+      // Refresh active chat if open
+      const ct = chatTargetRef.current
+      if (ct && screen === 'conversation') {
+        try {
+          let res: any
+          if (ct.type === 'broadcast') res = await api.get('/messages?pageSize=100&isBroadcast=true')
+          else if (ct.type === 'department' && ct.id) res = await api.get(`/messages?pageSize=100&departmentId=${ct.id}`)
+          else if (ct.type === 'direct' && ct.id) res = await api.get(`/messages/thread/${ct.id}`)
+          const data = res?.data ?? res
+          const sorted = (Array.isArray(data) ? data : []).map(mapMsg).sort((a: Message, b: Message) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+          setChatMessages(prev => {
+            if (sorted.length > prev.length) {
+              const lastNew = sorted[sorted.length - 1]
+              if (lastNew && lastNew.senderId !== user?.id) playMessageSound()
+              return sorted
+            }
+            return prev
+          })
+        } catch {}
       }
-      prevMsgCount.current = messages.length
-    }, 5000)
+    }, 4000)
     return () => clearInterval(interval)
-  }, [messages.length, user?.id])
+  }, [user?.id, screen])
 
   useEffect(() => {
     api.get<any>('/messages/contacts').then((r: any) => {

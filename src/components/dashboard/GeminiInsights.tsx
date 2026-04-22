@@ -13,10 +13,20 @@ const TYPE_CONFIG: Record<string, { icon: typeof ShieldAlert; text: string; bg: 
   bilgi:  { icon: Info,          text: 'text-slate-500',  bg: 'bg-slate-50',  border: 'border-slate-200',  labelKey: 'operiq_type_info'       },
 }
 
+const SEV_BADGE: Record<string, { bg: string; text: string; label: string }> = {
+  KRITIK: { bg: 'bg-red-100 border-red-200', text: 'text-red-700', label: 'Kritik' },
+  YUKSEK: { bg: 'bg-amber-100 border-amber-200', text: 'text-amber-700', label: 'Y\u00fcksek' },
+  ORTA: { bg: 'bg-blue-100 border-blue-200', text: 'text-blue-700', label: 'Orta' },
+  DUSUK: { bg: 'bg-zinc-100 border-zinc-200', text: 'text-zinc-600', label: 'D\u00fc\u015f\u00fck' },
+}
+
 function renderBold(text: string) {
-  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
-    part.startsWith('**') ? <strong key={i}>{part.slice(2, -2)}</strong> : <span key={i}>{part}</span>
-  )
+  return text.split(/(\[(?:KRITIK|YUKSEK|ORTA|DUSUK)\]|\*\*[^*]+\*\*)/g).map((part, i) => {
+    const m = part.match(/^\[(KRITIK|YUKSEK|ORTA|DUSUK)\]$/)
+    if (m) { const s = SEV_BADGE[m[1]]; return <span key={i} className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border mr-1.5 ${s.bg} ${s.text}`}>{s.label}</span> }
+    if (part.startsWith('**')) return <strong key={i}>{part.slice(2, -2)}</strong>
+    return <span key={i}>{part}</span>
+  })
 }
 
 // ── Critical Alert Popup helpers ─────────────────────────────────────────────

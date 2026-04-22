@@ -84,19 +84,39 @@ export default function PlatformMessages() {
 
   // Poll for new messages every 5s + play sound
   const prevCountRef = useRef(messages.length)
+  // Poll for new messages + refresh active conversation
+  const activeConvRef = useRef(activeConv)
+  activeConvRef.current = activeConv
   useEffect(() => {
     const interval = setInterval(async () => {
       const prevLen = prevCountRef.current
       await loadAll()
-      // If new messages arrived that we didn't send, play sound
-      if (messages.length > prevLen) {
-        const newMsgs = messages.slice(0, messages.length - prevLen)
-        if (newMsgs.some(m => m.senderId !== user?.id)) playMessageSound()
+      // Refresh active conversation if open
+      if (activeConvRef.current) {
+        try {
+          let res: any
+          if (activeConvRef.current.type === 'broadcast') res = await api.get('/messages?pageSize=200&isBroadcast=true')
+          else if (activeConvRef.current.type === 'department' && activeConvRef.current.id) res = await api.get(`/messages?pageSize=200&departmentId=${activeConvRef.current.id}`)
+          else if (activeConvRef.current.type === 'direct' && activeConvRef.current.id) res = await api.get(`/messages/thread/${activeConvRef.current.id}`)
+          const data = res?.data ?? res
+          const newMsgs = (Array.isArray(data) ? data : []).map(mapMsg).sort((a: Message, b: Message) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+          setChatMessages(prev => {
+            if (newMsgs.length !== prev.length) {
+              // New message arrived - play sound if not from us
+              const lastNew = newMsgs[newMsgs.length - 1]
+              if (lastNew && lastNew.senderId !== user?.id && prev.length > 0 && newMsgs.length > prev.length) {
+                playMessageSound()
+              }
+              return newMsgs
+            }
+            return prev
+          })
+        } catch {}
       }
       prevCountRef.current = messages.length
-    }, 5000)
+    }, 4000)
     return () => clearInterval(interval)
-  }, [messages.length, user?.id])
+  }, [user?.id])
   useEffect(() => {
     api.get<any>('/messages/contacts').then((r: any) => {
       const d = r?.data ?? r
@@ -198,12 +218,12 @@ export default function PlatformMessages() {
           </div>
           <div className="flex items-center gap-1.5">
             <button onClick={() => setStoryForm(true)} className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100">Story</button>
-            <button onClick={() => setShowNewChat(true)} className="w-8 h-8 rounded-lg bg-[color:var(--border-subtle)] flex items-center justify-center hover:bg-[var(--border-subtle)]"><Plus size={16} className="text-[color:var(--text-2)]" /></button>
+            <button onClick={() => setShowNewChat(true)} className="w-8 h-8 rounded-lg bg-[var(--border-subtle)] flex items-center justify-center hover:bg-[var(--border-subtle)]"><Plus size={16} className="text-[color:var(--text-2)]" /></button>
           </div>
         </div>
         {/* Search */}
         <div className="px-3 py-2">
-          <div className="flex items-center gap-2 bg-[color:var(--border-subtle)] rounded-lg px-3 py-1.5">
+          <div className="flex items-center gap-2 bg-[var(--border-subtle)] rounded-lg px-3 py-1.5">
             <Search size={14} className="text-[color:var(--text-3)]" />
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder={tr ? 'Ara...' : 'Search...'}
               className="flex-1 bg-transparent outline-none text-sm text-[color:var(--text-1)]" />
@@ -227,7 +247,7 @@ export default function PlatformMessages() {
           {filtered.map((conv, i) => (
             <button key={i} onClick={() => openConv(conv)}
               className={clsx('w-full flex items-center gap-3 px-4 py-3 border-b border-[color:var(--border-subtle)] hover:bg-[var(--surface)] transition-colors text-left',
-                activeConv?.type === conv.type && activeConv?.id === conv.id && 'bg-[color:var(--border-subtle)]'
+                activeConv?.type === conv.type && activeConv?.id === conv.id && 'bg-[var(--border-subtle)]'
               )}>
               <div className={clsx('w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0',
                 conv.type === 'broadcast' ? 'bg-emerald-500' : conv.type === 'department' ? 'bg-blue-500' : 'bg-cyan-600'
@@ -296,7 +316,7 @@ export default function PlatformMessages() {
                         {isMe && (
                           <div className="absolute top-0.5 right-1 hidden group-hover:flex items-center gap-0.5 bg-white/90 rounded-lg shadow-sm border border-[color:var(--border-subtle)] px-1 py-0.5">
                             <button onClick={() => { const newText = prompt(tr ? 'Mesaj\u0131 d\u00fczenle:' : 'Edit message:', msg.content); if (newText && newText !== msg.content) { api.patch(`/messages/${msg.id}/edit`, { content: newText }).then(() => openConv(activeConv!)).catch(() => {}) } }}
-                              className="p-1 rounded hover:bg-[color:var(--border-subtle)]" title={tr ? 'D\u00fczenle' : 'Edit'}><Pencil size={12} className="text-[color:var(--text-2)]" /></button>
+                              className="p-1 rounded hover:bg-[var(--border-subtle)]" title={tr ? 'D\u00fczenle' : 'Edit'}><Pencil size={12} className="text-[color:var(--text-2)]" /></button>
                             <button onClick={() => { if (confirm(tr ? 'Mesaj silinsin mi?' : 'Delete message?')) { api.delete(`/messages/${msg.id}`).then(() => openConv(activeConv!)).catch(() => {}) } }}
                               className="p-1 rounded hover:bg-red-500/10" title={tr ? 'Sil' : 'Delete'}><Trash2 size={12} className="text-red-400" /></button>
                           </div>
@@ -310,7 +330,7 @@ export default function PlatformMessages() {
             </div>
             {/* Input */}
             <div className="px-5 py-3 border-t border-[color:var(--border)] bg-[var(--surface)] flex items-center gap-3">
-              <div className="flex-1 bg-[color:var(--border-subtle)] rounded-xl px-4 py-2.5">
+              <div className="flex-1 bg-[var(--border-subtle)] rounded-xl px-4 py-2.5">
                 <input value={reply} onChange={e => setReply(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMsg()}
                   placeholder={tr ? 'Mesaj yaz\u0131n...' : 'Type a message...'}
                   className="w-full bg-transparent outline-none text-sm text-[color:var(--text-1)]" />
@@ -362,7 +382,7 @@ export default function PlatformMessages() {
               ))}
             </div>
             <div className="flex justify-end gap-2 mt-4">
-              <button onClick={() => setStoryForm(false)} className="px-4 py-2 text-sm text-[color:var(--text-2)] hover:bg-[color:var(--border-subtle)] rounded-lg">{tr ? '\u0130ptal' : 'Cancel'}</button>
+              <button onClick={() => setStoryForm(false)} className="px-4 py-2 text-sm text-[color:var(--text-2)] hover:bg-[var(--border-subtle)] rounded-lg">{tr ? '\u0130ptal' : 'Cancel'}</button>
               <button onClick={createStory} disabled={!storyContent.trim()}
                 className="px-4 py-2 text-sm font-semibold bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:opacity-40">{tr ? 'Payla\u015f' : 'Share'}</button>
             </div>

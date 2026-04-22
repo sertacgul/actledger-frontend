@@ -677,9 +677,19 @@ export function useGeminiInsights(type?: InsightAnalysisType) {
     [type],
   )
 
+  // Filter out INVENTORY_INTELLIGENCE/STOCK_ANALYSIS unless critical (these live in AssetIQ)
+  const allInsights = (data?.data ?? []).map(mapGeminiInsight) as GeminiInsight[]
+  const filtered = allInsights.filter(i => {
+    const rawType = (data?.data ?? []).find((d: any) => d.id === i.id)?.type
+    if (rawType === 'INVENTORY_INTELLIGENCE' || rawType === 'STOCK_ANALYSIS') {
+      return i.priority === 'yuksek' // Only show if critical/high priority
+    }
+    return true
+  })
+
   return {
-    insights: (data?.data ?? []).map(mapGeminiInsight) as GeminiInsight[],
-    total:    data?.meta?.total ?? 0,
+    insights: filtered,
+    total:    filtered.length,
     loading,
     error,
     refetch,

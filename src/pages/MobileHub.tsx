@@ -1459,8 +1459,8 @@ export default function MobileHub() {
             className={clsx(
               'flex items-center gap-2 px-4 py-2 rounded-lg text-[12px] font-medium transition-all',
               activeTab === tab.key
-                ? 'bg-zinc-900 text-white'
-                : 'text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50'
+                ? tab.key === 'platform_messages' ? 'bg-amber-700 text-white' : 'bg-zinc-900 text-white'
+                : tab.key === 'platform_messages' ? 'text-amber-700 hover:text-amber-800 hover:bg-amber-50' : 'text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50'
             )}
           >
             <tab.icon size={14} />

@@ -11,13 +11,18 @@ const STORAGE_KEY = 'actledger_lang'
 
 const LanguageContext = createContext<LanguageContextType | null>(null)
 
+const VALID_LANGS: Lang[] = ['tr', 'en', 'ru', 'de']
+
 function detectInitial(): Lang {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved === 'tr' || saved === 'en') return saved
+    const saved = localStorage.getItem(STORAGE_KEY) as Lang | null
+    if (saved && VALID_LANGS.includes(saved)) return saved
   } catch { /* SSR / disabled */ }
-  if (typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('en')) {
-    return 'en'
+  if (typeof navigator !== 'undefined') {
+    const bl = navigator.language?.toLowerCase()
+    if (bl?.startsWith('en')) return 'en'
+    if (bl?.startsWith('ru')) return 'ru'
+    if (bl?.startsWith('de')) return 'de'
   }
   return 'tr'
 }
@@ -34,8 +39,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const t = useCallback(
     (key: TranslationKey, vars?: Record<string, string | number>) => {
-      const dict = translations[lang] ?? translations.tr
-      let value = dict[key] ?? translations.tr[key] ?? key
+      const dict = (translations as any)[lang] ?? translations.tr
+      let value = dict[key] ?? (translations as any).en[key] ?? (translations as any).tr[key] ?? key
       if (vars) {
         for (const [k, v] of Object.entries(vars)) {
           value = value.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v))
@@ -59,8 +64,11 @@ export function useLanguage() {
   return ctx
 }
 
-/** Convenience: pick the right side of a bilingual { tr, en } object. */
+/** Convenience: pick the right side of a bilingual { tr, en } object. RU/DE fallback to EN. */
 export function useBi() {
   const { lang } = useLanguage()
-  return <T,>(value: { tr: T; en: T }): T => value[lang]
+  return <T,>(value: { tr: T; en: T }): T => {
+    if (lang === 'tr') return value.tr
+    return value.en // EN, RU, DE all use English for bilingual content
+  }
 }

@@ -9,7 +9,7 @@ import { useLanguage } from '../../context/LanguageContext'
 import { useNotifications, markAllNotificationsRead, usePrintLog } from '../../lib/hooks'
 import { tokenStore } from '../../lib/api'
 import LiveClock from '../ui/LiveClock'
-import { FlagTR, FlagUS } from '../ui/Flags'
+import { FlagTR, FlagUS, FlagRU, FlagDE } from '../ui/Flags'
 
 interface HeaderProps { title: string; subtitle?: string; onMenuClick?: () => void }
 
@@ -175,35 +175,10 @@ export default function Header({ title, subtitle, onMenuClick }: HeaderProps) {
           </div>
 
           {/* Language toggle with flags */}
-          <div className="flex items-center gap-0.5 p-0.5 rounded-md" style={{ background: 'var(--surface-secondary, rgba(0,0,0,0.04))' }}>
-            <button
-              type="button"
-              onClick={() => setLang('tr')}
-              className={clsx(
-                'flex items-center gap-1 px-1.5 py-1 rounded text-[10px] font-bold transition-all',
-                lang === 'tr'
-                  ? 'bg-white shadow-sm text-slate-900 dark:bg-slate-700 dark:text-white'
-                  : 'text-slate-400 hover:text-slate-600'
-              )}
-              aria-label="Turkce"
-            >
-              <FlagTR size={16} />
-              <span>TR</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setLang('en')}
-              className={clsx(
-                'flex items-center gap-1 px-1.5 py-1 rounded text-[10px] font-bold transition-all',
-                lang === 'en'
-                  ? 'bg-white shadow-sm text-slate-900 dark:bg-slate-700 dark:text-white'
-                  : 'text-slate-400 hover:text-slate-600'
-              )}
-              aria-label="English"
-            >
-              <FlagUS size={16} />
-              <span>EN</span>
-            </button>
+          {/* Language indicator (set at login, not changeable after) */}
+          <div className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold" style={{ background: 'var(--surface-secondary, rgba(0,0,0,0.04))', color: 'var(--text-2)' }}>
+            {lang === 'tr' ? <FlagTR size={14} /> : lang === 'ru' ? <FlagRU size={14} /> : lang === 'de' ? <FlagDE size={14} /> : <FlagUS size={14} />}
+            <span>{lang.toUpperCase()}</span>
           </div>
 
           {/* Theme toggle */}

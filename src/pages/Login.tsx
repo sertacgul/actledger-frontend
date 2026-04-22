@@ -6,6 +6,9 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useCompany } from '../context/CompanyContext'
+import { useLanguage } from '../context/LanguageContext'
+import { FlagTR, FlagUS, FlagRU, FlagDE } from '../components/ui/Flags'
+import type { Lang } from '../i18n/translations'
 import { SECTORS } from '../data/sectors'
 import BrandMark from '../components/ui/BrandMark'
 
@@ -150,9 +153,17 @@ function DashboardMockup() {
   )
 }
 
+const LANG_OPTIONS: { code: Lang; label: string; Flag: typeof FlagTR }[] = [
+  { code: 'tr', label: 'T\u00fcrk\u00e7e', Flag: FlagTR },
+  { code: 'en', label: 'English', Flag: FlagUS },
+  { code: 'ru', label: '\u0420\u0443\u0441\u0441\u043a\u0438\u0439', Flag: FlagRU },
+  { code: 'de', label: 'Deutsch', Flag: FlagDE },
+]
+
 export default function Login() {
   const { login, error: authError } = useAuth()
   const { config } = useCompany()
+  const { lang, setLang } = useLanguage()
   const navigate = useNavigate()
 
   const [email,       setEmail]       = useState(() => localStorage.getItem('actledger_remember_email') ?? DEMO_USERS[0].email)
@@ -225,6 +236,18 @@ export default function Login() {
           Giriş <ExternalLink size={11} />
         </a>
       </nav>
+
+      {/* Language selector */}
+      <div className="absolute top-4 right-6 z-20 flex items-center gap-1.5">
+        {LANG_OPTIONS.map(opt => (
+          <button key={opt.code} onClick={() => setLang(opt.code)}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all ${
+              lang === opt.code ? 'bg-white/90 shadow-sm ring-1 ring-zinc-200 text-zinc-800' : 'bg-white/30 text-zinc-500 hover:bg-white/60'
+            }`}>
+            <opt.Flag size={16} /> {opt.label}
+          </button>
+        ))}
+      </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 pt-8 pb-20">
 

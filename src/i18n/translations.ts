@@ -9,7 +9,7 @@
 // use the `useBi()` helper from LanguageContext - that picks the right side of
 // a { tr, en } object directly.
 
-export type Lang = 'tr' | 'en'
+export type Lang = 'tr' | 'en' | 'ru' | 'de'
 
 export const translations = {
   tr: {
@@ -749,6 +749,78 @@ export const translations = {
     admin_mobile_reset_pass:'Reset Password',
     admin_mobile_last_sync: 'Last Sync',
   },
-} satisfies Record<Lang, Record<string, string>>
+
+  // ── Russian (Ru) ─────────────────────────────────────────────────────────
+  ru: {
+    common_save: '\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c', common_cancel: '\u041e\u0442\u043c\u0435\u043d\u0430', common_delete: '\u0423\u0434\u0430\u043b\u0438\u0442\u044c',
+    common_edit: '\u0420\u0435\u0434\u0430\u043a\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c', common_add: '\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c', common_remove: '\u0423\u0431\u0440\u0430\u0442\u044c',
+    common_search: '\u041f\u043e\u0438\u0441\u043a', common_loading: '\u0417\u0430\u0433\u0440\u0443\u0437\u043a\u0430...', common_close: '\u0417\u0430\u043a\u0440\u044b\u0442\u044c',
+    common_apply: '\u041f\u0440\u0438\u043c\u0435\u043d\u0438\u0442\u044c', common_preview: '\u041f\u0440\u0435\u0434\u043f\u0440\u043e\u0441\u043c\u043e\u0442\u0440', common_select: '\u0412\u044b\u0431\u0440\u0430\u0442\u044c',
+    common_yes: '\u0414\u0430', common_no: '\u041d\u0435\u0442', common_continue: '\u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u044c',
+    common_back: '\u041d\u0430\u0437\u0430\u0434', common_more: '\u0415\u0449\u0451', common_all: '\u0412\u0441\u0435',
+    common_active: '\u0410\u043a\u0442\u0438\u0432\u043d\u044b\u0439', common_inactive: '\u041d\u0435\u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0439', common_count: '\u041a\u043e\u043b-\u0432\u043e',
+    common_actions: '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u044f', common_new: '\u041d\u043e\u0432\u044b\u0439', common_general: '\u041e\u0431\u0449\u0435\u0435',
+    nav_dashboard: '\u041f\u0430\u043d\u0435\u043b\u044c', nav_tasks: '\u0417\u0430\u0434\u0430\u0447\u0438', nav_reports: '\u041e\u0442\u0447\u0451\u0442\u044b',
+    nav_departments: '\u041e\u0442\u0434\u0435\u043b\u044b', nav_users: '\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u0438',
+    nav_insights: '\u0410\u043d\u0430\u043b\u0438\u0442\u0438\u043a\u0430 OperIQ', nav_mobile: '\u041c\u043e\u0431\u0438\u043b\u044c\u043d\u044b\u0439 \u0446\u0435\u043d\u0442\u0440',
+    nav_files: '\u0424\u0430\u0439\u043b\u044b', nav_inventory: '\u0418\u043d\u0432\u0435\u043d\u0442\u0430\u0440\u044c', nav_iot: 'IoT',
+    nav_map: '\u041a\u0430\u0440\u0442\u0430', nav_stock: '\u0421\u043a\u043b\u0430\u0434', nav_automation: '\u0410\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0437\u0430\u0446\u0438\u044f',
+    nav_workflows: '\u041f\u0440\u043e\u0446\u0435\u0441\u0441\u044b', nav_settings: '\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438',
+    toolbar_home: '\u0413\u043b\u0430\u0432\u043d\u0430\u044f', toolbar_home_short: '\u0413\u043b\u0430\u0432\u043d\u0430\u044f',
+    toolbar_back: '\u041d\u0430\u0437\u0430\u0434', toolbar_forward: '\u0412\u043f\u0435\u0440\u0451\u0434',
+    toolbar_new_short: '\u041d\u043e\u0432\u044b\u0439', toolbar_new_task: '\u041d\u043e\u0432\u0430\u044f \u0437\u0430\u0434\u0430\u0447\u0430',
+    toolbar_new_report: '\u041d\u043e\u0432\u044b\u0439 \u043e\u0442\u0447\u0451\u0442', toolbar_new_user: '\u041d\u043e\u0432\u044b\u0439 \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c',
+    toolbar_new_department: '\u041d\u043e\u0432\u044b\u0439 \u043e\u0442\u0434\u0435\u043b', toolbar_new_folder: '\u041d\u043e\u0432\u0430\u044f \u043f\u0430\u043f\u043a\u0430',
+    toolbar_new_inventory: '\u041d\u043e\u0432\u044b\u0439 \u0438\u043d\u0432\u0435\u043d\u0442\u0430\u0440\u044c', toolbar_new_broadcast: '\u0420\u0430\u0441\u0441\u044b\u043b\u043a\u0430 \u0437\u0430\u0434\u0430\u0447',
+    toolbar_new_record: '\u041d\u043e\u0432\u0430\u044f \u0437\u0430\u043f\u0438\u0441\u044c', toolbar_search: '\u041f\u043e\u0438\u0441\u043a', toolbar_search_short: '\u041f\u043e\u0438\u0441\u043a',
+    toolbar_filter: '\u0424\u0438\u043b\u044c\u0442\u0440', toolbar_filter_short: '\u0424\u0438\u043b\u044c\u0442\u0440',
+    toolbar_refresh: '\u041e\u0431\u043d\u043e\u0432\u0438\u0442\u044c', toolbar_export: '\u042d\u043a\u0441\u043f\u043e\u0440\u0442 Excel', toolbar_export_short: 'Excel',
+    toolbar_print: '\u041f\u0435\u0447\u0430\u0442\u044c',
+    settings_language: '\u042f\u0437\u044b\u043a', settings_language_desc: '\u042f\u0437\u044b\u043a \u0438\u043d\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u0430',
+    settings_language_tr: 'T\u00fcrk\u00e7e', settings_language_en: 'English',
+    settings_language_ru: '\u0420\u0443\u0441\u0441\u043a\u0438\u0439', settings_language_de: 'Deutsch',
+    m_nav_tasks: '\u0417\u0430\u0434\u0430\u0447\u0438', m_nav_forms: '\u0424\u043e\u0440\u043c\u044b', m_nav_messages: '\u0421\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u044f',
+    m_nav_profile: '\u041f\u0440\u043e\u0444\u0438\u043b\u044c',
+    page_dashboard_title: '\u041f\u0430\u043d\u0435\u043b\u044c', page_dashboard_subtitle: '\u041e\u0431\u0437\u043e\u0440 \u043e\u043f\u0435\u0440\u0430\u0446\u0438\u0439',
+    page_tasks_title: '\u0417\u0430\u0434\u0430\u0447\u0438', page_tasks_subtitle: '\u0423\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u0437\u0430\u0434\u0430\u0447\u0430\u043c\u0438',
+    page_inventory_intelligence_title: 'AssetIQ', page_inventory_intelligence_subtitle: '',
+  },
+
+  // ── German (De) ──────────────────────────────────────────────────────────
+  de: {
+    common_save: 'Speichern', common_cancel: 'Abbrechen', common_delete: 'L\u00f6schen',
+    common_edit: 'Bearbeiten', common_add: 'Hinzuf\u00fcgen', common_remove: 'Entfernen',
+    common_search: 'Suche', common_loading: 'Wird geladen...', common_close: 'Schlie\u00dfen',
+    common_apply: 'Anwenden', common_preview: 'Vorschau', common_select: 'Ausw\u00e4hlen',
+    common_yes: 'Ja', common_no: 'Nein', common_continue: 'Fortfahren',
+    common_back: 'Zur\u00fcck', common_more: 'Mehr', common_all: 'Alle',
+    common_active: 'Aktiv', common_inactive: 'Inaktiv', common_count: 'Anzahl',
+    common_actions: 'Aktionen', common_new: 'Neu', common_general: 'Allgemein',
+    nav_dashboard: 'Dashboard', nav_tasks: 'Aufgaben', nav_reports: 'Berichte',
+    nav_departments: 'Abteilungen', nav_users: 'Benutzer',
+    nav_insights: 'OperIQ Analysen', nav_mobile: 'Mobilzentrale',
+    nav_files: 'Dateien', nav_inventory: 'Inventar', nav_iot: 'IoT',
+    nav_map: 'Karte', nav_stock: 'Lager', nav_automation: 'Automatisierung',
+    nav_workflows: 'Abl\u00e4ufe', nav_settings: 'Einstellungen',
+    toolbar_home: 'Startseite', toolbar_home_short: 'Start',
+    toolbar_back: 'Zur\u00fcck', toolbar_forward: 'Vorw\u00e4rts',
+    toolbar_new_short: 'Neu', toolbar_new_task: 'Neue Aufgabe',
+    toolbar_new_report: 'Neuer Bericht', toolbar_new_user: 'Neuer Benutzer',
+    toolbar_new_department: 'Neue Abteilung', toolbar_new_folder: 'Neuer Ordner',
+    toolbar_new_inventory: 'Neues Inventar', toolbar_new_broadcast: 'Aufgabenrundschreiben',
+    toolbar_new_record: 'Neuer Eintrag', toolbar_search: 'Suche', toolbar_search_short: 'Suche',
+    toolbar_filter: 'Filter', toolbar_filter_short: 'Filter',
+    toolbar_refresh: 'Aktualisieren', toolbar_export: 'Excel Export', toolbar_export_short: 'Excel',
+    toolbar_print: 'Drucken',
+    settings_language: 'Sprache', settings_language_desc: 'Sprache der Benutzeroberfl\u00e4che',
+    settings_language_tr: 'T\u00fcrk\u00e7e', settings_language_en: 'English',
+    settings_language_ru: '\u0420\u0443\u0441\u0441\u043a\u0438\u0439', settings_language_de: 'Deutsch',
+    m_nav_tasks: 'Aufgaben', m_nav_forms: 'Formulare', m_nav_messages: 'Nachrichten',
+    m_nav_profile: 'Profil',
+    page_dashboard_title: 'Dashboard', page_dashboard_subtitle: 'Betriebs\u00fcbersicht',
+    page_tasks_title: 'Aufgaben', page_tasks_subtitle: 'Aufgabenverwaltung',
+    page_inventory_intelligence_title: 'AssetIQ', page_inventory_intelligence_subtitle: '',
+  },
+} as Record<Lang, Record<string, string>>
 
 export type TranslationKey = keyof (typeof translations)['tr']

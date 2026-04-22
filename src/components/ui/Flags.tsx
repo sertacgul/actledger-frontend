@@ -10,6 +10,30 @@ export function FlagTR({ size = 20 }: { size?: number }) {
   )
 }
 
+export function FlagRU({ size = 20 }: { size?: number }) {
+  const h = size * 0.667
+  return (
+    <svg viewBox="0 0 30 20" width={size} height={h} className="inline-block flex-shrink-0 rounded-[2px]" style={{ verticalAlign: 'middle' }}>
+      <rect width="30" height="20" fill="#fff" rx="2" />
+      <rect y="0" width="30" height="6.67" fill="#fff" rx="2" />
+      <rect y="6.67" width="30" height="6.67" fill="#0039A6" />
+      <rect y="13.33" width="30" height="6.67" fill="#D52B1E" rx="2" />
+    </svg>
+  )
+}
+
+export function FlagDE({ size = 20 }: { size?: number }) {
+  const h = size * 0.667
+  return (
+    <svg viewBox="0 0 30 20" width={size} height={h} className="inline-block flex-shrink-0 rounded-[2px]" style={{ verticalAlign: 'middle' }}>
+      <rect width="30" height="20" fill="#000" rx="2" />
+      <rect y="0" width="30" height="6.67" fill="#000" rx="2" />
+      <rect y="6.67" width="30" height="6.67" fill="#DD0000" />
+      <rect y="13.33" width="30" height="6.67" fill="#FFCC00" rx="2" />
+    </svg>
+  )
+}
+
 export function FlagUS({ size = 20 }: { size?: number }) {
   const h = size * 0.667
   return (

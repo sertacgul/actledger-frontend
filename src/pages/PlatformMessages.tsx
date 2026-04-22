@@ -45,6 +45,19 @@ export default function PlatformMessages() {
   const [search, setSearch] = useState('')
   const [showNewChat, setShowNewChat] = useState(false)
 
+  // Track read broadcast/dept messages per user (localStorage)
+  const READ_KEY = `actledger:read_msgs:${user?.id}`
+  const getReadIds = (): Set<string> => {
+    try { return new Set(JSON.parse(localStorage.getItem(READ_KEY) || '[]')) } catch { return new Set() }
+  }
+  const markLocalRead = (ids: string[]) => {
+    const s = getReadIds()
+    ids.forEach(id => s.add(id))
+    try { localStorage.setItem(READ_KEY, JSON.stringify([...s].slice(-500))) } catch {}
+    setLocalReadIds(s)
+  }
+  const [localReadIds, setLocalReadIds] = useState<Set<string>>(() => getReadIds())
+
   // Active conversation
   const [activeConv, setActiveConv] = useState<Conv | null>(null)
   const [chatMessages, setChatMessages] = useState<Message[]>([])
@@ -134,11 +147,11 @@ export default function PlatformMessages() {
     const m = new Map<string, Conv>()
     const bMsgs = messages.filter(x => x.isBroadcast)
     if (bMsgs.length > 0 || true) {
-      m.set('broadcast', { type: 'broadcast', name: tr ? 'Genel Duyuru' : 'General', lastMsg: bMsgs[0] || { content: tr ? 'Hen\u00fcz mesaj yok' : 'No messages', createdAt: new Date().toISOString() } as any, unread: bMsgs.filter(x => x.senderId !== user?.id && !x.readAt).length, subtitle: tr ? 'T\u00fcm \u015firket' : 'All company' })
+      m.set('broadcast', { type: 'broadcast', name: tr ? 'Genel Duyuru' : 'General', lastMsg: bMsgs[0] || { content: tr ? 'Hen\u00fcz mesaj yok' : 'No messages', createdAt: new Date().toISOString() } as any, unread: bMsgs.filter(x => x.senderId !== user?.id && !localReadIds.has(x.id)).length, subtitle: tr ? 'T\u00fcm \u015firket' : 'All company' })
     }
     const dMsgs = messages.filter(x => !x.isBroadcast && x.departmentName)
     if (dMsgs.length > 0 || user?.departmentId) {
-      m.set('dept', { type: 'department', id: user?.departmentId, name: dMsgs[0]?.departmentName || (tr ? 'Departman\u0131m' : 'My Dept'), lastMsg: dMsgs[0] || { content: '', createdAt: new Date().toISOString() } as any, unread: dMsgs.filter(x => x.senderId !== user?.id && !x.readAt).length, subtitle: tr ? 'Departman grubu' : 'Department group' })
+      m.set('dept', { type: 'department', id: user?.departmentId, name: dMsgs[0]?.departmentName || (tr ? 'Departman\u0131m' : 'My Dept'), lastMsg: dMsgs[0] || { content: '', createdAt: new Date().toISOString() } as any, unread: dMsgs.filter(x => x.senderId !== user?.id && !localReadIds.has(x.id)).length, subtitle: tr ? 'Departman grubu' : 'Department group' })
     }
     const directs = messages.filter(x => !x.isBroadcast && !x.departmentName)
     for (const msg of directs) {
@@ -160,24 +173,26 @@ export default function PlatformMessages() {
   const openConv = async (conv: Conv) => {
     setActiveConv(conv)
     setChatLoading(true)
+    let fetchedData: any[] = []
     try {
       let res: any
       if (conv.type === 'broadcast') res = await api.get('/messages?pageSize=200&isBroadcast=true')
       else if (conv.type === 'department' && conv.id) res = await api.get(`/messages?pageSize=200&departmentId=${conv.id}`)
       else if (conv.type === 'direct' && conv.id) res = await api.get(`/messages/thread/${conv.id}`)
       const data = res?.data ?? res
-      setChatMessages((Array.isArray(data) ? data : []).map(mapMsg).sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()))
-      // Mark read
-      for (const x of (Array.isArray(data) ? data : [])) {
+      fetchedData = Array.isArray(data) ? data : []
+      setChatMessages(fetchedData.map(mapMsg).sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()))
+      // Mark read on backend
+      for (const x of fetchedData) {
         if ((x.senderId ?? x.sender?.id) !== user?.id && !x.readAt) api.patch(`/messages/${x.id}/read`).catch(() => {})
       }
     } catch {}
     setChatLoading(false)
-    // Refresh unread count + conversation list after marking messages as read
-    setTimeout(() => {
-      api.get<any>('/messages/unread-count').then((r: any) => setUnreadCount(r?.total ?? 0)).catch(() => {})
-      loadAll()
-    }, 500) // Small delay to let markRead propagate
+    // Mark all messages as locally read (for broadcast/dept unread tracking)
+    const ids = fetchedData.map((m: any) => m.id).filter(Boolean)
+    if (ids.length > 0) markLocalRead(ids)
+    // Refresh unread count
+    api.get<any>('/messages/unread-count').then((r: any) => setUnreadCount(r?.total ?? 0)).catch(() => {})
   }
 
   useEffect(() => { if (activeConv) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [chatMessages.length])
@@ -216,7 +231,7 @@ export default function PlatformMessages() {
         <div className="px-4 py-3 border-b border-[color:var(--border)] flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h2 className="text-base font-bold text-[color:var(--text-1)]">{tr ? 'Mesajlar' : 'Messages'}</h2>
-            {unreadCount > 0 && <span className="px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-[9px] font-bold min-w-[18px] text-center">{unreadCount}</span>}
+            {(() => { const total = conversations.reduce((s, c) => s + c.unread, 0); return total > 0 ? <span className="px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-[9px] font-bold min-w-[18px] text-center">{total}</span> : null })()}
           </div>
           <div className="flex items-center gap-1.5">
             <button onClick={() => setStoryForm(true)} className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100">Story</button>

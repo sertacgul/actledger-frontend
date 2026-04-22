@@ -40,7 +40,6 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
         { to: '/gorevler',  icon: CheckSquare,     label: t('nav_tasks'),     desc: t('tooltip_tasks' as TranslationKey),     shortcut: 'g t' },
         { to: '/raporlar',  icon: FileText,        label: t('nav_reports'),   desc: t('tooltip_reports' as TranslationKey),   shortcut: 'g r' },
         { to: '/harita',    icon: MapPin,          label: lang === 'tr' ? 'Operasyon & Tesis' : 'Operations & Facility', desc: lang === 'tr' ? 'Canl\u0131 harita ve tesis kat planlar\u0131' : 'Live map and facility floor plans',    shortcut: 'g h' },
-        { to: '/mesajlar',  icon: MessageSquare,   label: lang === 'tr' ? 'Mesajlar' : 'Messages', desc: lang === 'tr' ? 'WhatsApp tarz\u0131 mesajla\u015fma' : 'WhatsApp-style messaging', shortcut: 'g j' },
       ],
     },
     {

@@ -12,6 +12,11 @@ import { TASK_STATUS_LABELS, TASK_PRIORITY_LABELS, TASK_TYPE_LABELS } from '../t
 import DraggableModal from '../components/ui/DraggableModal'
 import { useToolbarActions } from '../lib/useToolbarActions'
 import { api } from '../lib/api'
+import PlatformMessages from './PlatformMessages'
+
+function PlatformMessagesEmbed() {
+  return <div style={{ height: 'calc(100vh - 240px)' }}><PlatformMessages /></div>
+}
 
 /* ── Form types ── */
 type FormType = 'checklist' | 'soru_cevap' | 'denetim' | 'sayisal' | 'coktan_secmeli' | 'serbest'
@@ -58,7 +63,7 @@ interface ThreadMessage {
   replyToId?: string | null
 }
 
-type Tab = 'tasks' | 'forms' | 'messages' | 'devices'
+type Tab = 'tasks' | 'forms' | 'devices' | 'platform_messages'
 
 function SyncBadge({ lastSync, isOnline }: { lastSync: string; isOnline: boolean }) {
   const diff = Math.floor((Date.now() - new Date(lastSync).getTime()) / 60000)
@@ -1416,7 +1421,7 @@ export default function MobileHub() {
   const TABS: { key: Tab; icon: typeof CheckSquare; label: string; count?: number }[] = [
     { key: 'tasks',    icon: CheckSquare,   label: 'Görev Yayını',    count: activeTasks.length     },
     { key: 'forms',    icon: FileStack,     label: 'Form Şablonları', count: FORM_TEMPLATES.length  },
-    { key: 'messages', icon: MessageSquare, label: 'Mesajlaşma',      count: unreadMsgCount         },
+    { key: 'platform_messages', icon: MessageSquare, label: 'Mesajlar', count: unreadMsgCount },
     { key: 'devices',  icon: Smartphone,    label: 'Cihazlar',        count: mobileUsersCount       },
   ]
 
@@ -1480,7 +1485,7 @@ export default function MobileHub() {
             : <TaskBroadcast tasks={tasks} departments={departments} users={users} onRefetch={refetchTasks} />
         )}
         {activeTab === 'forms'    && <FormTemplates departments={departments} />}
-        {activeTab === 'messages' && <Messaging departments={departments} />}
+        {activeTab === 'platform_messages' && <PlatformMessagesEmbed />}
         {activeTab === 'devices'  && (
           usersLoading || deptsLoading
             ? <div className="surface h-40 animate-pulse" />

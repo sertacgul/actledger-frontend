@@ -174,8 +174,10 @@ export default function PlatformMessages() {
     } catch {}
     setChatLoading(false)
     // Refresh unread count + conversation list after marking messages as read
-    api.get<any>('/messages/unread-count').then((r: any) => setUnreadCount(r?.total ?? 0)).catch(() => {})
-    loadAll()
+    setTimeout(() => {
+      api.get<any>('/messages/unread-count').then((r: any) => setUnreadCount(r?.total ?? 0)).catch(() => {})
+      loadAll()
+    }, 500) // Small delay to let markRead propagate
   }
 
   useEffect(() => { if (activeConv) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [chatMessages.length])

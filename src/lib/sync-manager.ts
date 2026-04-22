@@ -95,7 +95,7 @@ async function uploadPendingMedia(): Promise<void> {
   const queue = await offlineDb.getMediaQueue()
   if (queue.length === 0) return
 
-  const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:3001/api/v1'
+  const { API_BASE } = await import('./api')
 
   for (const item of queue) {
     try {

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
-import { api, tokenStore, mapUser, ApiError } from '../lib/api'
+import { api, tokenStore, mapUser, ApiError, API_BASE } from '../lib/api'
 import { useCompany } from './CompanyContext'
 import type { User, UserRole } from '../types'
 
@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false
     ;(async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE ?? 'http://localhost:3001/api/v1'}/auth/refresh`, {
+        const res = await fetch(`${API_BASE}/auth/refresh`, {
           method: 'POST',
           credentials: 'include',
         })

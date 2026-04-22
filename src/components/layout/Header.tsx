@@ -7,7 +7,7 @@ import { useCompany } from '../../context/CompanyContext'
 import { useTheme } from '../../context/ThemeContext'
 import { useLanguage } from '../../context/LanguageContext'
 import { useNotifications, markAllNotificationsRead, usePrintLog } from '../../lib/hooks'
-import { tokenStore } from '../../lib/api'
+import { tokenStore, SERVER_BASE } from '../../lib/api'
 import LiveClock from '../ui/LiveClock'
 import { FlagTR, FlagUS, FlagRU, FlagDE } from '../ui/Flags'
 
@@ -51,7 +51,7 @@ export default function Header({ title, subtitle, onMenuClick }: HeaderProps) {
     const token = tokenStore.get()
     if (!token || !user) return
 
-    const socket = io('http://localhost:3001', {
+    const socket = io(SERVER_BASE, {
       auth: { token },
       transports: ['websocket', 'polling'],
       reconnection: true,

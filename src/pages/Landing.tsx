@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { API_BASE } from '../lib/api'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   ArrowRight, Shield, Zap, BarChart3, Users, Layers, Activity,
@@ -1048,7 +1049,7 @@ function OperIQChatbot({ lang }: { lang: 'tr' | 'en' }) {
     setLoading(true)
 
     try {
-      const res = await fetch('http://localhost:3001/api/v1/landing-chat', {
+      const res = await fetch(`${API_BASE}/landing-chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1323,8 +1324,7 @@ export default function Landing() {
     setContactLoading(true)
     setContactResult(null)
     try {
-      const API = 'http://localhost:3001/api/v1'
-      const res = await fetch(`${API}/contact`, {
+      const res = await fetch(`${API_BASE}/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(contactForm),

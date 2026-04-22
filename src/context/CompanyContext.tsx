@@ -26,7 +26,7 @@ interface CompanyContextType {
 }
 
 const DEFAULT_CONFIG: AppConfig = {
-  serverUrl: 'http://localhost:3001/api',
+  serverUrl: (import.meta.env.VITE_API_BASE ?? 'http://localhost:3001/api/v1').replace(/\/v1$/, ''),
   deploymentMode: 'on-premise',
   licenseType: 'enterprise',
   licenseKey: '',

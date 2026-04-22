@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" fill="none">
-  <rect width="192" height="192" rx="40" fill="#0f172a"/>
-  <rect x="16" y="16" width="160" height="160" rx="32" fill="#1e293b"/>
-  <path d="M48 64h96M48 96h64M48 128h80" stroke="white" stroke-width="10" stroke-linecap="round"/>
-  <circle cx="144" cy="128" r="24" fill="#22d3ee"/>
-  <path d="M132 128l9 9L153 122" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="96" y="176" text-anchor="middle" fill="#22d3ee" font-family="system-ui" font-size="18" font-weight="bold">ActLedger</text>
-</svg>

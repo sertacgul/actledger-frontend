@@ -8,7 +8,7 @@ import {
 import clsx from 'clsx'
 import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
-import { api, API_BASE, tokenStore } from '../../lib/api'
+import { api, API_BASE, SERVER_BASE, tokenStore } from '../../lib/api'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -788,7 +788,7 @@ export default function MobileOperIQ() {
                 )}
                 {msg.photoUrl && (
                   <div className="mb-2 rounded-lg overflow-hidden">
-                    <img src={msg.photoUrl.startsWith('blob:') ? msg.photoUrl : `http://localhost:3001${msg.photoUrl}`}
+                    <img src={msg.photoUrl.startsWith('blob:') ? msg.photoUrl : `${SERVER_BASE}${msg.photoUrl}`}
                       alt="Yüklenen fotoğraf" className="w-full max-h-48 object-cover rounded-lg" />
                   </div>
                 )}

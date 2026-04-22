@@ -1,5 +1,8 @@
 // ── API Base URL ──────────────────────────────────────────────────────────────
-export const API_BASE = 'http://localhost:3001/api/v1'
+export const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:3001/api/v1'
+
+// Socket / asset base (without /api/v1)
+export const SERVER_BASE = API_BASE.replace(/\/api\/v1$/, '')
 
 // ── Token store (in-memory; refresh token lives in httpOnly cookie) ───────────
 let _token: string | null = null

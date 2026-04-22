@@ -1248,7 +1248,7 @@ function OperIQChatbot({ lang }: { lang: 'tr' | 'en' }) {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
-              placeholder={lang === 'tr' ? 'ATAOL AI Techs ad\u0131nda, 200 ki\u015finin \u00e7al\u0131\u015ft\u0131\u011f\u0131, 10 departman\u0131 olan bir yapay zek\u00e2 firmas\u0131y\u0131z. Bize hangi kapsamda, nas\u0131l bir destek sa\u011flayabilirsiniz?' : 'We are an AI company called ATAOL AI Techs with 200 employees and 10 departments. In what scope and how can you support us?'}
+              placeholder={lang === 'tr' ? '\u00d6rne\u011fin: ATAOL AI Techs ad\u0131nda, 200 ki\u015finin \u00e7al\u0131\u015ft\u0131\u011f\u0131, 10 departman\u0131 olan bir yapay zek\u00e2 firmas\u0131y\u0131z. Bize hangi kapsamda, nas\u0131l bir destek sa\u011flayabilirsiniz?' : 'For example: We are an AI company called ATAOL AI Techs with 200 employees and 10 departments. In what scope and how can you support us?'}
               className="flex-1 bg-transparent outline-none text-sm resize-none"
               style={{ color: '#e2e8f0', minHeight: '60px', maxHeight: '80px' }}
               rows={3}

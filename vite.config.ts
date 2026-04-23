@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
         name: 'ActLedger Mobil',
         short_name: 'ActLedger',
@@ -19,9 +19,9 @@ export default defineConfig({
         scope: '/',
         start_url: '/m/gorevler',
         icons: [
-          { src: '/images/icon-192.svg', sizes: '192x192', type: 'image/svg+xml' },
-          { src: '/images/icon-512.svg', sizes: '512x512', type: 'image/svg+xml' },
-          { src: '/images/icon-512.svg', sizes: '512x512', type: 'image/svg+xml', purpose: 'maskable' },
+          { src: '/images/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/images/icon-512.png', sizes: '512x512', type: 'image/png' },
+          { src: '/images/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
           { src: '/favicon.svg', sizes: 'any', type: 'image/svg+xml' },
         ],
       },

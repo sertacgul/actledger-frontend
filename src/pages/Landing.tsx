@@ -1100,10 +1100,10 @@ function OperIQChatbot({ lang }: { lang: 'tr' | 'en' }) {
       </div>
 
       {/* Floating button with OperIQ symbol */}
-      <div className="relative flex items-center justify-center" style={{ margin: '0 auto', width: '72px', height: '72px' }}>
+      <div className="relative flex items-center justify-center" style={{ margin: '0 auto', width: '56px', height: '56px' }}>
         {/* Gold heartbeat wave 1 */}
         <div
-          className="absolute rounded-full"
+          className="absolute rounded-full hidden md:block"
           style={{
             inset: '-20px',
             background: 'radial-gradient(circle, rgba(234,179,8,0.15) 0%, rgba(234,179,8,0) 70%)',
@@ -1112,7 +1112,7 @@ function OperIQChatbot({ lang }: { lang: 'tr' | 'en' }) {
         />
         {/* Gold heartbeat wave 2 */}
         <div
-          className="absolute rounded-full"
+          className="absolute rounded-full hidden md:block"
           style={{
             inset: '-35px',
             background: 'radial-gradient(circle, rgba(234,179,8,0.08) 0%, rgba(234,179,8,0) 70%)',
@@ -1121,7 +1121,7 @@ function OperIQChatbot({ lang }: { lang: 'tr' | 'en' }) {
         />
         {/* Gold heartbeat wave 3 - fog effect */}
         <div
-          className="absolute rounded-full"
+          className="absolute rounded-full hidden md:block"
           style={{
             inset: '-55px',
             background: 'radial-gradient(circle, rgba(251,191,36,0.06) 0%, transparent 60%)',
@@ -1152,8 +1152,8 @@ function OperIQChatbot({ lang }: { lang: 'tr' | 'en' }) {
           onClick={() => setOpen(o => !o)}
           className="relative flex items-center justify-center transition-all duration-500 hover:scale-110"
           style={{
-            width: '72px',
-            height: '72px',
+            width: '56px',
+            height: '56px',
             borderRadius: '50%',
             background: 'linear-gradient(135deg, #06b6d4, #0891b2, #0e7490)',
             boxShadow: '0 8px 40px rgba(6,182,212,0.4), 0 0 40px rgba(234,179,8,0.2), 0 0 80px rgba(234,179,8,0.1), inset 0 1px 0 rgba(255,255,255,0.2)',
@@ -1697,7 +1697,7 @@ export default function Landing() {
                 </div>
                 <h1
                   className="font-extrabold leading-[1.05] tracking-tight"
-                  style={{ fontSize: 'clamp(56px, 7vw, 96px)' }}
+                  style={{ fontSize: 'clamp(32px, 5vw, 96px)' }}
                 >
                   <span style={{ color: '#0f2b3d' }}>{t.heroTitle.split(' ').slice(0, 2).join(' ')}</span>
                   <br />
@@ -1744,7 +1744,7 @@ export default function Landing() {
                 <DashboardMockup />
                 {/* Floating Gantt + Donut stacked - top right */}
                 <div
-                  className="absolute flex flex-col gap-3"
+                  className="absolute flex-col gap-3 hidden lg:flex"
                   style={{
                     top: '-60px',
                     right: '-40px',
@@ -2774,28 +2774,28 @@ export default function Landing() {
 
           {/* Table */}
           <Reveal>
-            <div className="rounded-2xl overflow-hidden glow-pulse mx-auto"
+            <div className="rounded-2xl overflow-x-auto glow-pulse mx-auto"
               style={{
-                maxWidth: '70%',
+                maxWidth: 'min(95%, 900px)',
                 background: 'rgba(255,255,255,0.85)',
                 backdropFilter: 'blur(12px)',
                 border: '1px solid rgba(6,182,212,0.15)',
                 boxShadow: '0 20px 60px rgba(0,0,0,0.08)',
               }}>
               {/* Table header */}
-              <div className="grid grid-cols-12 gap-0" style={{ background: 'linear-gradient(135deg, #0f2b3d, #1a3a4f)', borderBottom: '2px solid rgba(6,182,212,0.3)' }}>
-                <div className="col-span-4 px-8 py-6">
-                  <span className="text-lg font-bold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              <div className="grid grid-cols-12 gap-0" style={{ background: 'linear-gradient(135deg, #0f2b3d, #1a3a4f)', borderBottom: '2px solid rgba(6,182,212,0.3)', minWidth: '600px' }}>
+                <div className="col-span-4 px-3 md:px-8 py-4 md:py-6">
+                  <span className="text-sm md:text-lg font-bold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>
                     {lang === 'tr' ? 'Kriter' : 'Criteria'}
                   </span>
                 </div>
-                <div className="col-span-4 px-8 py-6 text-center" style={{ background: 'rgba(6,182,212,0.15)', borderLeft: '1px solid rgba(6,182,212,0.2)', borderRight: '1px solid rgba(6,182,212,0.2)' }}>
-                  <span className="text-lg font-extrabold tracking-wider" style={{ color: '#22d3ee' }}>
+                <div className="col-span-4 px-3 md:px-8 py-4 md:py-6 text-center" style={{ background: 'rgba(6,182,212,0.15)', borderLeft: '1px solid rgba(6,182,212,0.2)', borderRight: '1px solid rgba(6,182,212,0.2)' }}>
+                  <span className="text-sm md:text-lg font-extrabold tracking-wider" style={{ color: '#22d3ee' }}>
                     {t.benchmarkCol1}
                   </span>
                 </div>
-                <div className="col-span-4 px-8 py-6 text-center">
-                  <span className="text-lg font-bold tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                <div className="col-span-4 px-3 md:px-8 py-4 md:py-6 text-center">
+                  <span className="text-sm md:text-lg font-bold tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>
                     {t.benchmarkCol2}
                   </span>
                 </div>
@@ -2880,23 +2880,24 @@ export default function Landing() {
                       animationDelay: `${i * 0.04}s`,
                       background: isPrice ? 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(20,184,166,0.05))' : i % 2 === 0 ? 'transparent' : 'rgba(6,182,212,0.015)',
                       borderBottom: '1px solid rgba(6,182,212,0.06)',
+                      minWidth: '600px',
                     }}
                   >
-                    <div className="col-span-4 px-8 py-5 flex items-center">
-                      <span className={`text-base font-semibold ${isPrice ? 'text-lg' : ''}`} style={{ color: isPrice ? '#0891b2' : '#0f2b3d' }}>
+                    <div className="col-span-4 px-3 md:px-8 py-3 md:py-5 flex items-center">
+                      <span className={`text-sm md:text-base font-semibold ${isPrice ? 'md:text-lg' : ''}`} style={{ color: isPrice ? '#0891b2' : '#0f2b3d' }}>
                         {row[0]}
                       </span>
                     </div>
-                    <div className="col-span-4 px-8 py-5 flex items-center gap-2.5 justify-center text-center"
+                    <div className="col-span-4 px-3 md:px-8 py-3 md:py-5 flex items-center gap-2 justify-center text-center"
                       style={{ background: 'rgba(6,182,212,0.03)', borderLeft: '1px solid rgba(6,182,212,0.08)', borderRight: '1px solid rgba(6,182,212,0.08)' }}>
-                      <span className="inline-block w-3 h-3 rounded-full flex-shrink-0" style={{ background: actHas ? '#06b6d4' : '#f59e0b' }} />
-                      <span className={`text-base font-medium ${isPrice ? 'font-bold text-lg' : ''}`} style={{ color: isPrice ? '#0891b2' : '#1a2e3b' }}>
+                      <span className="inline-block w-2.5 h-2.5 md:w-3 md:h-3 rounded-full flex-shrink-0" style={{ background: actHas ? '#06b6d4' : '#f59e0b' }} />
+                      <span className={`text-sm md:text-base font-medium ${isPrice ? 'font-bold md:text-lg' : ''}`} style={{ color: isPrice ? '#0891b2' : '#1a2e3b' }}>
                         {row[1]}
                       </span>
                     </div>
-                    <div className="col-span-4 px-8 py-5 flex items-center gap-2.5 justify-center text-center">
-                      <span className="inline-block w-3 h-3 rounded-full flex-shrink-0" style={{ background: tradBad ? '#ef4444' : '#f59e0b' }} />
-                      <span className="text-base" style={{ color: '#0f172a' }}>
+                    <div className="col-span-4 px-3 md:px-8 py-3 md:py-5 flex items-center gap-2 justify-center text-center">
+                      <span className="inline-block w-2.5 h-2.5 md:w-3 md:h-3 rounded-full flex-shrink-0" style={{ background: tradBad ? '#ef4444' : '#f59e0b' }} />
+                      <span className="text-sm md:text-base" style={{ color: '#0f172a' }}>
                         {row[2]}
                       </span>
                     </div>

@@ -616,7 +616,7 @@ function ScrollGrowIphone({ src }: { src: string }) {
           className="flex-1 w-full"
           style={{
             maxWidth: '860px',
-            height: '607px',
+            aspectRatio: '16/9',
             transform: `scale(${videoScale}) translateY(${(1 - progress) * 20}px)`,
             opacity: videoOpacity,
             transition: 'transform 0.3s ease-out, opacity 0.3s ease-out',
@@ -1669,7 +1669,7 @@ export default function Landing() {
             <button
               type="button"
               onClick={() => setLoginOpen(true)}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-lg transition-all duration-300 hover:scale-105"
+              className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-lg transition-all duration-300 hover:scale-105"
               style={{
                 background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
                 color: '#ffffff',
@@ -2001,7 +2001,7 @@ export default function Landing() {
             { title: t.nf7Title, body: t.nf7Body, benefit: t.nf7Benefit, img: '/images/File_management.jpg', icon: FolderOpen,   color: '#0369a1' },
             { title: t.nf9Title, body: t.nf9Body, benefit: t.nf9Benefit, img: '/images/Form.PNG',           icon: ListChecks,    color: '#c026d3' },
             /* AssetIQ, Mobil QR, IoT Sorumlu */
-            { title: t.nf10Title, body: t.nf10Body, benefit: t.nf10Benefit, img: '/images/Asset.jpg',          icon: ScanLine,      color: '#059669' },
+            { title: t.nf10Title, body: t.nf10Body, benefit: t.nf10Benefit, img: '/images/Depolama.PNG',       icon: ScanLine,      color: '#059669' },
             { title: t.nf11Title, body: t.nf11Body, benefit: t.nf11Benefit, img: '/images/Act_mobil.jpg',      icon: Camera,        color: '#0d9488' },
             { title: t.nf12Title, body: t.nf12Body, benefit: t.nf12Benefit, img: '/images/OperIQ.jpg',         icon: Radio,         color: '#dc2626' },
             /* Iletisim & analitik */

@@ -74,10 +74,21 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
+      - name: Install CocoaPods dependencies
+        working-directory: ios/App
+        run: |
+          if [ -f Podfile ]; then pod install; fi
+
       - name: Build iOS archive
         working-directory: ios/App
         run: |
-          xcodebuild -workspace App.xcworkspace \
+          # Use xcworkspace if exists, otherwise xcodeproj
+          if [ -d "App.xcworkspace" ]; then
+            WORKSPACE="-workspace App.xcworkspace"
+          else
+            WORKSPACE="-project App.xcodeproj"
+          fi
+          xcodebuild $WORKSPACE \
             -scheme App \
             -sdk iphoneos \
             -configuration Release \

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ActLedger</string>
+    <string name="title_activity_main">ActLedger</string>
+    <string name="package_name">com.ataolaitech.actledger</string>
+    <string name="custom_url_scheme">com.ataolaitech.actledger</string>
+</resources>

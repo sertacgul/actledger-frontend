@@ -54,8 +54,6 @@
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>ActLedger saha takibi icin konumunuzu kullanir</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>ActLedger saha takibi icin arka planda konum kullanir</string>
 	<key>NSCameraUsageDescription</key>
 	<string>ActLedger saha raporlari icin kamera kullanir</string>
 	<key>NSPhotoLibraryUsageDescription</key>

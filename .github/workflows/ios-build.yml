@@ -74,21 +74,20 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
+      - name: Install CocoaPods
+        working-directory: ios/App
+        run: pod install
+
       - name: Set manual signing
         working-directory: ios/App
         run: |
-          # Get provisioning profile UUID
-          PP_UUID=$(security cms -D -i ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision 2>/dev/null | plutil -extract UUID raw -)
-          echo "PP_UUID=$PP_UUID" >> $GITHUB_ENV
-
-          # Disable automatic signing and set manual
           sed -i '' 's/CODE_SIGN_STYLE = Automatic/CODE_SIGN_STYLE = Manual/g' App.xcodeproj/project.pbxproj
           sed -i '' "s/DEVELOPMENT_TEAM = ***REDACTED***;/DEVELOPMENT_TEAM = ***REDACTED***; PROVISIONING_PROFILE_SPECIFIER = \"ActLedger AppStore\";/g" App.xcodeproj/project.pbxproj
 
       - name: Build iOS archive
         working-directory: ios/App
         run: |
-          xcodebuild -project App.xcodeproj \
+          xcodebuild -workspace App.xcworkspace \
             -scheme App \
             -sdk iphoneos \
             -configuration Release \

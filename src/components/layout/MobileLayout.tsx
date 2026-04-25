@@ -28,39 +28,33 @@ export default function MobileLayout() {
     // Start offline sync manager
     startSyncManager()
 
-    // Register push notifications (Capacitor native or Web Push fallback)
+    // Register push notifications
     ;(async () => {
       try {
-        // Try Capacitor native push first (iOS/Android app)
-        const { Capacitor } = await import('@capacitor/core').catch(() => ({ Capacitor: null }))
-        if (Capacitor?.isNativePlatform?.()) {
-          console.log('[Push] Native platform detected, using Capacitor PushNotifications')
-          const { PushNotifications } = await import('@capacitor/push-notifications')
-          const permResult = await PushNotifications.requestPermissions()
-          console.log('[Push] Permission:', permResult.receive)
-          if (permResult.receive === 'granted') {
-            await PushNotifications.register()
-            PushNotifications.addListener('registration', (token) => {
-              console.log('[Push] Native token:', token.value.substring(0, 20) + '...')
-              const platform = Capacitor.getPlatform() === 'ios' ? 'apns' : 'fcm'
-              api.post('/notifications/device-token', { token: token.value, platform }).catch(() => {})
-            })
-            PushNotifications.addListener('registrationError', (err) => {
-              console.error('[Push] Registration error:', err.error)
-            })
-            PushNotifications.addListener('pushNotificationReceived', (notification) => {
-              console.log('[Push] Received:', notification.title)
-            })
-            PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
-              console.log('[Push] Action:', action.notification.title)
-            })
-          }
+        // Check if running inside Capacitor native app (iOS/Android)
+        const isNative = !!(window as any).Capacitor?.isNativePlatform?.()
+
+        if (isNative) {
+          console.log('[Push] Native Capacitor app detected')
+          // In native mode with server.url, Capacitor plugins work via bridge
+          try {
+            const { PushNotifications } = await import('@capacitor/push-notifications')
+            const perm = await PushNotifications.requestPermissions()
+            if (perm.receive === 'granted') {
+              await PushNotifications.register()
+              PushNotifications.addListener('registration', (token) => {
+                console.log('[Push] APNs token received')
+                const platform = (window as any).Capacitor?.getPlatform?.() === 'ios' ? 'apns' : 'fcm'
+                api.post('/notifications/device-token', { token: token.value, platform }).catch(() => {})
+              })
+              PushNotifications.addListener('registrationError', (err) => console.error('[Push] Error:', err.error))
+            }
+          } catch { console.log('[Push] Capacitor plugin not available, skipping') }
           return
         }
 
         // Web Push fallback (PWA in browser)
-        console.log('[Push] Web platform, trying Web Push...')
-        if (!('serviceWorker' in navigator) || !('PushManager' in window)) { console.log('[Push] No Web Push support'); return }
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
         const permission = await Notification.requestPermission()
         if (permission !== 'granted') return
         const reg = await navigator.serviceWorker.ready
@@ -69,19 +63,19 @@ export default function MobileLayout() {
           const res = await api.get<any>('/notifications/vapid-public-key')
           const vapidKey = res?.key || (res as any)?.data?.key || res
           if (!vapidKey) return
-          const urlBase64ToUint8Array = (base64String: string) => {
-            const padding = '='.repeat((4 - base64String.length % 4) % 4)
-            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
-            const rawData = window.atob(base64)
-            const outputArray = new Uint8Array(rawData.length)
-            for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i)
-            return outputArray
+          const urlBase64ToUint8Array = (s: string) => {
+            const p = '='.repeat((4 - s.length % 4) % 4)
+            const b = (s + p).replace(/-/g, '+').replace(/_/g, '/')
+            const r = window.atob(b)
+            const o = new Uint8Array(r.length)
+            for (let i = 0; i < r.length; ++i) o[i] = r.charCodeAt(i)
+            return o
           }
           sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(vapidKey) })
         }
         if (sub) {
-          const subJson = sub.toJSON()
-          await api.post('/notifications/push-subscribe', { endpoint: subJson.endpoint, keys: subJson.keys, userAgent: navigator.userAgent }).catch(() => {})
+          const j = sub.toJSON()
+          await api.post('/notifications/push-subscribe', { endpoint: j.endpoint, keys: j.keys, userAgent: navigator.userAgent }).catch(() => {})
         }
       } catch (err) { console.error('[Push] Error:', err) }
     })()

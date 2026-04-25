@@ -28,27 +28,36 @@ export default function MobileLayout() {
     // Start offline sync manager
     startSyncManager()
 
-    // Register push notifications - check every 3 seconds for APNs token
-    const pushInterval = setInterval(async () => {
-      try {
-        const apnsToken = (window as any).__APNS_TOKEN__ || localStorage.getItem('apns_device_token')
-        if (apnsToken && !localStorage.getItem('apns_registered')) {
-          console.log('[Push] APNs token found, registering...')
-          await api.post('/notifications/device-token', { token: apnsToken, platform: 'apns' })
-          localStorage.setItem('apns_registered', 'true')
-          console.log('[Push] APNs registered successfully!')
-          clearInterval(pushInterval)
-        }
-      } catch {}
-    }, 3000)
-
-    // Also try Web Push for browser users
+    // Register push notifications
     ;(async () => {
       try {
-        if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
-        const permission = await Notification.requestPermission()
-        if (permission !== 'granted') return
-        const reg = await navigator.serviceWorker.ready
+        // Try Capacitor native push (works when server.url is NOT set)
+        const cap = (window as any).Capacitor
+        if (cap?.isNativePlatform?.()) {
+          const { PushNotifications } = await import('@capacitor/push-notifications')
+          const perm = await PushNotifications.requestPermissions()
+          if (perm.receive === 'granted') {
+            await PushNotifications.register()
+            PushNotifications.addListener('registration', async (token) => {
+              console.log('[Push] Native token received:', token.value.substring(0, 16) + '...')
+              const platform = cap.getPlatform?.() === 'ios' ? 'apns' : 'fcm'
+              try {
+                await api.post('/notifications/device-token', { token: token.value, platform })
+                console.log('[Push] Token registered with backend')
+              } catch (e) { console.error('[Push] Backend registration failed:', e) }
+            })
+            PushNotifications.addListener('registrationError', (e) => console.error('[Push] Reg error:', e.error))
+            PushNotifications.addListener('pushNotificationReceived', (n) => console.log('[Push] Received:', n.title))
+          }
+          return // skip web push
+        }
+
+        // Web Push fallback
+        if (!('PushManager' in window)) return
+        if (Notification.permission === 'default') await Notification.requestPermission()
+        if (Notification.permission !== 'granted') return
+        const reg = await navigator.serviceWorker?.ready
+        if (!reg) return
         let sub = await reg.pushManager.getSubscription()
         if (!sub) {
           const res = await api.get<any>('/notifications/vapid-public-key')
@@ -61,7 +70,7 @@ export default function MobileLayout() {
           const j = sub.toJSON()
           await api.post('/notifications/push-subscribe', { endpoint: j.endpoint, keys: j.keys, userAgent: navigator.userAgent }).catch(() => {})
         }
-      } catch {}
+      } catch (err) { console.error('[Push] Error:', err) }
     })()
 
     // Location: send every 60s - mobile users always share location
@@ -91,7 +100,6 @@ export default function MobileLayout() {
       window.removeEventListener('offline', off)
       stopSyncManager()
       if (locationInterval) clearInterval(locationInterval)
-      clearInterval(pushInterval)
     }
   }, [user, navigate])
 

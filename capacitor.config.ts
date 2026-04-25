@@ -4,11 +4,6 @@ const config: CapacitorConfig = {
   appId: 'com.ataolaitech.actledger',
   appName: 'ActLedger',
   webDir: 'dist',
-  server: {
-    url: 'https://www.actledger.com/m/giris',
-    cleartext: false,
-    allowNavigation: ['*.actledger.com', 'actledger.com'],
-  },
   plugins: {
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
@@ -26,7 +21,6 @@ const config: CapacitorConfig = {
   ios: {
     scheme: 'ActLedger',
     contentInset: 'automatic',
-    allowsLinkPreview: false,
   },
   android: {
     buildOptions: {

@@ -8,17 +8,14 @@ on:
       - 'src/**'
       - 'ios/**'
       - 'capacitor.config.ts'
-      - 'package.json'
 
 env:
-  APP_ID: com.ataolaitech.actledger
-  TEAM_ID: ***REDACTED***
-  APPLE_ID: "6757182605"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build-ios:
     runs-on: macos-15
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - name: Checkout
@@ -39,10 +36,18 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync ios
 
-      - name: Setup Xcode
-        uses: maxim-lobanov/setup-xcode@v1
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
         with:
-          xcode-version: latest-stable
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Install Fastlane
+        run: gem install fastlane
+
+      - name: Install CocoaPods
+        working-directory: ios/App
+        run: pod install
 
       - name: Install Apple certificate & provisioning profile
         env:
@@ -51,95 +56,68 @@ jobs:
           BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-          # Create variables
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
-          # Decode from base64
           echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
           echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
 
-          # Create temporary keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
 
-          # Import certificate
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
 
-          # Copy provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
 
-      - name: Install CocoaPods
-        working-directory: ios/App
-        run: pod install
-
-      - name: Configure manual signing
-        working-directory: ios/App
-        run: |
-          # Get provisioning profile UUID
-          PP_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< $(security cms -D -i ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision 2>/dev/null))
+          # Extract UUID for fastlane
+          PP_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< $(security cms -D -i $PP_PATH 2>/dev/null))
+          echo "PP_UUID=$PP_UUID" >> $GITHUB_ENV
           echo "Provisioning Profile UUID: $PP_UUID"
 
-          # Patch pbxproj: set manual signing + team + profile ONLY on App target
-          python3 << 'PYEOF'
-          import re
-          with open("App.xcodeproj/project.pbxproj", "r") as f:
-              content = f.read()
-          # Set CODE_SIGN_STYLE to Manual for all
-          content = content.replace("CODE_SIGN_STYLE = Automatic", "CODE_SIGN_STYLE = Manual")
-          with open("App.xcodeproj/project.pbxproj", "w") as f:
-              f.write(content)
-          PYEOF
-
-      - name: Build iOS archive
+      - name: Build & Archive with Fastlane
         working-directory: ios/App
+        env:
+          TEAM_ID: ***REDACTED***
+          PP_UUID: ${{ env.PP_UUID }}
         run: |
-          PP_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< $(security cms -D -i ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision 2>/dev/null))
+          # Create Fastfile
+          mkdir -p fastlane
+          cat > fastlane/Fastfile << 'FASTFILE'
+          default_platform(:ios)
 
-          xcodebuild -workspace App.xcworkspace \
-            -scheme App \
-            -sdk iphoneos \
-            -configuration Release \
-            -archivePath $RUNNER_TEMP/App.xcarchive \
-            -destination "generic/platform=iOS" \
-            DEVELOPMENT_TEAM=***REDACTED*** \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            "PROVISIONING_PROFILE_SPECIFIER=" \
-            PROVISIONING_PROFILE="$PP_UUID" \
-            COMPILER_INDEX_STORE_ENABLE=NO \
-            archive
+          platform :ios do
+            desc "Build and archive for App Store"
+            lane :build do
+              update_code_signing_settings(
+                use_automatic_signing: false,
+                path: "App.xcodeproj",
+                team_id: ENV["TEAM_ID"],
+                code_sign_identity: "Apple Distribution",
+                profile_uuid: ENV["PP_UUID"],
+                targets: ["App"]
+              )
 
-      - name: Export IPA
-        run: |
-          cat > $RUNNER_TEMP/ExportOptions.plist << 'PLIST'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>method</key>
-            <string>app-store-connect</string>
-            <key>teamID</key>
-            <string>***REDACTED***</string>
-            <key>uploadBitcode</key>
-            <false/>
-            <key>uploadSymbols</key>
-            <true/>
-            <key>destination</key>
-            <string>upload</string>
-          </dict>
-          </plist>
-          PLIST
+              build_app(
+                workspace: "App.xcworkspace",
+                scheme: "App",
+                configuration: "Release",
+                export_method: "app-store",
+                export_team_id: ENV["TEAM_ID"],
+                output_directory: "./build",
+                output_name: "ActLedger.ipa",
+                clean: true,
+                xcargs: "COMPILER_INDEX_STORE_ENABLE=NO"
+              )
+            end
+          end
+          FASTFILE
 
-          xcodebuild -exportArchive \
-            -archivePath $RUNNER_TEMP/App.xcarchive \
-            -exportPath $RUNNER_TEMP/export \
-            -exportOptionsPlist $RUNNER_TEMP/ExportOptions.plist
+          fastlane build
 
       - name: Upload to TestFlight
         env:
@@ -147,13 +125,12 @@ jobs:
           APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
         run: |
-          # Create API key file
           mkdir -p ~/private_keys
           echo "$APP_STORE_CONNECT_API_KEY" > ~/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8
 
           xcrun altool --upload-app \
             --type ios \
-            --file "$RUNNER_TEMP/export/App.ipa" \
+            --file "ios/App/build/ActLedger.ipa" \
             --apiKey "$APP_STORE_CONNECT_API_KEY_ID" \
             --apiIssuer "$APP_STORE_CONNECT_API_ISSUER_ID"
 

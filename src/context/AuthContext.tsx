@@ -53,8 +53,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const result = await api.post<any>('/auth/login', { email, password })
       tokenStore.set(result.accessToken)
+      localStorage.setItem('actledger_token', result.accessToken)
       const mapped = mapUser(result.user)
       setUser(mapped)
+      localStorage.setItem('actledger_user_id', mapped.id)
       // Fetch full profile to sync company sector
       try {
         const me = await api.get<any>('/auth/me')
@@ -73,8 +75,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const result = await api.post<any>('/mobile-auth/login', { code, password })
       tokenStore.set(result.accessToken)
+      localStorage.setItem('actledger_token', result.accessToken)
       const mapped = mapUser(result.user)
       setUser(mapped)
+      localStorage.setItem('actledger_user_id', mapped.id)
       return { user: mapped, mustChangePassword: result.mustChangePassword ?? false }
     } catch (e: any) {
       const msg = e instanceof ApiError ? e.message : 'Giris yapilamadi'

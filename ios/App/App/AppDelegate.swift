@@ -1,12 +1,10 @@
 import UIKit
 import Capacitor
-import WebKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-    var deviceToken: String?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         UNUserNotificationCenter.current().delegate = self
@@ -22,15 +20,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         let token = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
-        self.deviceToken = token
         print("[APNs] Token: \(token.prefix(20))...")
         UserDefaults.standard.set(token, forKey: "apns_device_token")
-
         NotificationCenter.default.post(name: .capacitorDidRegisterForRemoteNotifications, object: deviceToken)
 
-        // Inject token into WebView so JavaScript can read it
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-            self.injectTokenToWebView()
+        // Inject token via JavaScript into the WKWebView
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+            self.injectToken(token)
         }
     }
 
@@ -39,48 +35,44 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: error)
     }
 
-    private func injectTokenToWebView() {
-        guard let token = self.deviceToken else { return }
-        guard let vc = window?.rootViewController as? CAPBridgeViewController else { return }
+    private func injectToken(_ token: String) {
+        // Find the WKWebView in the view hierarchy
+        guard let rootVC = window?.rootViewController else {
+            print("[APNs] No root VC")
+            return
+        }
 
-        let js = """
-        (function() {
-            window.__APNS_TOKEN__ = '\(token)';
-            console.log('[APNs] Token injected into WebView');
-            // Auto-register if auth token exists
-            var authToken = localStorage.getItem('actledger_token');
-            if (authToken && authToken.length > 10) {
-                var apiBase = 'https://api.actledger.com/api/v1';
-                fetch(apiBase + '/notifications/device-token', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + authToken
-                    },
-                    body: JSON.stringify({ token: '\(token)', platform: 'apns' })
-                }).then(function(r) {
-                    console.log('[APNs] Token registered:', r.status);
-                }).catch(function(e) {
-                    console.log('[APNs] Token registration failed:', e);
-                });
-            } else {
-                console.log('[APNs] No auth token yet, will register on login');
+        func findWebView(in view: UIView) -> WKWebView? {
+            if let wk = view as? WKWebView { return wk }
+            for sub in view.subviews {
+                if let found = findWebView(in: sub) { return found }
             }
-        })();
-        """
-        vc.webView?.evaluateJavaScript(js, completionHandler: { _, error in
+            return nil
+        }
+
+        guard let webView = findWebView(in: rootVC.view) else {
+            print("[APNs] No WKWebView found, retrying in 3s...")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                self.injectToken(token)
+            }
+            return
+        }
+
+        let js = "window.__APNS_TOKEN__ = '\(token)'; localStorage.setItem('apns_device_token', '\(token)'); console.log('[APNs] Token stored');"
+        webView.evaluateJavaScript(js) { _, error in
             if let error = error {
-                print("[APNs] JS injection error: \(error)")
+                print("[APNs] JS error: \(error.localizedDescription)")
             } else {
-                print("[APNs] Token injected successfully")
+                print("[APNs] Token injected OK")
             }
-        })
+        }
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
-        // Re-inject token when app comes to foreground
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.injectTokenToWebView()
+        if let token = UserDefaults.standard.string(forKey: "apns_device_token") {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                self.injectToken(token)
+            }
         }
     }
 
@@ -102,7 +94,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.badge, .sound, .banner])
     }
-
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         completionHandler()
     }

@@ -28,27 +28,23 @@ export default function MobileLayout() {
     // Start offline sync manager
     startSyncManager()
 
-    // Register push notifications
+    // Register push notifications - check every 3 seconds for APNs token
+    const pushInterval = setInterval(async () => {
+      try {
+        const apnsToken = (window as any).__APNS_TOKEN__ || localStorage.getItem('apns_device_token')
+        if (apnsToken && !localStorage.getItem('apns_registered')) {
+          console.log('[Push] APNs token found, registering...')
+          await api.post('/notifications/device-token', { token: apnsToken, platform: 'apns' })
+          localStorage.setItem('apns_registered', 'true')
+          console.log('[Push] APNs registered successfully!')
+          clearInterval(pushInterval)
+        }
+      } catch {}
+    }, 3000)
+
+    // Also try Web Push for browser users
     ;(async () => {
       try {
-        // Check for native APNs token (injected by AppDelegate)
-        const apnsToken = (window as any).__APNS_TOKEN__
-        if (apnsToken) {
-          console.log('[Push] APNs token found, registering with backend...')
-          await api.post('/notifications/device-token', { token: apnsToken, platform: 'apns' }).catch(() => {})
-          return
-        }
-
-        // Retry after delay (token might be injected later)
-        setTimeout(async () => {
-          const t = (window as any).__APNS_TOKEN__
-          if (t) {
-            console.log('[Push] APNs token found (delayed), registering...')
-            await api.post('/notifications/device-token', { token: t, platform: 'apns' }).catch(() => {})
-          }
-        }, 5000)
-
-        // Web Push fallback (PWA in browser)
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
         const permission = await Notification.requestPermission()
         if (permission !== 'granted') return
@@ -65,7 +61,7 @@ export default function MobileLayout() {
           const j = sub.toJSON()
           await api.post('/notifications/push-subscribe', { endpoint: j.endpoint, keys: j.keys, userAgent: navigator.userAgent }).catch(() => {})
         }
-      } catch (err) { console.error('[Push] Error:', err) }
+      } catch {}
     })()
 
     // Location: send every 60s - mobile users always share location
@@ -95,6 +91,7 @@ export default function MobileLayout() {
       window.removeEventListener('offline', off)
       stopSyncManager()
       if (locationInterval) clearInterval(locationInterval)
+      clearInterval(pushInterval)
     }
   }, [user, navigate])
 

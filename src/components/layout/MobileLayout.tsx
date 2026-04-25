@@ -31,27 +31,22 @@ export default function MobileLayout() {
     // Register push notifications
     ;(async () => {
       try {
-        // Check if running inside Capacitor native app (iOS/Android)
-        const isNative = !!(window as any).Capacitor?.isNativePlatform?.()
-
-        if (isNative) {
-          console.log('[Push] Native Capacitor app detected')
-          // In native mode with server.url, Capacitor plugins work via bridge
-          try {
-            const { PushNotifications } = await import('@capacitor/push-notifications')
-            const perm = await PushNotifications.requestPermissions()
-            if (perm.receive === 'granted') {
-              await PushNotifications.register()
-              PushNotifications.addListener('registration', (token) => {
-                console.log('[Push] APNs token received')
-                const platform = (window as any).Capacitor?.getPlatform?.() === 'ios' ? 'apns' : 'fcm'
-                api.post('/notifications/device-token', { token: token.value, platform }).catch(() => {})
-              })
-              PushNotifications.addListener('registrationError', (err) => console.error('[Push] Error:', err.error))
-            }
-          } catch { console.log('[Push] Capacitor plugin not available, skipping') }
+        // Check for native APNs token (injected by AppDelegate)
+        const apnsToken = (window as any).__APNS_TOKEN__
+        if (apnsToken) {
+          console.log('[Push] APNs token found, registering with backend...')
+          await api.post('/notifications/device-token', { token: apnsToken, platform: 'apns' }).catch(() => {})
           return
         }
+
+        // Retry after delay (token might be injected later)
+        setTimeout(async () => {
+          const t = (window as any).__APNS_TOKEN__
+          if (t) {
+            console.log('[Push] APNs token found (delayed), registering...')
+            await api.post('/notifications/device-token', { token: t, platform: 'apns' }).catch(() => {})
+          }
+        }, 5000)
 
         // Web Push fallback (PWA in browser)
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
@@ -63,15 +58,8 @@ export default function MobileLayout() {
           const res = await api.get<any>('/notifications/vapid-public-key')
           const vapidKey = res?.key || (res as any)?.data?.key || res
           if (!vapidKey) return
-          const urlBase64ToUint8Array = (s: string) => {
-            const p = '='.repeat((4 - s.length % 4) % 4)
-            const b = (s + p).replace(/-/g, '+').replace(/_/g, '/')
-            const r = window.atob(b)
-            const o = new Uint8Array(r.length)
-            for (let i = 0; i < r.length; ++i) o[i] = r.charCodeAt(i)
-            return o
-          }
-          sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(vapidKey) })
+          const u = (s: string) => { const p='='.repeat((4-s.length%4)%4); const b=(s+p).replace(/-/g,'+').replace(/_/g,'/'); const r=window.atob(b); const o=new Uint8Array(r.length); for(let i=0;i<r.length;++i)o[i]=r.charCodeAt(i); return o }
+          sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: u(vapidKey) })
         }
         if (sub) {
           const j = sub.toJSON()

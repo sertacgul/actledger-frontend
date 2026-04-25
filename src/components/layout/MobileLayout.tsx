@@ -28,6 +28,64 @@ export default function MobileLayout() {
     // Start offline sync manager
     startSyncManager()
 
+    // Register push notifications (Capacitor native or Web Push fallback)
+    ;(async () => {
+      try {
+        // Try Capacitor native push first (iOS/Android app)
+        const { Capacitor } = await import('@capacitor/core').catch(() => ({ Capacitor: null }))
+        if (Capacitor?.isNativePlatform?.()) {
+          console.log('[Push] Native platform detected, using Capacitor PushNotifications')
+          const { PushNotifications } = await import('@capacitor/push-notifications')
+          const permResult = await PushNotifications.requestPermissions()
+          console.log('[Push] Permission:', permResult.receive)
+          if (permResult.receive === 'granted') {
+            await PushNotifications.register()
+            PushNotifications.addListener('registration', (token) => {
+              console.log('[Push] Native token:', token.value.substring(0, 20) + '...')
+              const platform = Capacitor.getPlatform() === 'ios' ? 'apns' : 'fcm'
+              api.post('/notifications/device-token', { token: token.value, platform }).catch(() => {})
+            })
+            PushNotifications.addListener('registrationError', (err) => {
+              console.error('[Push] Registration error:', err.error)
+            })
+            PushNotifications.addListener('pushNotificationReceived', (notification) => {
+              console.log('[Push] Received:', notification.title)
+            })
+            PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+              console.log('[Push] Action:', action.notification.title)
+            })
+          }
+          return
+        }
+
+        // Web Push fallback (PWA in browser)
+        console.log('[Push] Web platform, trying Web Push...')
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) { console.log('[Push] No Web Push support'); return }
+        const permission = await Notification.requestPermission()
+        if (permission !== 'granted') return
+        const reg = await navigator.serviceWorker.ready
+        let sub = await reg.pushManager.getSubscription()
+        if (!sub) {
+          const res = await api.get<any>('/notifications/vapid-public-key')
+          const vapidKey = res?.key || (res as any)?.data?.key || res
+          if (!vapidKey) return
+          const urlBase64ToUint8Array = (base64String: string) => {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4)
+            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+            const rawData = window.atob(base64)
+            const outputArray = new Uint8Array(rawData.length)
+            for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i)
+            return outputArray
+          }
+          sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(vapidKey) })
+        }
+        if (sub) {
+          const subJson = sub.toJSON()
+          await api.post('/notifications/push-subscribe', { endpoint: subJson.endpoint, keys: subJson.keys, userAgent: navigator.userAgent }).catch(() => {})
+        }
+      } catch (err) { console.error('[Push] Error:', err) }
+    })()
+
     // Location: send every 60s - mobile users always share location
     let locationInterval: ReturnType<typeof setInterval> | null = null
     const sendLocation = () => {
@@ -64,8 +122,19 @@ export default function MobileLayout() {
     setSyncing(false)
   }
 
+  // Detect if running in standalone PWA mode
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true
+  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
+  const [showInstallBanner, setShowInstallBanner] = useState(() => {
+    if (isStandalone) return false
+    const dismissed = localStorage.getItem('actledger_install_dismissed')
+    if (dismissed && Date.now() - Number(dismissed) < 86400000) return false // 24h cooldown
+    return true
+  })
+
   const tabs = [
-    { to: '/m/gorevler',  icon: ClipboardList,  label: t('m_nav_tasks') },
+    { to: '/m/gorevler',  icon: ClipboardList,   label: t('m_nav_tasks') },
+    { to: '/m/formlar',   icon: FileSpreadsheet, label: 'Formlar' },
     { to: '/m/qr-tarama', icon: ScanLine,        label: 'QR',             highlight: false, qr: true },
     { to: '/m/operiq',    icon: Cpu,             label: 'OperIQ',         highlight: true },
     { to: '/m/mesajlar',  icon: MessageSquare,   label: t('m_nav_messages') },
@@ -74,6 +143,19 @@ export default function MobileLayout() {
 
   return (
     <div className="flex flex-col h-[100dvh] bg-slate-50" style={{ maxWidth: 480, margin: '0 auto' }}>
+      {/* Install PWA banner */}
+      {showInstallBanner && (
+        <div className="bg-cyan-600 text-white text-xs font-medium py-2.5 px-4 flex items-center gap-2 safe-area-top">
+          <div className="flex-1">
+            {isIOS
+              ? 'Bildirim almak icin uygulamayi ana ekrana ekleyin: Paylas > Ana Ekrana Ekle'
+              : 'Bildirim almak icin uygulamayi ana ekrana ekleyin'}
+          </div>
+          <button type="button" onClick={() => { setShowInstallBanner(false); localStorage.setItem('actledger_install_dismissed', String(Date.now())) }}
+            className="text-white/80 font-bold text-lg leading-none px-1">x</button>
+        </div>
+      )}
+
       {/* Offline banner */}
       {!online && (
         <div className="bg-amber-500 text-white text-center text-xs font-semibold py-1.5 px-3">

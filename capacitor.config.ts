@@ -4,10 +4,6 @@ const config: CapacitorConfig = {
   appId: 'com.ataolaitech.actledger',
   appName: 'ActLedger',
   webDir: 'dist',
-  server: {
-    url: 'https://www.actledger.com',
-    cleartext: false,
-  },
   plugins: {
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],

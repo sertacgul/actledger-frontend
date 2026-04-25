@@ -17,7 +17,7 @@ env:
 
 jobs:
   build-ios:
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 30
 
     steps:
@@ -42,7 +42,7 @@ jobs:
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '16.2'
+          xcode-version: latest-stable
 
       - name: Install Apple certificate & provisioning profile
         env:
@@ -78,12 +78,6 @@ jobs:
         working-directory: ios/App
         run: pod install
 
-      - name: Set manual signing
-        working-directory: ios/App
-        run: |
-          sed -i '' 's/CODE_SIGN_STYLE = Automatic/CODE_SIGN_STYLE = Manual/g' App.xcodeproj/project.pbxproj
-          sed -i '' "s/DEVELOPMENT_TEAM = ***REDACTED***;/DEVELOPMENT_TEAM = ***REDACTED***; PROVISIONING_PROFILE_SPECIFIER = \"ActLedger AppStore\";/g" App.xcodeproj/project.pbxproj
-
       - name: Build iOS archive
         working-directory: ios/App
         run: |
@@ -92,10 +86,11 @@ jobs:
             -sdk iphoneos \
             -configuration Release \
             -archivePath $RUNNER_TEMP/App.xcarchive \
-            CODE_SIGN_STYLE=Manual \
+            -destination "generic/platform=iOS" \
+            -allowProvisioningUpdates \
             DEVELOPMENT_TEAM=***REDACTED*** \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="ActLedger AppStore" \
+            CODE_SIGN_STYLE=Automatic \
+            COMPILER_INDEX_STORE_ENABLE=NO \
             archive
 
       - name: Export IPA

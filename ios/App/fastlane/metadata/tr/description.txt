@@ -1,0 +1,26 @@
+ActLedger, kurumsal operasyonlarinizi tek bir merkezden yonetmenizi saglayan end-to-end platformdur. 15+ sektore ozel hazir KPI sablonlari, yapay zeka destekli analitik ve gercek zamanli saha takibi ile operasyonel mukemmellige ulasmanizi saglar.
+
+TEMEL OZELLIKLER
+
+- Gercek Zamanli Operasyonlar: Saha verileri anlik olarak toplanir, islenir ve kokpit ekranina yansitirilir.
+- OperIQ - AI Destekli Icgoruler: Yapay zeka motorumuz sahadan gelen her veriyi analiz eder, risk ve firsat sinyalleri uretir, aksiyon onerir.
+- Kurumsal KPI Motoru: 7800+ hazir KPI sablonu, 5 katmanli olcum yapisi. Sektorunuze ozel metrikler tek tikla aktif.
+- Saha Operasyonlari: Mobil uyumlu gorev yonetimi, konum bazli takip ve cevrimdisi calisma destegi.
+- Rol Bazli Erisim: 8 seviyeli yetki hiyerarsisi, departman bazli veri izolasyonu ve denetim izi.
+- Gercek Zamanli Dashboard: Suruklenir widgetlar, canli grafikler, departman bazli gorunumler.
+- AssetIQ Envanter Yonetimi: QR kod ile anlik stok hareketi, parti/lot takibi, hiyerarsik onay akisi.
+- Canli Harita ve Tesis Yonetimi: GPS takip, 2D/3D tesis plani, IoT cihaz yerlestirme.
+- Excel/SQL Aktarim: Mevcut verilerinizi sorunsuz aktarin. Excel, CSV ve SQL veritabani entegrasyonu.
+
+15+ SEKTOR SABLONU
+
+Uretim, insaat, lojistik, enerji, saglik, perakende, tarim, gida, madencilik, turizm ve daha fazlasi icin sektore ozel yapilandirma. Terminoloji, departmanlar ve KPI setleri sektorunuzun dilinde.
+
+NASIL CALISIR?
+
+1. Admin sektoru ve departmanlari secer, organizasyon agacini kurar.
+2. KPI sablonlari otomatik dagitilir, ekipler hemen calismaya baslar.
+3. OperIQ aksiyona donusturulebilir icgoruler uretir.
+4. Mobil QR tarama ile stok islemleri, hiyerarsik onay akisi, canli tesis haritasi.
+
+Gizlilik politikamiz: https://www.actledger.com/privacy

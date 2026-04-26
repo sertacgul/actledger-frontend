@@ -1,0 +1,102 @@
+name: App Store Submit
+
+on:
+  workflow_dispatch:
+    inputs:
+      submit_for_review:
+        description: 'Submit for App Review after upload?'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+      skip_screenshots:
+        description: 'Skip screenshot upload?'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  submit:
+    runs-on: macos-15
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Install Fastlane
+        run: gem install fastlane
+
+      - name: Setup App Store Connect API Key
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/private_keys
+          echo "$ASC_PRIVATE_KEY" > ~/private_keys/AuthKey_${ASC_KEY_ID}.p8
+
+      - name: Upload metadata & submit to App Store
+        working-directory: ios/App
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          SUBMIT_FOR_REVIEW: ${{ github.event.inputs.submit_for_review }}
+          SKIP_SCREENSHOTS: ${{ github.event.inputs.skip_screenshots }}
+        run: |
+          mkdir -p fastlane
+
+          cat > fastlane/Fastfile << 'FASTFILE'
+          default_platform(:ios)
+
+          platform :ios do
+            desc "Upload metadata and optionally submit for review"
+            lane :submit do
+              api_key = app_store_connect_api_key(
+                key_id: ENV["ASC_KEY_ID"],
+                issuer_id: ENV["ASC_ISSUER_ID"],
+                key_filepath: File.expand_path("~/private_keys/AuthKey_#{ENV['ASC_KEY_ID']}.p8")
+              )
+
+              deliver(
+                api_key: api_key,
+                app_identifier: "com.ataolaitech.actledger",
+                skip_binary_upload: true,
+                skip_screenshots: ENV["SKIP_SCREENSHOTS"] == "true",
+                force: true,
+                submit_for_review: ENV["SUBMIT_FOR_REVIEW"] == "true",
+                automatic_release: false,
+                phased_release: true,
+                metadata_path: "./fastlane/metadata",
+                screenshots_path: "./fastlane/screenshots",
+                precheck_include_in_app_purchases: false,
+                submission_information: {
+                  add_id_info_uses_idfa: false,
+                  export_compliance_uses_encryption: false,
+                  export_compliance_encryption_updated: false
+                },
+                app_rating_config_path: "./fastlane/rating_config.json"
+              )
+            end
+          end
+          FASTFILE
+
+          fastlane submit
+
+      - name: Cleanup
+        if: always()
+        run: rm -f ~/private_keys/AuthKey_*.p8 || true

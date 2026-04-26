@@ -1,0 +1,26 @@
+ActLedger is an end-to-end platform for managing your enterprise operations from a single hub. With 15+ industry-specific KPI templates, AI-powered analytics, and real-time field tracking, ActLedger helps you achieve operational excellence.
+
+KEY FEATURES
+
+- Real-Time Operations: Field data is collected, processed, and reflected on the cockpit screen instantly.
+- OperIQ - AI-Powered Insights: Our AI engine analyzes all field data, generates risk and opportunity signals, and recommends actions.
+- Enterprise KPI Engine: 7800+ ready-made KPI templates with a 5-layer measurement structure. Industry-specific metrics activated with a single tap.
+- Field Operations: Mobile-friendly task management, location-based tracking, and offline support.
+- Role-Based Access: 8-level permission hierarchy, department-level data isolation, and audit trail.
+- Real-Time Dashboard: Draggable widgets, live charts, and department-level views.
+- AssetIQ Inventory Management: Instant stock movements via QR code, batch/lot tracking, hierarchical approval flows.
+- Live Map and Facility Management: GPS tracking, 2D/3D facility plans, IoT device placement.
+- Excel/SQL Import: Seamlessly import your existing data. Excel, CSV, and SQL database integration.
+
+15+ INDUSTRY TEMPLATES
+
+Manufacturing, construction, logistics, energy, healthcare, retail, agriculture, food, mining, tourism, and more. Terminology, departments, and KPI sets speak your industry's language.
+
+HOW IT WORKS
+
+1. Admin selects the industry and departments, builds the organization tree.
+2. KPI templates are automatically distributed, teams start working immediately.
+3. OperIQ generates actionable insights for decision makers.
+4. Mobile QR scanning for stock operations, hierarchical approval flow, live facility map.
+
+Privacy policy: https://www.actledger.com/privacy

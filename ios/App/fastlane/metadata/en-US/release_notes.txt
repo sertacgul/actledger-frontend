@@ -1,0 +1,1 @@
+First release of ActLedger! Access the enterprise operations management platform from your mobile device. Receive instant task and KPI alerts via push notifications.

@@ -1,0 +1,7 @@
+ActLedger is an enterprise operations management platform. The app loads our web application within a native iOS wrapper using Capacitor.
+
+To test the app, use the following demo credentials:
+Login Code: ACT-KT5LDA
+Password: KT5LDA
+
+The app requires an internet connection to function as it connects to our web platform at actledger.com.

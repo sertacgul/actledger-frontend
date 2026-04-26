@@ -1,1 +1,1 @@
-operasyon,KPI,saha,yonetim,dashboard,envanter,analitik,AI,gorev,takip,departman,rapor,uretim,verimlilik,isletme
+operasyon,KPI,saha,yonetim,dashboard,envanter,analitik,AI,gorev,takip,departman,rapor

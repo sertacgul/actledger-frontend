@@ -16,8 +16,17 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            storeFile file("../actledger-release.jks")
+            storePassword System.getenv("KEYSTORE_PASSWORD") ?: "***REDACTED***"
+            keyAlias "actledger"
+            keyPassword System.getenv("KEY_PASSWORD") ?: "***REDACTED***"
+        }
+    }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

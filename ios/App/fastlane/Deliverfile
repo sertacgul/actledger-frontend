@@ -4,9 +4,6 @@
 app_identifier("com.ataolaitech.actledger")
 username("changeme@example.com")
 
-# Use App Store Connect API key (same as TestFlight uploads)
-# Keys are passed via environment variables in CI
-
 # Metadata path
 metadata_path("./fastlane/metadata")
 screenshots_path("./fastlane/screenshots")
@@ -19,17 +16,11 @@ force(true)
 # Skip uploading screenshots if folder is empty
 skip_screenshots(false)
 
-# Price tier (free app)
-price_tier(0)
-
 # Primary category
 primary_category("MZGenre.Business")
 
-# App rating - set manually in App Store Connect
-# (Fastlane doesn't support newer required fields like healthOrWellnessTopics)
-
-# Availability
-phased_release(true)
-
 # Copyright
 copyright("2026 ATAOL AI Techs")
+
+# Price and availability are set manually in App Store Connect
+# Age rating is set manually in App Store Connect

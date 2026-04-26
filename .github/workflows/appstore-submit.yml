@@ -80,7 +80,6 @@ jobs:
                 force: true,
                 submit_for_review: ENV["SUBMIT_FOR_REVIEW"] == "true",
                 automatic_release: false,
-                phased_release: true,
                 metadata_path: "./fastlane/metadata",
                 screenshots_path: "./fastlane/screenshots",
                 precheck_include_in_app_purchases: false,

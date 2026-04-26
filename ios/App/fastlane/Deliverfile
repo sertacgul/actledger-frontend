@@ -25,8 +25,8 @@ price_tier(0)
 # Primary category
 primary_category("MZGenre.Business")
 
-# App rating - standard business app, no objectionable content
-app_rating_config_path("./fastlane/rating_config.json")
+# App rating - set manually in App Store Connect
+# (Fastlane doesn't support newer required fields like healthOrWellnessTopics)
 
 # Availability
 phased_release(true)

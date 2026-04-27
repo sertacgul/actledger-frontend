@@ -279,7 +279,7 @@ export default function MobileMessages() {
   // ── Conversation Screen ───────────────────────────────────────
   if (screen === 'conversation' && chatTarget) {
     return (
-      <div className="flex flex-col h-full bg-slate-50">
+      <div className="flex flex-col bg-slate-50" style={{ height: '100dvh', maxHeight: '100dvh', overflow: 'hidden' }}>
         {/* Header */}
         <div className="bg-slate-800 text-white px-3 py-2.5 flex items-center gap-3 flex-shrink-0">
           <button onClick={() => { setScreen('chats'); setChatTarget(null); loadAllMessages() }} className="p-1"><ArrowLeft size={20} /></button>
@@ -344,7 +344,7 @@ export default function MobileMessages() {
         </div>
 
         {/* Input bar */}
-        <div className="bg-white border-t border-slate-200 px-3 py-2 flex items-end gap-2 flex-shrink-0">
+        <div className="bg-white border-t border-slate-200 px-3 py-2 flex items-end gap-2 flex-shrink-0" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
           <div className="flex-1 bg-slate-100 rounded-2xl px-4 py-2">
             <input
               value={reply} onChange={e => setReply(e.target.value)}

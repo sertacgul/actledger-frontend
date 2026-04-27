@@ -46,6 +46,8 @@ export interface User {
   phone?: string
   active: boolean
   createdAt: string
+  isOnline?: boolean
+  lastSyncAt?: string | null
 }
 
 export interface Department {

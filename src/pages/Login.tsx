@@ -211,8 +211,6 @@ export default function Login() {
   const [selectedIdx, setSelectedIdx] = useState(0)
   const [loading,     setLoading]     = useState(false)
   const [formError,   setFormError]   = useState<string | null>(null)
-  const [needs2FA,    setNeeds2FA]    = useState(false)
-  const [twoFACode,   setTwoFACode]  = useState('')
 
   const phrases = ['Sahadan kontrol odasına.', 'Veri konuşur, eylem doğar.', 'Operasyonun yeni katmanı.', 'Her departman, tek ekran.']
   const [phraseIdx, setPhraseIdx] = useState(0)
@@ -239,12 +237,7 @@ export default function Login() {
       } else {
         localStorage.removeItem('actledger_remember_email')
       }
-      const result = await login(email, password, needs2FA ? twoFACode : undefined)
-      if (result && 'requiresTwoFactor' in result) {
-        setNeeds2FA(true)
-        setLoading(false)
-        return
-      }
+      const result = await login(email, password)
       navigate(result?.role === 'platform_admin' ? '/admin' : '/panel')
     } catch (e: any) {
       setFormError(e.message ?? 'Giris yapilamadi')
@@ -448,26 +441,6 @@ export default function Login() {
                     </button>
                   </div>
                 </div>
-
-                {/* 2FA Code Input */}
-                {needs2FA && (
-                  <div>
-                    <label className="block text-[11px] font-bold text-cyan-700 uppercase tracking-wider mb-1.5">
-                      2FA Dogrulama Kodu
-                    </label>
-                    <input
-                      type="text"
-                      value={twoFACode}
-                      onChange={e => { setTwoFACode(e.target.value.replace(/\D/g, '')); setFormError(null) }}
-                      placeholder="6 haneli kod"
-                      maxLength={6}
-                      autoFocus
-                      className="w-full px-4 py-3 rounded-lg bg-cyan-50 border border-cyan-300 text-zinc-900 text-[18px] text-center tracking-[0.3em] font-mono placeholder-zinc-400
-                        focus:outline-none focus:border-cyan-400 focus:bg-white focus:ring-2 focus:ring-cyan-100 transition-all"
-                    />
-                    <p className="text-[10px] text-zinc-500 mt-1">Authenticator uygulamanızdaki kodu girin</p>
-                  </div>
-                )}
 
                 {/* Remember me */}
                 <label className="flex items-center gap-2 cursor-pointer">

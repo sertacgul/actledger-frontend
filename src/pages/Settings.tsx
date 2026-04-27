@@ -254,87 +254,6 @@ function CompanySettings() {
   )
 }
 
-/* ── 2FA Setup Component ── */
-function TwoFactorSetup() {
-  const [enabled, setEnabled] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [showSetup, setShowSetup] = useState(false)
-  const [qrCode, setQrCode] = useState('')
-  const [secret, setSecret] = useState('')
-  const [code, setCode] = useState('')
-  const [error, setError] = useState('')
-  const [saving, setSaving] = useState(false)
-
-  useEffect(() => {
-    api.get<{ enabled: boolean }>('/auth/2fa/status')
-      .then(d => setEnabled(d.enabled))
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
-
-  const handleSetup = async () => {
-    try {
-      const data = await api.post<{ qrCode: string; secret: string }>('/auth/2fa/setup')
-      setQrCode(data.qrCode)
-      setSecret(data.secret)
-      setShowSetup(true)
-      setError('')
-    } catch (e: any) { setError(e.message) }
-  }
-
-  const handleEnable = async () => {
-    if (code.length !== 6) { setError('6 haneli kod girin'); return }
-    setSaving(true); setError('')
-    try {
-      await api.post('/auth/2fa/enable', { code })
-      setEnabled(true)
-      setShowSetup(false)
-      setCode('')
-    } catch (e: any) { setError(e.message ?? 'Kod hatali') }
-    finally { setSaving(false) }
-  }
-
-  const handleDisable = async () => {
-    const disableCode = prompt('2FA\'yi kapatmak icin authenticator kodunuzu girin:')
-    if (!disableCode) return
-    try {
-      await api.post('/auth/2fa/disable', { code: disableCode })
-      setEnabled(false)
-    } catch (e: any) { alert(e.message ?? 'Kod hatali') }
-  }
-
-  if (loading) return <SettingRow label="Iki Faktorlu Dogrulama" description="Yukleniyor..."><Loader2 size={14} className="animate-spin" /></SettingRow>
-
-  return (
-    <>
-      <SettingRow label="Iki Faktorlu Dogrulama (2FA)" description={enabled ? 'Aktif - Authenticator uygulamasi ile dogrulama' : 'Devre disi - Etkinlestirmek icin tiklayin'}>
-        {enabled ? (
-          <button type="button" className="btn-default btn-sm text-red-600" onClick={handleDisable}>Devre Disi Birak</button>
-        ) : (
-          <button type="button" className="btn-dark btn-sm" onClick={handleSetup}>Etkinlestir</button>
-        )}
-      </SettingRow>
-      {showSetup && (
-        <div className="px-4 pb-4 space-y-3">
-          <div className="p-4 rounded-lg border border-blue-200 bg-blue-50 space-y-3">
-            <p className="text-[12px] font-semibold text-blue-800">1. Authenticator uygulamanizda (Google Authenticator, Authy vb.) asagidaki QR kodu tarayin:</p>
-            {qrCode && <img src={qrCode} alt="2FA QR Code" className="mx-auto w-48 h-48 rounded-lg border" />}
-            <p className="text-[10px] text-blue-600 text-center break-all">Manuel giris: {secret}</p>
-            <p className="text-[12px] font-semibold text-blue-800 mt-2">2. Uygulamadaki 6 haneli kodu girin:</p>
-            <div className="flex gap-2">
-              <input className="input w-32 text-center tracking-widest font-mono text-lg" maxLength={6} value={code}
-                onChange={e => setCode(e.target.value.replace(/\D/g, ''))} placeholder="000000" />
-              <button type="button" className="btn-dark btn-sm" onClick={handleEnable} disabled={saving}>
-                {saving ? 'Dogrulanıyor...' : 'Dogrula ve Etkinlestir'}
-              </button>
-            </div>
-            {error && <p className="text-[11px] text-red-600">{error}</p>}
-          </div>
-        </div>
-      )}
-    </>
-  )
-}
 
 /* ── Security Tab ── */
 function SecuritySettings() {
@@ -389,7 +308,6 @@ function SecuritySettings() {
       </Section>
 
       <Section title="Kimlik Dogrulama" description="Oturum ve erişim guvenligi">
-        <TwoFactorSetup />
         <SettingRow label="Oturum Süresi" description="Otomatik oturum kapatma süresi">
           <select className="select w-36">
             <option>4 saat</option>

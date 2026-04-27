@@ -7,7 +7,7 @@ interface AuthContextType {
   user:    User | null
   loading: boolean
   error:   string | null
-  login:   (email: string, password: string, twoFactorCode?: string) => Promise<User | undefined | { requiresTwoFactor: true }>
+  login:   (email: string, password: string) => Promise<User | undefined>
   mobileLogin: (code: string, password: string) => Promise<{ user: User; mustChangePassword: boolean }>
   logout:  () => Promise<void>
 }
@@ -48,18 +48,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => { cancelled = true }
   }, [])
 
-  const login = async (email: string, password: string, twoFactorCode?: string) => {
+  const login = async (email: string, password: string) => {
     setError(null)
     try {
-      const body: any = { email, password }
-      if (twoFactorCode) body.twoFactorCode = twoFactorCode
-      const result = await api.post<any>('/auth/login', body)
-
-      // If 2FA is required, return early
-      if (result.requiresTwoFactor) {
-        return { requiresTwoFactor: true } as any
-      }
-
+      const result = await api.post<any>('/auth/login', { email, password })
       tokenStore.set(result.accessToken)
       localStorage.setItem('actledger_token', result.accessToken)
       const mapped = mapUser(result.user)

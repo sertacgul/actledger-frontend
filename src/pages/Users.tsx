@@ -36,8 +36,8 @@ function UserCard({ user, departments }: { user: User; departments: Department[]
           </div>
           <div className={clsx(
             'absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white',
-            user.active ? 'bg-green-500' : 'bg-slate-300'
-          )} />
+            user.isOnline ? 'bg-green-500' : 'bg-slate-300'
+          )} title={user.isOnline ? 'Cevrimici' : user.lastSyncAt ? `Son gorulme: ${new Date(user.lastSyncAt).toLocaleString('tr-TR')}` : 'Cevrimdisi'} />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-slate-900 truncate">{user.name}</p>
@@ -67,10 +67,10 @@ function UserCard({ user, departments }: { user: User; departments: Department[]
       <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
         <span className={clsx(
           'text-[10px] font-medium flex items-center gap-1',
-          user.active ? 'text-green-600' : 'text-slate-400'
+          user.isOnline ? 'text-green-600' : 'text-slate-400'
         )}>
-          {user.active ? <UserCheck size={11} /> : <UserX size={11} />}
-          {user.active ? 'Aktif' : 'Pasif'}
+          {user.isOnline ? <UserCheck size={11} /> : <UserX size={11} />}
+          {user.isOnline ? 'Cevrimici' : user.lastSyncAt ? new Date(user.lastSyncAt).toLocaleString('tr-TR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Cevrimdisi'}
         </span>
         <span className="text-[10px] text-slate-400">
           Katılım: {new Date(user.createdAt).toLocaleDateString('tr-TR')}

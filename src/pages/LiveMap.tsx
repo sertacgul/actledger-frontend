@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { MapContainer, TileLayer, CircleMarker, Marker, Popup, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, CircleMarker, Marker, Popup, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import {
@@ -90,6 +90,13 @@ function MapController({ center, zoom }: { center: [number, number]; zoom: numbe
   return null
 }
 
+function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
+  useMapEvents({
+    click(e) { onMapClick(e.latlng.lat, e.latlng.lng) },
+  })
+  return null
+}
+
 function createFacilityIcon(color: string) {
   return L.divIcon({
     className: '',
@@ -125,6 +132,10 @@ export default function LiveMap() {
   const [dmsResult, setDmsResult] = useState<{ lat: number; lng: number } | null>(null)
   const [mapCenter, setMapCenter] = useState<[number, number]>([39.0, 35.0])
   const [mapZoom, setMapZoom] = useState(6)
+
+  // Map click mode: null = normal, 'nearby' | 'personnel' | 'vehicle' | 'equipment' | 'facility'
+  const [mapClickMode, setMapClickMode] = useState<string | null>(null)
+  const [clickedPoint, setClickedPoint] = useState<{ lat: number; lng: number } | null>(null)
 
   // Nearby search
   const [nearbyMode, setNearbyMode] = useState(false)
@@ -186,9 +197,31 @@ export default function LiveMap() {
 
   const activateNearbyMode = () => {
     setNearbyMode(true)
+    setMapClickMode('nearby')
     // Use center of current map view or DMS result
     if (dmsResult) {
       handleNearbySearch(dmsResult.lat, dmsResult.lng)
+    }
+  }
+
+  const handleMapClick = (lat: number, lng: number) => {
+    const point = { lat, lng }
+    setClickedPoint(point)
+
+    if (mapClickMode === 'nearby') {
+      handleNearbySearch(lat, lng)
+    } else if (mapClickMode === 'personnel') {
+      setShowAddPersonnel(true)
+      setMapClickMode(null)
+    } else if (mapClickMode === 'vehicle') {
+      setShowAddVehicle(true)
+      setMapClickMode(null)
+    } else if (mapClickMode === 'equipment') {
+      setShowAddEquipment(true)
+      setMapClickMode(null)
+    } else if (mapClickMode === 'facility') {
+      setShowCreateFacility(true)
+      setMapClickMode(null)
     }
   }
 
@@ -284,24 +317,33 @@ export default function LiveMap() {
 
         <div className="ml-auto flex items-center gap-2">
           <button type="button" onClick={activateNearbyMode}
-            className={clsx('btn-secondary text-xs', nearbyMode && 'ring-2 ring-red-300 bg-red-50 text-red-700')}>
+            className={clsx('btn-secondary text-xs', mapClickMode === 'nearby' && 'ring-2 ring-red-300 bg-red-50 text-red-700')}>
             <Crosshair size={12} /> En Yakin Personel
           </button>
           <button type="button" onClick={handleRefresh} disabled={refreshing} className="btn-secondary text-xs">
             <RefreshCw size={12} className={refreshing ? 'animate-spin' : ''} /> Yenile
           </button>
-          <button type="button" onClick={() => setShowAddPersonnel(true)} className="btn-secondary text-xs">
-            <User size={12} /> Personel Ekle
+          <button type="button" onClick={() => setMapClickMode(mapClickMode === 'personnel' ? null : 'personnel')}
+            className={clsx('btn-secondary text-xs', mapClickMode === 'personnel' && 'ring-2 ring-blue-300 bg-blue-50 text-blue-700')}>
+            <User size={12} /> {mapClickMode === 'personnel' ? 'Haritadan Sec...' : 'Personel Ekle'}
           </button>
-          <button type="button" onClick={() => setShowAddVehicle(true)} className="btn-secondary text-xs">
-            <Truck size={12} /> Araç Ekle
+          <button type="button" onClick={() => setMapClickMode(mapClickMode === 'vehicle' ? null : 'vehicle')}
+            className={clsx('btn-secondary text-xs', mapClickMode === 'vehicle' && 'ring-2 ring-green-300 bg-green-50 text-green-700')}>
+            <Truck size={12} /> {mapClickMode === 'vehicle' ? 'Haritadan Sec...' : 'Arac Ekle'}
           </button>
-          <button type="button" onClick={() => setShowAddEquipment(true)} className="btn-secondary text-xs">
-            <Wrench size={12} /> Ekipman Ekle
+          <button type="button" onClick={() => setMapClickMode(mapClickMode === 'equipment' ? null : 'equipment')}
+            className={clsx('btn-secondary text-xs', mapClickMode === 'equipment' && 'ring-2 ring-amber-300 bg-amber-50 text-amber-700')}>
+            <Wrench size={12} /> {mapClickMode === 'equipment' ? 'Haritadan Sec...' : 'Ekipman Ekle'}
           </button>
-          <button type="button" onClick={() => setShowCreateFacility(true)} className="btn-primary text-xs">
-            <Plus size={12} /> Tesis Ekle
+          <button type="button" onClick={() => setMapClickMode(mapClickMode === 'facility' ? null : 'facility')}
+            className={clsx('btn-primary text-xs', mapClickMode === 'facility' && 'ring-2 ring-indigo-300')}>
+            <Plus size={12} /> {mapClickMode === 'facility' ? 'Haritadan Sec...' : 'Tesis Ekle'}
           </button>
+          {mapClickMode && (
+            <button type="button" onClick={() => { setMapClickMode(null); setClickedPoint(null) }} className="btn-secondary text-xs text-red-600">
+              <X size={12} /> Iptal
+            </button>
+          )}
         </div>
       </div>
 
@@ -364,6 +406,7 @@ export default function LiveMap() {
         ) : (
           <MapContainer center={mapCenter} zoom={mapZoom} style={{ height: '100%', width: '100%' }} scrollWheelZoom>
             <MapController center={mapCenter} zoom={mapZoom} />
+            <MapClickHandler onMapClick={handleMapClick} />
             <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
             {/* Personnel: live task-based markers */}
@@ -590,12 +633,13 @@ export default function LiveMap() {
         <AddMapEntityModal
           title="Personel Ekle"
           icon={<User size={13} />}
+          defaultCoords={clickedPoint}
           fields={[
             { key: 'name', label: 'Ad Soyad *', placeholder: 'Ahmet Yilmaz' },
             { key: 'role', label: 'Gorev / Pozisyon', placeholder: 'Teknisyen' },
             { key: 'phone', label: 'Telefon', placeholder: '0532 xxx xx xx' },
           ]}
-          onClose={() => setShowAddPersonnel(false)}
+          onClose={() => { setShowAddPersonnel(false); setClickedPoint(null) }}
           onSave={async (data) => {
             const lat = parseFloat(data.latitude), lng = parseFloat(data.longitude)
             if (!data.name || isNaN(lat) || isNaN(lng)) throw new Error('Ad ve koordinat zorunlu')
@@ -607,14 +651,15 @@ export default function LiveMap() {
 
       {showAddVehicle && (
         <AddMapEntityModal
-          title="Araç Ekle"
+          title="Arac Ekle"
           icon={<Truck size={13} />}
+          defaultCoords={clickedPoint}
           fields={[
-            { key: 'name', label: 'Araç Adı / Plaka *', placeholder: '34 ABC 123' },
-            { key: 'vehicleType', label: 'Araç Tipi', placeholder: 'Kamyon, Binek, Pikap...' },
+            { key: 'name', label: 'Arac Adi / Plaka *', placeholder: '34 ABC 123' },
+            { key: 'vehicleType', label: 'Arac Tipi', placeholder: 'Kamyon, Binek, Pikap...' },
             { key: 'driver', label: 'Sofor', placeholder: 'Mehmet Demir' },
           ]}
-          onClose={() => setShowAddVehicle(false)}
+          onClose={() => { setShowAddVehicle(false); setClickedPoint(null) }}
           onSave={async (data) => {
             const lat = parseFloat(data.latitude), lng = parseFloat(data.longitude)
             if (!data.name || isNaN(lat) || isNaN(lng)) throw new Error('Araç adı ve koordinat zorunlu')
@@ -628,12 +673,13 @@ export default function LiveMap() {
         <AddMapEntityModal
           title="Ekipman Ekle"
           icon={<Wrench size={13} />}
+          defaultCoords={clickedPoint}
           fields={[
-            { key: 'name', label: 'Ekipman Adı *', placeholder: 'Jenerator #3' },
+            { key: 'name', label: 'Ekipman Adi *', placeholder: 'Jenerator #3' },
             { key: 'equipmentType', label: 'Tip', placeholder: 'Jenerator, Valf, Pompa...' },
             { key: 'serial', label: 'Seri No', placeholder: 'SN-2024-001' },
           ]}
-          onClose={() => setShowAddEquipment(false)}
+          onClose={() => { setShowAddEquipment(false); setClickedPoint(null) }}
           onSave={async (data) => {
             const lat = parseFloat(data.latitude), lng = parseFloat(data.longitude)
             if (!data.name || isNaN(lat) || isNaN(lng)) throw new Error('Ekipman adı ve koordinat zorunlu')
@@ -728,16 +774,20 @@ function CreateFacilityModal({ lang, onClose, onCreated }: { lang: string; onClo
 // ── Generic Add Map Entity Modal ──────────────────────────────────────────
 
 function AddMapEntityModal({
-  title, icon, fields, onClose, onSave,
+  title, icon, fields, onClose, onSave, defaultCoords,
 }: {
   title: string
   icon: React.ReactNode
   fields: { key: string; label: string; placeholder: string }[]
   onClose: () => void
   onSave: (data: Record<string, string>) => Promise<void>
+  defaultCoords?: { lat: number; lng: number } | null
 }) {
   const [form, setForm] = useState<Record<string, string>>(() => {
-    const init: Record<string, string> = { latitude: '', longitude: '' }
+    const init: Record<string, string> = {
+      latitude: defaultCoords?.lat?.toString() ?? '',
+      longitude: defaultCoords?.lng?.toString() ?? '',
+    }
     fields.forEach(f => { init[f.key] = '' })
     return init
   })

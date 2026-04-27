@@ -1631,12 +1631,12 @@ export default function Landing() {
         <div className="w-full px-4 sm:px-6 lg:px-12 py-4 flex items-center justify-between overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
           <div className="flex items-center gap-4 flex-shrink-0">
             <div className="[&>div]:gap-1 lg:[&>div]:gap-2.5"><BrandMark size={36} variant="dark" /></div>
-            <span className="hidden lg:block text-[15px] font-bold" style={{ color: '#ffffff' }}>
+            <span className="hidden xl:block text-[13px] font-bold whitespace-nowrap" style={{ color: '#ffffff' }}>
               ATAOL AI Techs taraf{'\u0131'}ndan geli{'\u015f'}tirildi.
             </span>
           </div>
 
-          <div className="hidden md:flex items-center gap-8 text-lg font-bold flex-nowrap whitespace-nowrap" style={{ color: '#ffffff' }}>
+          <div className="hidden md:flex items-center gap-4 lg:gap-6 xl:gap-8 text-base lg:text-lg font-bold flex-nowrap whitespace-nowrap" style={{ color: '#ffffff' }}>
             <a href="#platform" className="hover:text-cyan-300 transition-colors duration-300">{t.navPlatform}</a>
             <a href="#sectors" className="hover:text-cyan-300 transition-colors duration-300">{t.navSectors}</a>
             <a href="#features" className="hover:text-cyan-300 transition-colors duration-300">{t.navFeatures}</a>
@@ -3374,10 +3374,6 @@ export default function Landing() {
               <div className="space-y-3">
                 <a href="mailto:support@strategythrust.com" className="flex items-center gap-2 text-lg transition-colors duration-300 hover:text-cyan-400" style={{ color: '#ffffff' }}>
                   <Mail size={14} style={{ color: '#22d3ee' }} />
-                  support@strategythrust.com
-                </a>
-                <a href="mailto:support@strategythrust.com" className="flex items-center gap-2 text-lg transition-colors duration-300 hover:text-cyan-400" style={{ color: '#ffffff' }}>
-                  <Mail size={14} style={{ color: '#14b8a6' }} />
                   support@strategythrust.com
                 </a>
                 <a href="tel:+905322013416" className="flex items-center gap-2 text-lg transition-colors duration-300 hover:text-cyan-400" style={{ color: '#ffffff' }}>

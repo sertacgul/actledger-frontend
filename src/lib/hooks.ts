@@ -209,6 +209,27 @@ export async function analyzeReport(id: string): Promise<FieldReportAIAnalysis> 
   return api.post<FieldReportAIAnalysis>(`/field-reports/${id}/analyze`)
 }
 
+export async function createReport(body: {
+  title: string; content?: string; departmentId: string;
+  taskId?: string; severity?: string; tags?: string[];
+}): Promise<any> {
+  return api.post('/field-reports', body)
+}
+
+export async function submitReport(id: string): Promise<void> {
+  await api.patch(`/field-reports/${id}/status`, { status: 'INCELENIYOR' })
+}
+
+export async function broadcastReport(id: string, userIds: string[]): Promise<any> {
+  return api.post(`/field-reports/${id}/broadcast`, { userIds })
+}
+
+export async function reportFieldAction(id: string, body: {
+  status: 'TAMAMLANDI' | 'SORUNLU'; note?: string; gpsLatitude?: number; gpsLongitude?: number;
+}): Promise<any> {
+  return api.patch(`/field-reports/${id}/field-action`, body)
+}
+
 // ── KPIs ────────────────────────────────────────────────────────────────────
 export type KpiLayer = 'PERFORMANCE' | 'QUALITY' | 'TIME' | 'RISK' | 'AI_INSIGHT'
 
@@ -589,6 +610,7 @@ interface UserFilter {
   role?: string
   active?: string
   search?: string
+  includeMobile?: boolean
 }
 
 export function useUsers(filter: UserFilter = {}) {
@@ -598,10 +620,11 @@ export function useUsers(filter: UserFilter = {}) {
   if (filter.active === 'aktif')  params.set('active', 'true')
   if (filter.active === 'pasif')  params.set('active', 'false')
   if (filter.search)              params.set('search', filter.search)
+  if (filter.includeMobile)       params.set('includeMobile', 'true')
 
   const { data, loading, error, refetch } = useFetch<PaginatedResult<any>>(
     () => api.get(`/users?${params}`),
-    [filter.departmentId, filter.role, filter.active, filter.search],
+    [filter.departmentId, filter.role, filter.active, filter.search, filter.includeMobile],
   )
 
   return {

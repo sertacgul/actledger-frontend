@@ -21,6 +21,7 @@
     "clsx": "^2.1.0",
     "docx-preview": "^0.3.7",
     "html5-qrcode": "^2.3.8",
+    "jsonwebtoken": "^9.0.3",
     "jspdf": "^4.2.1",
     "leaflet": "^1.9.4",
     "leaflet.heat": "^0.2.0",

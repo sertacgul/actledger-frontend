@@ -26,6 +26,11 @@ export default function DashboardEditor({ dashboard, onSave, onClose }: Props) {
   const [nameErr, setNameErr] = useState('')
 
   useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [])
+
+  useEffect(() => {
     setName(dashboard?.name ?? '')
     setSelected(dashboard?.widgets ?? WIDGET_REGISTRY.map(w => w.id))
   }, [dashboard])

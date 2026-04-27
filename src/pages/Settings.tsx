@@ -1,13 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Server, Key, Building2, Globe, Shield,
   HardDrive, Wifi, CheckCircle, AlertTriangle,
-  Save, RefreshCw, ExternalLink, Layers, Languages, Type,
+  Save, RefreshCw, ExternalLink, Layers, Languages, Type, Loader2,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useCompany } from '../context/CompanyContext'
 import { useLanguage } from '../context/LanguageContext'
 import { useTheme } from '../context/ThemeContext'
+import { api } from '../lib/api'
 
 type SettingsTab = 'deployment' | 'company' | 'security' | 'integrations'
 
@@ -253,6 +254,88 @@ function CompanySettings() {
   )
 }
 
+/* ── 2FA Setup Component ── */
+function TwoFactorSetup() {
+  const [enabled, setEnabled] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [showSetup, setShowSetup] = useState(false)
+  const [qrCode, setQrCode] = useState('')
+  const [secret, setSecret] = useState('')
+  const [code, setCode] = useState('')
+  const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    api.get<{ enabled: boolean }>('/auth/2fa/status')
+      .then(d => setEnabled(d.enabled))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  const handleSetup = async () => {
+    try {
+      const data = await api.post<{ qrCode: string; secret: string }>('/auth/2fa/setup')
+      setQrCode(data.qrCode)
+      setSecret(data.secret)
+      setShowSetup(true)
+      setError('')
+    } catch (e: any) { setError(e.message) }
+  }
+
+  const handleEnable = async () => {
+    if (code.length !== 6) { setError('6 haneli kod girin'); return }
+    setSaving(true); setError('')
+    try {
+      await api.post('/auth/2fa/enable', { code })
+      setEnabled(true)
+      setShowSetup(false)
+      setCode('')
+    } catch (e: any) { setError(e.message ?? 'Kod hatali') }
+    finally { setSaving(false) }
+  }
+
+  const handleDisable = async () => {
+    const disableCode = prompt('2FA\'yi kapatmak icin authenticator kodunuzu girin:')
+    if (!disableCode) return
+    try {
+      await api.post('/auth/2fa/disable', { code: disableCode })
+      setEnabled(false)
+    } catch (e: any) { alert(e.message ?? 'Kod hatali') }
+  }
+
+  if (loading) return <SettingRow label="Iki Faktorlu Dogrulama" description="Yukleniyor..."><Loader2 size={14} className="animate-spin" /></SettingRow>
+
+  return (
+    <>
+      <SettingRow label="Iki Faktorlu Dogrulama (2FA)" description={enabled ? 'Aktif - Authenticator uygulamasi ile dogrulama' : 'Devre disi - Etkinlestirmek icin tiklayin'}>
+        {enabled ? (
+          <button type="button" className="btn-default btn-sm text-red-600" onClick={handleDisable}>Devre Disi Birak</button>
+        ) : (
+          <button type="button" className="btn-dark btn-sm" onClick={handleSetup}>Etkinlestir</button>
+        )}
+      </SettingRow>
+      {showSetup && (
+        <div className="px-4 pb-4 space-y-3">
+          <div className="p-4 rounded-lg border border-blue-200 bg-blue-50 space-y-3">
+            <p className="text-[12px] font-semibold text-blue-800">1. Authenticator uygulamanizda (Google Authenticator, Authy vb.) asagidaki QR kodu tarayin:</p>
+            {qrCode && <img src={qrCode} alt="2FA QR Code" className="mx-auto w-48 h-48 rounded-lg border" />}
+            <p className="text-[10px] text-blue-600 text-center break-all">Manuel giris: {secret}</p>
+            <p className="text-[12px] font-semibold text-blue-800 mt-2">2. Uygulamadaki 6 haneli kodu girin:</p>
+            <div className="flex gap-2">
+              <input className="input w-32 text-center tracking-widest font-mono text-lg" maxLength={6} value={code}
+                onChange={e => setCode(e.target.value.replace(/\D/g, ''))} placeholder="000000" />
+              <button type="button" className="btn-dark btn-sm" onClick={handleEnable} disabled={saving}>
+                {saving ? 'Dogrulanıyor...' : 'Dogrula ve Etkinlestir'}
+              </button>
+            </div>
+            {error && <p className="text-[11px] text-red-600">{error}</p>}
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
 /* ── Security Tab ── */
 function SecuritySettings() {
   const [currentPw, setCurrentPw] = useState('')
@@ -306,14 +389,7 @@ function SecuritySettings() {
       </Section>
 
       <Section title="Kimlik Dogrulama" description="Oturum ve erişim guvenligi">
-        <SettingRow label="İki Faktörlü Doğrulama" description="Tüm hesaplarda 2FA zorunluluğu">
-          <label className="relative inline-flex cursor-pointer items-center">
-            <input type="checkbox" className="sr-only peer" defaultChecked />
-            <div className="h-5 w-9 rounded-full bg-zinc-200 peer-checked:bg-blue-600 transition-colors
-              after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white
-              after:transition-all peer-checked:after:translate-x-4" />
-          </label>
-        </SettingRow>
+        <TwoFactorSetup />
         <SettingRow label="Oturum Süresi" description="Otomatik oturum kapatma süresi">
           <select className="select w-36">
             <option>4 saat</option>
@@ -321,8 +397,16 @@ function SecuritySettings() {
             <option>24 saat</option>
           </select>
         </SettingRow>
-        <SettingRow label="IP Kısıtlaması" description="Yalnızca belirtilen IP aralığından erişim">
-          <button type="button" className="btn-default btn-sm">Yapılandır</button>
+        <SettingRow label="IP Kısıtlaması (Opsiyonel)" description="Etkinleştirildiğinde yalnızca belirtilen IP aralığından erişime izin verir">
+          <div className="flex items-center gap-2">
+            <label className="relative inline-flex cursor-pointer items-center">
+              <input type="checkbox" className="sr-only peer" />
+              <div className="h-5 w-9 rounded-full bg-zinc-200 peer-checked:bg-blue-600 transition-colors
+                after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white
+                after:transition-all peer-checked:after:translate-x-4" />
+            </label>
+            <button type="button" className="btn-default btn-sm">Yapılandır</button>
+          </div>
         </SettingRow>
       </Section>
 
@@ -352,9 +436,9 @@ function IntegrationsSettings() {
   const integrations = [
     { name: 'OperIQ', desc: 'Operasyonel içgörüler ve öneriler', status: 'connected', icon: '✦' },
     { name: 'E-posta (SMTP)', desc: 'Bildirim ve davet e-postaları', status: 'connected', icon: '✉' },
-    { name: 'Active Directory', desc: 'Kurumsal kimlik doğrulama', status: 'disconnected', icon: '⊞' },
-    { name: 'ERP Sistemi', desc: 'SAP, Oracle vb. veri entegrasyonu', status: 'disconnected', icon: '⧫' },
-    { name: 'Webhook', desc: 'Dış sistemlere olay bildirimi', status: 'disconnected', icon: '↗' },
+    { name: 'Active Directory', desc: 'Kurumsal kimlik doğrulama', status: 'coming_soon', icon: '⊞' },
+    { name: 'ERP Sistemi', desc: 'SAP, Oracle vb. veri entegrasyonu', status: 'coming_soon', icon: '⧫' },
+    { name: 'Webhook', desc: 'Dış sistemlere olay bildirimi', status: 'coming_soon', icon: '↗' },
   ]
 
   return (
@@ -370,12 +454,14 @@ function IntegrationsSettings() {
               <p className="text-[11px] text-zinc-400">{int.desc}</p>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
-              <span className={clsx('badge', int.status === 'connected' ? 'badge-success' : 'badge-neutral')}>
-                {int.status === 'connected' ? 'Bağlı' : 'Bağlı Değil'}
+              <span className={clsx('badge', int.status === 'connected' ? 'badge-success' : int.status === 'coming_soon' ? 'badge-warning' : 'badge-neutral')}>
+                {int.status === 'connected' ? 'Bağlı' : int.status === 'coming_soon' ? 'Yakında' : 'Bağlı Değil'}
               </span>
-              <button type="button" className="btn-default btn-sm">
-                {int.status === 'connected' ? 'Yapılandır' : 'Bağla'}
-              </button>
+              {int.status !== 'coming_soon' && (
+                <button type="button" className="btn-default btn-sm">
+                  {int.status === 'connected' ? 'Yapılandır' : 'Bağla'}
+                </button>
+              )}
             </div>
           </div>
         ))}

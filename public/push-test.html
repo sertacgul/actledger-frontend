@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ActLedger Push Test</title>
+<style>body{font-family:system-ui;background:#0f172a;color:white;padding:20px;max-width:500px;margin:0 auto}
+button{display:block;width:100%;padding:14px;margin:8px 0;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer}
+.btn-blue{background:#0891b2;color:white}.btn-green{background:#10b981;color:white}.btn-orange{background:#f59e0b;color:black}
+#log{background:#1e293b;border-radius:10px;padding:12px;margin-top:16px;font-size:12px;font-family:monospace;white-space:pre-wrap;max-height:400px;overflow-y:auto}
+.ok{color:#10b981}.err{color:#ef4444}.warn{color:#f59e0b}</style>
+</head><body>
+<h2>ActLedger Push Notification Test</h2>
+<div id="log"></div>
+
+<button class="btn-blue" onclick="step1()">1. Check Support</button>
+<button class="btn-blue" onclick="step2()">2. Request Permission</button>
+<button class="btn-blue" onclick="step3()">3. Register SW</button>
+<button class="btn-green" onclick="step4()">4. Subscribe to Push</button>
+<button class="btn-orange" onclick="step5()">5. Save to Server</button>
+<button class="btn-green" onclick="testLocal()">Test Local Notification</button>
+
+<script>
+const API = location.origin.includes('localhost') ? 'http://localhost:3001/api/v1' : 'https://api.actledger.com/api/v1';
+let swReg = null, pushSub = null, token = localStorage.getItem('actledger_token') || '';
+
+function log(msg, cls) {
+  const el = document.getElementById('log');
+  el.innerHTML += '<span class="'+(cls||'')+'">' + new Date().toLocaleTimeString() + ' ' + msg + '</span>\n';
+  el.scrollTop = el.scrollHeight;
+}
+
+function step1() {
+  log('--- Checking Support ---');
+  log('serviceWorker: ' + ('serviceWorker' in navigator), 'serviceWorker' in navigator ? 'ok' : 'err');
+  log('PushManager: ' + ('PushManager' in window), 'PushManager' in window ? 'ok' : 'err');
+  log('Notification: ' + ('Notification' in window), 'Notification' in window ? 'ok' : 'err');
+  log('Notification.permission: ' + (window.Notification?.permission || 'N/A'));
+  log('Protocol: ' + location.protocol, location.protocol === 'https:' ? 'ok' : 'err');
+  log('User-Agent: ' + navigator.userAgent.substring(0, 80));
+  if (token) log('Auth token: ' + token.substring(0, 20) + '...', 'ok');
+  else log('Auth token: NOT FOUND - login first!', 'err');
+}
+
+async function step2() {
+  log('--- Requesting Permission ---');
+  try {
+    const p = await Notification.requestPermission();
+    log('Permission result: ' + p, p === 'granted' ? 'ok' : 'err');
+  } catch(e) { log('Permission error: ' + e.message, 'err'); }
+}
+
+async function step3() {
+  log('--- Registering Service Worker ---');
+  try {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    log('Existing SWs: ' + regs.length);
+    swReg = await navigator.serviceWorker.ready;
+    log('SW ready: ' + swReg.active?.scriptURL, 'ok');
+    log('SW state: ' + swReg.active?.state);
+    log('pushManager: ' + (swReg.pushManager ? 'YES' : 'NO'), swReg.pushManager ? 'ok' : 'err');
+  } catch(e) { log('SW error: ' + e.message, 'err'); }
+}
+
+async function step4() {
+  log('--- Subscribing to Push ---');
+  try {
+    if (!swReg) { log('Run step 3 first!', 'err'); return; }
+
+    // Get existing sub
+    let sub = await swReg.pushManager.getSubscription();
+    if (sub) { log('Existing subscription found!', 'ok'); pushSub = sub; log('Endpoint: ' + sub.endpoint.substring(0, 80) + '...'); return; }
+
+    // Fetch VAPID key
+    log('Fetching VAPID key...');
+    const res = await fetch(API + '/notifications/vapid-public-key', {
+      headers: token ? { Authorization: 'Bearer ' + token } : {}
+    });
+    const body = await res.json();
+    log('VAPID response: ' + JSON.stringify(body).substring(0, 100));
+    const vapidKey = body?.data?.key || body?.key;
+    if (!vapidKey) { log('VAPID key missing!', 'err'); return; }
+    log('VAPID key: ' + vapidKey.substring(0, 30) + '...', 'ok');
+
+    // Convert
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+      return outputArray;
+    }
+
+    // Subscribe
+    log('Calling pushManager.subscribe...');
+    sub = await swReg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(vapidKey),
+    });
+    pushSub = sub;
+    log('SUBSCRIBED!', 'ok');
+    log('Endpoint: ' + sub.endpoint.substring(0, 80) + '...');
+  } catch(e) { log('Subscribe error: ' + e.message, 'err'); log('Error name: ' + e.name, 'err'); }
+}
+
+async function step5() {
+  log('--- Saving to Server ---');
+  if (!pushSub) { log('Run step 4 first!', 'err'); return; }
+  if (!token) { log('No auth token! Login to mobile app first.', 'err'); return; }
+  try {
+    const subJson = pushSub.toJSON();
+    const res = await fetch(API + '/notifications/push-subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: JSON.stringify({ endpoint: subJson.endpoint, keys: subJson.keys, userAgent: navigator.userAgent }),
+    });
+    const body = await res.json();
+    log('Save result: ' + JSON.stringify(body), res.ok ? 'ok' : 'err');
+  } catch(e) { log('Save error: ' + e.message, 'err'); }
+}
+
+function testLocal() {
+  log('--- Testing Local Notification ---');
+  if (Notification.permission !== 'granted') { log('Permission not granted!', 'err'); return; }
+  try {
+    new Notification('ActLedger Test', { body: 'Bu bir test bildirimidir', icon: '/images/icon-192.png' });
+    log('Local notification sent!', 'ok');
+  } catch(e) { log('Notification error: ' + e.message, 'err'); }
+}
+
+// Auto-detect token
+if (!token) {
+  try { token = JSON.parse(localStorage.getItem('actledger_auth') || '{}').token || ''; } catch{}
+}
+</script>
+</body></html>

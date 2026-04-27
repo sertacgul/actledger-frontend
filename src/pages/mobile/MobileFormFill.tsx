@@ -38,10 +38,41 @@ export default function MobileFormFill() {
     setValues(prev => ({ ...prev, [fieldId]: val }))
   }
 
-  const handleSubmit = () => {
-    // TODO: Send to backend or save offline
-    setSubmitted(true)
-    setTimeout(() => navigate('/m/formlar', { replace: true }), 1500)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
+
+  const handleSubmit = async () => {
+    // Validate required fields
+    const missingRequired = fields.filter(f => f.required && !values[f.fieldId] && values[f.fieldId] !== false && values[f.fieldId] !== 0)
+    if (missingRequired.length > 0) {
+      setSubmitError(`Zorunlu alanlar\u0131 doldurun: ${missingRequired.map(f => f.label).join(', ')}`)
+      return
+    }
+    setSubmitting(true)
+    setSubmitError('')
+    try {
+      // Get GPS (best-effort)
+      let gpsLatitude: number | undefined
+      let gpsLongitude: number | undefined
+      try {
+        const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 })
+        )
+        gpsLatitude = pos.coords.latitude
+        gpsLongitude = pos.coords.longitude
+      } catch {}
+
+      await api.post('/form-templates/submit', {
+        templateId: id,
+        values,
+        gpsLatitude,
+        gpsLongitude,
+      })
+      setSubmitted(true)
+      setTimeout(() => navigate('/m/formlar', { replace: true }), 1500)
+    } catch (e: any) {
+      setSubmitError(e?.message || 'Form g\u00f6nderilemedi')
+    } finally { setSubmitting(false) }
   }
 
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 size={24} className="text-cyan-500 animate-spin" /></div>
@@ -117,12 +148,14 @@ export default function MobileFormFill() {
           </div>
         ))}
 
+        {submitError && <p className="text-xs text-red-600 text-center">{submitError}</p>}
         <button
           type="button"
           onClick={handleSubmit}
-          className="w-full py-3.5 rounded-xl bg-cyan-600 text-white font-semibold text-sm active:scale-[0.98]"
+          disabled={submitting}
+          className="w-full py-3.5 rounded-xl bg-cyan-600 text-white font-semibold text-sm active:scale-[0.98] disabled:opacity-50"
         >
-          {t('m_form_submit')}
+          {submitting ? <Loader2 size={16} className="animate-spin mx-auto" /> : t('m_form_submit')}
         </button>
       </div>
     </div>

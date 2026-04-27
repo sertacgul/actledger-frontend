@@ -304,6 +304,24 @@
 }
 @media (min-width: 1024px) {
   .sidebar-backdrop { display: none; }
+  .sidebar.is-collapsed {
+    width: 64px;
+    overflow: hidden;
+  }
+  .sidebar.is-collapsed .sidebar-logo,
+  .sidebar.is-collapsed .sidebar-section-label,
+  .sidebar.is-collapsed .nav-item span,
+  .sidebar.is-collapsed .nav-item .nav-operiq span,
+  .sidebar.is-collapsed .sidebar-section .nav-item-tooltip { display: none; }
+  .sidebar.is-collapsed .nav-item { justify-content: center; padding-left: 0; padding-right: 0; }
+  .sidebar.is-collapsed .nav-item-icon { margin: 0; }
+  .sidebar.is-collapsed .sidebar-section { padding: 0 6px; }
+  .sidebar.is-collapsed .px-3 { display: none; }
+  .sidebar.is-collapsed .border-t { padding: 4px; }
+  .sidebar.is-collapsed .border-t .min-w-0 { display: none; }
+  .sidebar.is-collapsed .border-t .w-9 { width: 32px; height: 32px; }
+  .sidebar.is-collapsed + .sidebar-backdrop + .app-content,
+  .sidebar-collapsed.app-content { margin-left: 64px !important; }
 }
 
 .sidebar-logo {

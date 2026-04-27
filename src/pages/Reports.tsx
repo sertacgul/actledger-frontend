@@ -1,30 +1,54 @@
 import { useState, useRef } from 'react'
-import { Search, FileText, CheckCircle, AlertCircle, Clock, Camera, WifiOff, FileSpreadsheet, Sparkles, Loader2 } from 'lucide-react'
+import { Search, FileText, CheckCircle, AlertCircle, Clock, Camera, WifiOff, FileSpreadsheet, Sparkles, Loader2, Plus, X, Send, Users } from 'lucide-react'
 import clsx from 'clsx'
-import { useReports, useDepartments, updateReportStatus, analyzeReport } from '../lib/hooks'
+import { useReports, useDepartments, useUsers, updateReportStatus, analyzeReport, createReport, submitReport, broadcastReport } from '../lib/hooks'
 import type { FieldReport, ReportStatus, Department, FieldReportAIAnalysis } from '../types'
 import DraggableModal from '../components/ui/DraggableModal'
 import { exportToExcel } from '../lib/excelExport'
 import { useToolbarActions } from '../lib/useToolbarActions'
+import { useLanguage } from '../context/LanguageContext'
+import { SECTOR_TEMPLATES } from '../data/sectorTemplates'
+
+// Build department code -> bilingual name map from sector templates
+const DEPT_NAME_MAP: Record<string, { tr: string; en: string }> = {}
+for (const sector of Object.values(SECTOR_TEMPLATES)) {
+  for (const dept of sector.departments) {
+    DEPT_NAME_MAP[dept.code] = dept.name
+  }
+}
+function deptName(d: Department, tr: boolean): string {
+  const bilingual = DEPT_NAME_MAP[d.code]
+  return bilingual ? (tr ? bilingual.tr : bilingual.en) : d.name
+}
+
+const STATUS_LABELS: Record<ReportStatus, { tr: string; en: string }> = {
+  taslak:      { tr: 'Taslak',     en: 'Draft'    },
+  gonderildi:  { tr: 'Gonderildi', en: 'Submitted' },
+  onaylandi:   { tr: 'Onaylandi',  en: 'Approved'  },
+  reddedildi:  { tr: 'Reddedildi', en: 'Rejected'  },
+}
 
 const STATUS_CONFIG: Record<ReportStatus, { label: string; color: string; icon: typeof CheckCircle }> = {
   taslak:      { label: 'Taslak',     color: 'badge-neutral', icon: Clock       },
-  gonderildi:  { label: 'Gönderildi', color: 'badge-info',    icon: FileText    },
-  onaylandi:   { label: 'Onaylandı',  color: 'badge-success', icon: CheckCircle },
+  gonderildi:  { label: 'Gonderildi', color: 'badge-info',    icon: FileText    },
+  onaylandi:   { label: 'Onaylandi',  color: 'badge-success', icon: CheckCircle },
   reddedildi:  { label: 'Reddedildi', color: 'badge-danger',  icon: AlertCircle },
 }
 
 function ReportCard({
   report,
   departments,
+  tr = true,
   onSelect,
 }: {
   report: FieldReport
   departments: Department[]
+  tr?: boolean
   onSelect: (r: FieldReport) => void
 }) {
   const dept   = departments.find(d => d.id === report.departmentId)
   const config = STATUS_CONFIG[report.status]
+  const statusLabel = STATUS_LABELS[report.status] ? (tr ? STATUS_LABELS[report.status].tr : STATUS_LABELS[report.status].en) : config.label
   const StatusIcon = config.icon
   const progress = report.totalItems > 0
     ? Math.round((report.completedItems / report.totalItems) * 100)
@@ -38,10 +62,10 @@ function ReportCard({
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className={config.color}>{config.label}</span>
+            <span className={config.color}>{statusLabel}</span>
             {report.offlineCreated && (
               <span className="badge bg-amber-100 text-amber-700 gap-1">
-                <WifiOff size={10} /> Çevrimdışı
+                <WifiOff size={10} /> {tr ? 'Cevrimdisi' : 'Offline'}
               </span>
             )}
           </div>
@@ -93,7 +117,7 @@ function ReportCard({
           {dept && (
             <div className="flex items-center gap-1">
               <div className="w-2 h-2 rounded-full" style={{ background: dept.color }} />
-              <span>{dept.name}</span>
+              <span>{deptName(dept, tr)}</span>
             </div>
           )}
           {report.photos.length > 0 && (
@@ -111,20 +135,25 @@ function ReportCard({
 function ReportDetailModal({
   report,
   departments,
+  tr = true,
   onClose,
   onStatusChange,
 }: {
   report: FieldReport
   departments: Department[]
+  tr?: boolean
   onClose: () => void
   onStatusChange: () => void
 }) {
   const dept   = departments.find(d => d.id === report.departmentId)
   const config = STATUS_CONFIG[report.status]
+  const statusLabel = STATUS_LABELS[report.status] ? (tr ? STATUS_LABELS[report.status].tr : STATUS_LABELS[report.status].en) : config.label
   const [acting,    setActing]    = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
   const [analysis,  setAnalysis]  = useState<FieldReportAIAnalysis | null>(report.aiAnalysis ?? null)
   const [analyzeErr, setAnalyzeErr] = useState<string | null>(null)
+
+  const [showBroadcast, setShowBroadcast] = useState(false)
 
   const handleAction = async (action: 'onaylandi' | 'reddedildi') => {
     setActing(true)
@@ -135,6 +164,15 @@ function ReportDetailModal({
     } catch {
       setActing(false)
     }
+  }
+
+  const handleSubmit = async () => {
+    setActing(true)
+    try {
+      await submitReport(report.id)
+      onStatusChange()
+      onClose()
+    } catch { setActing(false) }
   }
 
   const handleAnalyze = async () => {
@@ -163,30 +201,47 @@ function ReportDetailModal({
   return (
     <DraggableModal
       title={report.title}
-      subtitle={config.label}
+      subtitle={statusLabel}
       icon={<FileText size={13} />}
       onClose={onClose}
       width={640}
       maxHeight="90vh"
-      footer={report.status === 'gonderildi' ? (
-        <>
-          <button type="button" disabled={acting} onClick={() => handleAction('onaylandi')}
-            className="btn-primary disabled:opacity-50">
-            <CheckCircle size={15} /> Onayla
-          </button>
-          <button type="button" disabled={acting} onClick={() => handleAction('reddedildi')}
-            className="btn-danger disabled:opacity-50">
-            Reddet
-          </button>
-        </>
-      ) : undefined}
+      footer={
+        report.status === 'taslak' ? (
+          <>
+            <button type="button" disabled={acting} onClick={handleSubmit}
+              className="btn-primary disabled:opacity-50">
+              <Send size={14} /> {tr ? 'Gonder' : 'Submit'}
+            </button>
+            <button type="button" onClick={() => setShowBroadcast(true)}
+              className="btn-default">
+              <Users size={14} /> {tr ? 'Ilet' : 'Broadcast'}
+            </button>
+          </>
+        ) : report.status === 'gonderildi' ? (
+          <>
+            <button type="button" disabled={acting} onClick={() => handleAction('onaylandi')}
+              className="btn-primary disabled:opacity-50">
+              <CheckCircle size={15} /> {tr ? 'Onayla' : 'Approve'}
+            </button>
+            <button type="button" disabled={acting} onClick={() => handleAction('reddedildi')}
+              className="btn-danger disabled:opacity-50">
+              {tr ? 'Reddet' : 'Reject'}
+            </button>
+            <button type="button" onClick={() => setShowBroadcast(true)}
+              className="btn-default">
+              <Users size={14} /> {tr ? 'Ilet' : 'Broadcast'}
+            </button>
+          </>
+        ) : undefined
+      }
     >
       <div className="p-6 space-y-5">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className={config.color}>{config.label}</span>
+          <span className={config.color}>{statusLabel}</span>
           {report.offlineCreated && (
             <span className="badge bg-amber-100 text-amber-700 gap-1">
-              <WifiOff size={10} /> Çevrimdışı Oluşturuldu
+              <WifiOff size={10} /> {tr ? 'Cevrimdisi' : 'Offline'}
             </span>
           )}
         </div>
@@ -194,7 +249,7 @@ function ReportDetailModal({
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
           {[
             { label: 'Raporlayan',  value: report.authorName ?? '-' },
-            { label: 'Departman',   value: dept?.name ?? '-'        },
+            { label: tr ? 'Departman' : 'Department',   value: dept ? deptName(dept, tr) : '-'        },
             { label: 'Oluşturulma', value: new Date(report.createdAt).toLocaleString('tr-TR') },
           ].map(item => (
             <div key={item.label} className="rounded-lg p-3" style={{ background: 'var(--border-subtle)', border: '1px solid var(--border)' }}>
@@ -372,15 +427,112 @@ function ReportDetailModal({
           )}
         </div>
       </div>
+      {showBroadcast && (
+        <BroadcastReportModal
+          reportId={report.id}
+          tr={tr}
+          onClose={() => setShowBroadcast(false)}
+          onDone={() => { setShowBroadcast(false); onStatusChange(); onClose() }}
+        />
+      )}
+    </DraggableModal>
+  )
+}
+
+/* ── Broadcast Report Modal ── */
+function BroadcastReportModal({ reportId, tr, onClose, onDone }: {
+  reportId: string; tr: boolean; onClose: () => void; onDone: () => void
+}) {
+  const { users } = useUsers({ includeMobile: true })
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [sending, setSending] = useState(false)
+
+  const MOBILE_ROLES = ['isci', 'teknisyen', 'muhendis', 'supervizor']
+  const mobileUsers = users.filter(u => u.active && MOBILE_ROLES.includes(u.role))
+  const platformUsers = users.filter(u => u.active && !MOBILE_ROLES.includes(u.role))
+
+  const toggle = (id: string) => setSelectedIds(prev => {
+    const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s
+  })
+  const selectAll = () => setSelectedIds(new Set(users.filter(u => u.active).map(u => u.id)))
+  const clearAll = () => setSelectedIds(new Set())
+
+  const handleSend = async () => {
+    if (selectedIds.size === 0) return
+    setSending(true)
+    try {
+      await broadcastReport(reportId, [...selectedIds])
+      onDone()
+    } catch { setSending(false) }
+  }
+
+  return (
+    <DraggableModal title={tr ? 'Raporu Ilet' : 'Broadcast Report'} icon={<Users size={13} />} onClose={onClose} width={420}>
+      <div className="p-4 space-y-3">
+        <div className="flex gap-2 mb-2">
+          <button type="button" onClick={selectAll} className="text-[11px] text-indigo-600 font-semibold hover:underline">
+            {tr ? 'Hepsini Sec' : 'Select All'}
+          </button>
+          <span className="text-zinc-300">|</span>
+          <button type="button" onClick={clearAll} className="text-[11px] text-zinc-500 font-semibold hover:underline">
+            {tr ? 'Temizle' : 'Clear'}
+          </button>
+          <span className="ml-auto text-[11px] text-zinc-500">{selectedIds.size} {tr ? 'kisi' : 'selected'}</span>
+        </div>
+        <div className="border border-zinc-200 rounded-xl max-h-[300px] overflow-y-auto">
+          {mobileUsers.length > 0 && (
+            <>
+              <div className="flex items-center justify-between px-3 py-1.5 bg-cyan-50 border-b border-zinc-100 sticky top-0">
+                <span className="text-[10px] font-bold text-cyan-700">{tr ? 'Mobil Kullanicilar' : 'Mobile Users'} ({mobileUsers.length})</span>
+                <button type="button" onClick={() => setSelectedIds(prev => { const s = new Set(prev); mobileUsers.forEach(u => s.add(u.id)); return s })}
+                  className="text-[9px] text-cyan-600 font-semibold hover:underline">{tr ? 'Tumunu Sec' : 'All'}</button>
+              </div>
+              {mobileUsers.map(u => (
+                <label key={u.id} className="flex items-center gap-2 px-3 py-1.5 hover:bg-zinc-50 cursor-pointer">
+                  <input type="checkbox" checked={selectedIds.has(u.id)} onChange={() => toggle(u.id)} className="rounded border-zinc-300 text-cyan-600" />
+                  <span className="text-[11px] text-zinc-700 truncate flex-1">{u.name}</span>
+                  <span className="text-[9px] text-zinc-400">{u.role}</span>
+                </label>
+              ))}
+            </>
+          )}
+          {platformUsers.length > 0 && (
+            <>
+              <div className="flex items-center justify-between px-3 py-1.5 bg-indigo-50 border-b border-zinc-100 sticky top-0">
+                <span className="text-[10px] font-bold text-indigo-700">{tr ? 'Platform Kullanicilari' : 'Platform Users'} ({platformUsers.length})</span>
+                <button type="button" onClick={() => setSelectedIds(prev => { const s = new Set(prev); platformUsers.forEach(u => s.add(u.id)); return s })}
+                  className="text-[9px] text-indigo-600 font-semibold hover:underline">{tr ? 'Tumunu Sec' : 'All'}</button>
+              </div>
+              {platformUsers.map(u => (
+                <label key={u.id} className="flex items-center gap-2 px-3 py-1.5 hover:bg-zinc-50 cursor-pointer">
+                  <input type="checkbox" checked={selectedIds.has(u.id)} onChange={() => toggle(u.id)} className="rounded border-zinc-300 text-indigo-600" />
+                  <span className="text-[11px] text-zinc-700 truncate flex-1">{u.name}</span>
+                  <span className="text-[9px] text-zinc-400">{u.role}</span>
+                </label>
+              ))}
+            </>
+          )}
+        </div>
+        <div className="flex gap-2 pt-2 border-t border-zinc-100">
+          <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center text-[12px]">{tr ? 'Iptal' : 'Cancel'}</button>
+          <button type="button" onClick={handleSend} disabled={sending || selectedIds.size === 0}
+            className="btn-primary flex-1 justify-center text-[12px] disabled:opacity-50">
+            {sending ? <Loader2 size={14} className="animate-spin" /> : <><Send size={12} /> {tr ? 'Ilet' : 'Send'}</>}
+          </button>
+        </div>
+      </div>
     </DraggableModal>
   )
 }
 
 export default function Reports() {
+  const { lang } = useLanguage()
+  const tr = lang === 'tr'
   const [search,        setSearch]        = useState('')
   const [filterStatus,  setFilterStatus]  = useState<string>('tumu')
   const [filterDept,    setFilterDept]    = useState<string>('tumu')
   const [selectedReport, setSelectedReport] = useState<FieldReport | null>(null)
+  const [showCreate,    setShowCreate]    = useState(false)
 
   const { reports, loading, refetch } = useReports({
     status:       filterStatus,
@@ -391,7 +543,7 @@ export default function Reports() {
   const searchRef = useRef<HTMLInputElement>(null)
 
   const handleExportExcel = () => {
-    const deptMap = Object.fromEntries(departments.map(d => [d.id, d.name]))
+    const deptMap = Object.fromEntries(departments.map(d => [d.id, deptName(d, tr)]))
     exportToExcel({
       filename:  `raporlar_${new Date().toISOString().slice(0,10)}.xlsx`,
       sheetName: 'Raporlar',
@@ -400,7 +552,7 @@ export default function Reports() {
         { header: 'İçerik',     accessor: r => r.content,                                        width: 50 },
         { header: 'Departman',  accessor: r => deptMap[r.departmentId] ?? '-',                   width: 22 },
         { header: 'Yazar',      accessor: r => r.authorName ?? '-',                              width: 22 },
-        { header: 'Durum',      accessor: r => STATUS_CONFIG[r.status]?.label ?? r.status,       width: 14 },
+        { header: tr ? 'Durum' : 'Status', accessor: r => { const s = STATUS_LABELS[r.status]; return s ? (tr ? s.tr : s.en) : r.status },  width: 14 },
         { header: 'Fotoğraf',   accessor: r => r.photos?.length ?? 0,                            width: 10 },
         { header: 'Oluşturma',  accessor: r => new Date(r.createdAt).toLocaleString('tr-TR'),    width: 18 },
       ],
@@ -424,10 +576,10 @@ export default function Reports() {
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Toplam Rapor',    value: reports.length,                          color: 'text-slate-700', bg: 'bg-slate-50' },
-          { label: 'Onay Bekleyen',   value: statusCounts['gonderildi']  || 0,         color: 'text-blue-700',  bg: 'bg-blue-50'  },
-          { label: 'Onaylanan',       value: statusCounts['onaylandi']   || 0,         color: 'text-green-700', bg: 'bg-green-50' },
-          { label: 'Sorunlu Raporlar', value: reports.filter(r => r.issues.length > 0).length, color: 'text-amber-700', bg: 'bg-amber-50' },
+          { label: tr ? 'Toplam Rapor' : 'Total Reports',      value: reports.length,                          color: 'text-slate-700', bg: 'bg-slate-50' },
+          { label: tr ? 'Onay Bekleyen' : 'Pending',         value: statusCounts['gonderildi']  || 0,         color: 'text-blue-700',  bg: 'bg-blue-50'  },
+          { label: tr ? 'Onaylanan' : 'Approved',            value: statusCounts['onaylandi']   || 0,         color: 'text-green-700', bg: 'bg-green-50' },
+          { label: tr ? 'Sorunlu Raporlar' : 'With Issues', value: reports.filter(r => r.issues.length > 0).length, color: 'text-amber-700', bg: 'bg-amber-50' },
         ].map(item => (
           <div key={item.label} className={clsx('card p-4', item.bg)}>
             <p className="text-xs text-slate-500 mb-1">{item.label}</p>
@@ -443,7 +595,7 @@ export default function Reports() {
           <input
             ref={searchRef}
             className="input pl-9"
-            placeholder="Rapor ara..."
+            placeholder={tr ? 'Rapor ara...' : 'Search reports...'}
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -454,8 +606,8 @@ export default function Reports() {
           value={filterStatus}
           onChange={e => setFilterStatus(e.target.value)}
         >
-          <option value="tumu">Tüm Durumlar</option>
-          {Object.entries(STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+          <option value="tumu">{tr ? 'Tum Durumlar' : 'All Statuses'}</option>
+          {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{tr ? v.tr : v.en}</option>)}
         </select>
         <select
           aria-label="Departman filtresi"
@@ -463,10 +615,15 @@ export default function Reports() {
           value={filterDept}
           onChange={e => setFilterDept(e.target.value)}
         >
-          <option value="tumu">Tüm Departmanlar</option>
-          {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+          <option value="tumu">{tr ? 'Tum Departmanlar' : 'All Departments'}</option>
+          {departments.map(d => <option key={d.id} value={d.id}>{deptName(d, tr)}</option>)}
         </select>
+        <button type="button" className="btn-primary" onClick={() => setShowCreate(true)}>
+          <Plus size={14} /> {tr ? 'Yeni Rapor Olustur' : 'Create Report'}
+        </button>
       </div>
+
+      {showCreate && <CreateReportModal departments={departments} tr={tr} onClose={() => setShowCreate(false)} onCreated={() => { setShowCreate(false); refetch() }} />}
 
       {/* Report Grid */}
       {loading ? (
@@ -476,7 +633,7 @@ export default function Reports() {
       ) : reports.length === 0 ? (
         <div className="card p-12 text-center">
           <FileText size={40} className="text-slate-300 mx-auto mb-3" />
-          <p className="text-slate-500 font-medium">Rapor bulunamadı</p>
+          <p className="text-slate-500 font-medium">{tr ? 'Rapor bulunamadi' : 'No reports found'}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -485,6 +642,7 @@ export default function Reports() {
               key={report.id}
               report={report}
               departments={departments}
+              tr={tr}
               onSelect={setSelectedReport}
             />
           ))}
@@ -495,10 +653,89 @@ export default function Reports() {
         <ReportDetailModal
           report={selectedReport}
           departments={departments}
+          tr={tr}
           onClose={() => setSelectedReport(null)}
           onStatusChange={refetch}
         />
       )}
     </div>
+  )
+}
+
+/* ── Create Report Modal ── */
+function CreateReportModal({ departments, tr, onClose, onCreated }: {
+  departments: Department[]
+  tr: boolean
+  onClose: () => void
+  onCreated: () => void
+}) {
+  const [title, setTitle] = useState('')
+  const [content, setContent] = useState('')
+  const [deptId, setDeptId] = useState('')
+  const [severity, setSeverity] = useState('ORTA')
+  const [tags, setTags] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSave = async () => {
+    if (!title.trim() || !deptId) { setError(tr ? 'Baslik ve departman zorunludur' : 'Title and department are required'); return }
+    setSaving(true)
+    setError('')
+    try {
+      await createReport({
+        title: title.trim(),
+        content: content.trim() || undefined,
+        departmentId: deptId,
+        severity,
+        tags: tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : undefined,
+      })
+      onCreated()
+    } catch (e) {
+      setError((e as any)?.message || (tr ? 'Rapor olusturulamadi' : 'Failed to create report'))
+    } finally { setSaving(false) }
+  }
+
+  return (
+    <DraggableModal title={tr ? 'Yeni Rapor Olustur' : 'Create Report'} icon={<FileText size={13} />} onClose={onClose} width={480}>
+      <div className="p-5 space-y-4">
+        <div>
+          <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">{tr ? 'Baslik' : 'Title'} *</label>
+          <input className="input" placeholder={tr ? 'Gunluk Saha Raporu' : 'Daily Field Report'} value={title} onChange={e => setTitle(e.target.value)} />
+        </div>
+        <div>
+          <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">{tr ? 'Aciklama' : 'Description'}</label>
+          <textarea className="input min-h-[80px]" placeholder={tr ? 'Rapor icerigi...' : 'Report content...'} value={content} onChange={e => setContent(e.target.value)} />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">{tr ? 'Departman' : 'Department'} *</label>
+            <select className="select" value={deptId} onChange={e => setDeptId(e.target.value)}>
+              <option value="">{tr ? 'Seciniz' : 'Select'}</option>
+              {departments.map(d => <option key={d.id} value={d.id}>{deptName(d, tr)}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">{tr ? 'Oncelik' : 'Priority'}</label>
+            <select className="select" value={severity} onChange={e => setSeverity(e.target.value)}>
+              <option value="DUSUK">{tr ? 'Dusuk' : 'Low'}</option>
+              <option value="ORTA">{tr ? 'Orta' : 'Medium'}</option>
+              <option value="YUKSEK">{tr ? 'Yuksek' : 'High'}</option>
+              <option value="KRITIK">{tr ? 'Kritik' : 'Critical'}</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">{tr ? 'Etiketler' : 'Tags'}</label>
+          <input className="input" placeholder={tr ? 'virgul ile ayirin: bakim, acil, saha' : 'comma separated: maintenance, urgent'} value={tags} onChange={e => setTags(e.target.value)} />
+        </div>
+        {error && <p className="text-[12px] text-red-600">{error}</p>}
+        <div className="flex gap-2 pt-2 border-t border-zinc-100">
+          <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center text-[12px]">{tr ? 'Iptal' : 'Cancel'}</button>
+          <button type="button" onClick={handleSave} disabled={saving} className="btn-primary flex-1 justify-center text-[12px]">
+            {saving ? <Loader2 size={14} className="animate-spin" /> : (tr ? 'Olustur' : 'Create')}
+          </button>
+        </div>
+      </div>
+    </DraggableModal>
   )
 }

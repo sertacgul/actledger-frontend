@@ -53,11 +53,31 @@ async function request<T>(
 
   if (_token) headers['Authorization'] = `Bearer ${_token}`
 
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers,
-    credentials: 'include',
-  })
+  // AI endpoints need longer timeout (90s instead of default)
+  const isAIRequest = path.startsWith('/gemini') || path.startsWith('/operiq-chat')
+  const controller = new AbortController()
+  const timeoutMs = isAIRequest ? 90_000 : 30_000
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+
+  let res: Response
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers,
+      credentials: 'include',
+      signal: controller.signal,
+    })
+  } catch (err: any) {
+    clearTimeout(timer)
+    if (err.name === 'AbortError') {
+      throw new ApiError(408, isAIRequest
+        ? 'OperIQ analizi zaman asimina ugradi. Lutfen tekrar deneyin.'
+        : 'Istek zaman asimina ugradi. Lutfen tekrar deneyin.')
+    }
+    throw new ApiError(0, 'Sunucuya baglanilamadi. Internet baglantinizi kontrol edin.')
+  } finally {
+    clearTimeout(timer)
+  }
 
   // Auto-refresh on 401
   if (res.status === 401 && retry && path !== '/auth/login') {

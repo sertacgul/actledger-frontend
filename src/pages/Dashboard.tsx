@@ -485,7 +485,7 @@ function renderWidget(
     .map(([s, v]) => ({ name: STATUS_TR[s] ?? s, value: v, color: STATUS_COLORS[s] ?? '#a1a1aa' }))
     .filter(d => d.value > 0)
 
-  const deptBarData = filteredDepts.slice(0, 6).map(d => ({ name: d.code, tamamlanma: d.completionRate }))
+  const deptBarData = filteredDepts.slice(0, 6).map(d => ({ name: d.name, tamamlanma: d.completionRate }))
 
   switch (id) {
     case 'kpi_cards':
@@ -503,37 +503,36 @@ function renderWidget(
         <div key="production_chart" className="xl:col-span-2 surface p-5">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <p className="text-[13px] font-semibold text-zinc-900">Üretim Performansı - Hat 1</p>
-              <p className="text-[11px] text-zinc-400 mt-0.5">{data.productionData.length} gün · hedef vs gerçekleşen (birim)</p>
+              <p className="text-[13px] font-semibold text-zinc-900">{deptTermLabel} Performansı</p>
+              <p className="text-[11px] text-zinc-400 mt-0.5">Görev tamamlanma oranları</p>
             </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-red-200 bg-red-50">
-              <AlertTriangle size={11} className="text-red-500" />
-              <span className="text-[11px] font-semibold text-red-700">
-                Son: {data.productionData[data.productionData.length - 1]?.gerceklesen ?? 0} / {data.productionData[data.productionData.length - 1]?.hedef ?? 100}
-              </span>
-            </div>
+            {filteredDepts.length > 0 && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-emerald-200 bg-emerald-50">
+                <span className="text-[11px] font-semibold text-emerald-700">
+                  Ort: %{Math.round(filteredDepts.reduce((s, d) => s + d.completionRate, 0) / filteredDepts.length)}
+                </span>
+              </div>
+            )}
           </div>
-          <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={data.productionData} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" vertical={false} />
-              <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#a1a1aa' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#a1a1aa' }} axisLine={false} tickLine={false} domain={[55, 115]} />
-              <Tooltip content={<CustomTooltip />} />
-              <Line type="monotone" dataKey="hedef" stroke="#cbd5e1" strokeWidth={1.5} strokeDasharray="4 4" dot={false} name="hedef" />
-              <Line type="monotone" dataKey="gerceklesen" stroke="#2563eb" strokeWidth={2}
-                dot={{ fill: '#2563eb', r: 3, strokeWidth: 0 }} activeDot={{ r: 5, strokeWidth: 0 }} name="gerceklesen" />
-            </LineChart>
-          </ResponsiveContainer>
-          <div className="flex items-center gap-5 mt-3">
-            <div className="flex items-center gap-1.5">
-              <svg width="20" height="2" viewBox="0 0 20 2" aria-hidden="true"><line x1="0" y1="1" x2="20" y2="1" stroke="#d4d4d8" strokeWidth="1.5" strokeDasharray="4 4" /></svg>
-              <span className="text-[11px] text-zinc-400">Hedef</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <svg width="20" height="2" viewBox="0 0 20 2" aria-hidden="true"><line x1="0" y1="1" x2="20" y2="1" stroke="#6366f1" strokeWidth="2" /></svg>
-              <span className="text-[11px] text-zinc-400">Gerçekleşen</span>
-            </div>
-          </div>
+          {deptsLoading ? (
+            <div className="h-[200px] animate-pulse bg-zinc-100 rounded-lg" />
+          ) : filteredDepts.length === 0 ? (
+            <div className="h-[200px] flex items-center justify-center text-[13px] text-zinc-400">Henüz departman verisi yok</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={deptBarData} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" vertical={false} />
+                <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#a1a1aa' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: '#a1a1aa' }} axisLine={false} tickLine={false} domain={[0, 100]} />
+                <Tooltip formatter={(v) => [`%${v}`, 'Tamamlanma']} />
+                <Bar dataKey="tamamlanma" radius={[4, 4, 0, 0]} maxBarSize={36}>
+                  {deptBarData.map((d, i) => (
+                    <Cell key={i} fill={d.tamamlanma >= 80 ? '#10b981' : d.tamamlanma >= 50 ? '#f59e0b' : '#ef4444'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
       )
 
@@ -771,7 +770,7 @@ function DefaultDashboard({ data, deptTermLabel, taskTermLabel }: {
     const key = normalizeKey(s)
     return { name: STATUS_TR[key] ?? s, value: v as number, color: STATUS_COLORS[key] ?? '#a1a1aa' }
   }).filter(d => d.value > 0)
-  const deptBarData = departments.slice(0, 6).map(d => ({ name: d.code, tamamlanma: d.completionRate }))
+  const deptBarData = departments.slice(0, 6).map(d => ({ name: d.name, tamamlanma: d.completionRate }))
 
   const renderContent = () => {
     if (activeChapter === 'genel') {
@@ -787,37 +786,36 @@ function DefaultDashboard({ data, deptTermLabel, taskTermLabel }: {
             <div className="surface p-5 xl:col-span-2">
               <div className="flex items-center justify-between mb-5">
                 <div>
-                  <p className="text-[13px] font-semibold text-zinc-900">Üretim Performansı - Hat 1</p>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">{data.productionData.length} gün · hedef vs gerçekleşen (birim)</p>
+                  <p className="text-[13px] font-semibold text-zinc-900">{deptTermLabel} Performansı</p>
+                  <p className="text-[11px] text-zinc-400 mt-0.5">Görev tamamlanma oranları</p>
                 </div>
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-red-200 bg-red-50">
-                  <AlertTriangle size={11} className="text-red-500" />
-                  <span className="text-[11px] font-semibold text-red-700">
-                    Son: {data.productionData[data.productionData.length - 1]?.gerceklesen ?? 0} / {data.productionData[data.productionData.length - 1]?.hedef ?? 100}
-                  </span>
-                </div>
+                {departments.length > 0 && (
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-emerald-200 bg-emerald-50">
+                    <span className="text-[11px] font-semibold text-emerald-700">
+                      Ort: %{Math.round(departments.reduce((s, d) => s + d.completionRate, 0) / departments.length)}
+                    </span>
+                  </div>
+                )}
               </div>
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={data.productionData} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" vertical={false} />
-                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#a1a1aa' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#a1a1aa' }} axisLine={false} tickLine={false} domain={[55, 115]} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Line type="monotone" dataKey="hedef" stroke="#cbd5e1" strokeWidth={1.5} strokeDasharray="4 4" dot={false} name="hedef" />
-                  <Line type="monotone" dataKey="gerceklesen" stroke="#2563eb" strokeWidth={2}
-                    dot={{ fill: '#2563eb', r: 3, strokeWidth: 0 }} activeDot={{ r: 5, strokeWidth: 0 }} name="gerceklesen" />
-                </LineChart>
-              </ResponsiveContainer>
-              <div className="flex items-center gap-5 mt-3">
-                <div className="flex items-center gap-1.5">
-                  <svg width="20" height="2" viewBox="0 0 20 2" aria-hidden="true"><line x1="0" y1="1" x2="20" y2="1" stroke="#d4d4d8" strokeWidth="1.5" strokeDasharray="4 4" /></svg>
-                  <span className="text-[11px] text-zinc-400">Hedef</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <svg width="20" height="2" viewBox="0 0 20 2" aria-hidden="true"><line x1="0" y1="1" x2="20" y2="1" stroke="#6366f1" strokeWidth="2" /></svg>
-                  <span className="text-[11px] text-zinc-400">Gerçekleşen</span>
-                </div>
-              </div>
+              {deptsLoading ? (
+                <div className="h-[200px] animate-pulse bg-zinc-100 rounded-lg" />
+              ) : departments.length === 0 ? (
+                <div className="h-[200px] flex items-center justify-center text-[13px] text-zinc-400">Henüz departman verisi yok</div>
+              ) : (
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={deptBarData} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" vertical={false} />
+                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#a1a1aa' }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 10, fill: '#a1a1aa' }} axisLine={false} tickLine={false} domain={[0, 100]} />
+                    <Tooltip formatter={(v) => [`%${v}`, 'Tamamlanma']} />
+                    <Bar dataKey="tamamlanma" radius={[4, 4, 0, 0]} maxBarSize={36}>
+                      {deptBarData.map((d, i) => (
+                        <Cell key={i} fill={d.tamamlanma >= 80 ? '#10b981' : d.tamamlanma >= 50 ? '#f59e0b' : '#ef4444'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
             <div className="surface p-5">
               <p className="text-[13px] font-semibold text-zinc-900 mb-1">Görev Dağılımı</p>

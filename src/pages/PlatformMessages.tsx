@@ -191,8 +191,9 @@ export default function PlatformMessages() {
     // Mark all messages as locally read (for broadcast/dept unread tracking)
     const ids = fetchedData.map((m: any) => m.id).filter(Boolean)
     if (ids.length > 0) markLocalRead(ids)
-    // Refresh unread count
+    // Refresh unread count and message list so badges update
     api.get<any>('/messages/unread-count').then((r: any) => setUnreadCount(r?.total ?? 0)).catch(() => {})
+    loadAll()
   }
 
   useEffect(() => { if (activeConv) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [chatMessages.length])

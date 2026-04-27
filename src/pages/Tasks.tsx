@@ -7,6 +7,7 @@ import type { Task, TaskStatus, TaskPriority, CustomAttribute } from '../types'
 import { TASK_STATUS_LABELS, TASK_PRIORITY_LABELS, TASK_TYPE_LABELS } from '../types'
 import DraggableModal from '../components/ui/DraggableModal'
 import { useLanguage } from '../context/LanguageContext'
+import { useAuth } from '../context/AuthContext'
 import TaskGroupsManager from '../components/tasks/TaskGroupsManager'
 import AttributesManager from '../components/tasks/AttributesManager'
 import { listAttributes, evaluateAttribute } from '../lib/attributesStore'
@@ -437,24 +438,42 @@ function TaskDetailModal({
   )
 }
 
+// Role level mapping for hierarchy checks
+const ROLE_LEVEL: Record<string, number> = {
+  super_admin: 10, platform_admin: 9, genel_mudur: 8, gm_yardimcisi: 7,
+  direktor: 6, mudur: 5, supervizor: 4, muhendis: 3, teknisyen: 2, isci: 1,
+}
+
 // ── Create Modal ───────────────────────────────────────────────────────────────
 function CreateTaskModal({
-  departments, users, onClose, onCreated,
+  departments, users, onClose, onCreated, currentUser,
 }: {
   departments: import('../types').Department[]
   users: import('../types').User[]
   onClose: () => void
   onCreated: () => void
+  currentUser: { role: string; departmentId?: string } | null
 }) {
+  const myLevel = ROLE_LEVEL[currentUser?.role ?? ''] ?? 0
+  // MUDUR and below: only own department. DIREKTOR+: all departments
+  const visibleDepts = myLevel >= ROLE_LEVEL.direktor
+    ? departments
+    : departments.filter(d => d.id === currentUser?.departmentId)
+
   const [form, setForm] = useState({
-    title: '', description: '', departmentId: departments[0]?.id ?? '',
+    title: '', description: '', departmentId: visibleDepts[0]?.id ?? '',
     assigneeId: '', priority: 'normal', type: 'standart', dueDate: '',
     latitude: '', longitude: '',
   })
   const [saving, setSaving] = useState(false)
   const [err,    setErr]    = useState<string | null>(null)
 
-  const deptUsers = users.filter(u => u.departmentId === form.departmentId && u.active)
+  // Filter users: same department (or all if "all" selected) + active + lower role level than creator
+  const deptUsers = users.filter(u =>
+    (form.departmentId === '__all__' ? true : u.departmentId === form.departmentId) &&
+    u.active &&
+    (ROLE_LEVEL[u.role] ?? 0) < myLevel
+  )
 
   const handleSubmit = async () => {
     if (!form.title || !form.assigneeId || !form.dueDate) return
@@ -464,7 +483,9 @@ function CreateTaskModal({
       await createTask({
         title:        form.title,
         description:  form.description,
-        departmentId: form.departmentId,
+        departmentId: form.departmentId === '__all__'
+          ? users.find(u => u.id === form.assigneeId)?.departmentId ?? ''
+          : form.departmentId,
         assigneeId:   form.assigneeId,
         priority:     form.priority,
         type:         form.type,
@@ -513,7 +534,8 @@ function CreateTaskModal({
             <label htmlFor="ct-dept" className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-2)' }}>Departman</label>
             <select id="ct-dept" className="select" value={form.departmentId}
               onChange={e => setForm({ ...form, departmentId: e.target.value, assigneeId: '' })}>
-              {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+              {visibleDepts.length > 1 && <option value="__all__">Tum Departmanlar</option>}
+              {visibleDepts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
             </select>
           </div>
           <div>
@@ -617,6 +639,7 @@ export default function Tasks() {
     search:       search || undefined,
   })
 
+  const { user } = useAuth()
   const { departments } = useDepartments()
   const { users }       = useUsers({ active: 'aktif' })
 
@@ -749,6 +772,7 @@ export default function Tasks() {
         <CreateTaskModal
           departments={departments}
           users={users}
+          currentUser={user}
           onClose={() => setShowCreate(false)}
           onCreated={refetch}
         />

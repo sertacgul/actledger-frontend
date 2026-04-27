@@ -1,19 +1,19 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Bell, RefreshCw, LogOut, ChevronDown, Printer, Sun, Moon, ZoomIn, ZoomOut, RotateCcw, Menu } from 'lucide-react'
+import { Bell, RefreshCw, LogOut, ChevronDown, Printer, Sun, Moon, ZoomIn, ZoomOut, RotateCcw, Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import clsx from 'clsx'
 import { io, type Socket } from 'socket.io-client'
 import { useAuth } from '../../context/AuthContext'
 import { useCompany } from '../../context/CompanyContext'
 import { useTheme } from '../../context/ThemeContext'
 import { useLanguage } from '../../context/LanguageContext'
-import { useNotifications, markAllNotificationsRead, usePrintLog } from '../../lib/hooks'
+import { useNotifications, markAllNotificationsRead, markNotificationRead, usePrintLog } from '../../lib/hooks'
 import { tokenStore, SERVER_BASE } from '../../lib/api'
 import LiveClock from '../ui/LiveClock'
 import { FlagTR, FlagUS, FlagRU, FlagDE } from '../ui/Flags'
 
-interface HeaderProps { title: string; subtitle?: string; onMenuClick?: () => void }
+interface HeaderProps { title: string; subtitle?: string; onMenuClick?: () => void; onToggleCollapse?: () => void; sidebarCollapsed?: boolean }
 
-export default function Header({ title, subtitle, onMenuClick }: HeaderProps) {
+export default function Header({ title, subtitle, onMenuClick, onToggleCollapse, sidebarCollapsed }: HeaderProps) {
   const { user, logout } = useAuth()
   const { config } = useCompany()
   const { theme, zoom, toggleTheme, zoomIn, zoomOut, resetZoom } = useTheme()
@@ -46,10 +46,23 @@ export default function Header({ title, subtitle, onMenuClick }: HeaderProps) {
     } catch { /* audio not available */ }
   }, [])
 
+  // Request notification permission on mount
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission()
+    }
+  }, [])
+
   // Socket.io real-time notification listener
   useEffect(() => {
     const token = tokenStore.get()
     if (!token || !user) return
+
+    const showBrowserNotif = (title: string, body: string) => {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        try { new Notification(title, { body, icon: '/favicon.svg', badge: '/favicon.svg', tag: `actledger-${Date.now()}` }) } catch {}
+      }
+    }
 
     const socket = io(SERVER_BASE, {
       auth: { token },
@@ -58,11 +71,22 @@ export default function Header({ title, subtitle, onMenuClick }: HeaderProps) {
       reconnectionDelay: 3000,
     })
 
-    socket.on('notification:new', () => {
+    socket.on('notification:new', (data?: { title?: string; body?: string; message?: string }) => {
       refetch()
       playBellSound()
       setBellPulse(true)
       setTimeout(() => setBellPulse(false), 2000)
+      showBrowserNotif(data?.title || 'ActLedger', data?.body || data?.message || 'Yeni bildirim')
+    })
+
+    socket.on('message:new', (data?: { message?: { senderId?: string; senderName?: string; content?: string; sender?: { id?: string; name?: string } } }) => {
+      const msg = data?.message
+      const msgSenderId = msg?.senderId || msg?.sender?.id
+      // Don't notify the sender
+      if (msgSenderId === user?.id) return
+      playBellSound()
+      const senderLabel = msg?.senderName || msg?.sender?.name || 'Yeni Mesaj'
+      showBrowserNotif(senderLabel, msg?.content || 'Yeni bir mesajiniz var')
     })
 
     socket.on('task:updated', () => refetch())
@@ -82,6 +106,13 @@ export default function Header({ title, subtitle, onMenuClick }: HeaderProps) {
     refetch()
   }
 
+  const handleMarkOneRead = async (id: string, read: boolean) => {
+    if (!read) {
+      await markNotificationRead(id)
+      refetch()
+    }
+  }
+
   const closeAll = () => { setNotifOpen(false); setMenuOpen(false) }
 
   const isDark = theme === 'dark'
@@ -91,7 +122,7 @@ export default function Header({ title, subtitle, onMenuClick }: HeaderProps) {
       <header className="app-header">
         {/* Left */}
         <div className="flex items-center gap-2 min-w-0">
-          {/* Hamburger - mobile only */}
+          {/* Hamburger - mobile drawer */}
           {onMenuClick && (
             <button
               type="button"
@@ -100,6 +131,17 @@ export default function Header({ title, subtitle, onMenuClick }: HeaderProps) {
               aria-label={t('header_open_menu')}
             >
               <Menu size={16} />
+            </button>
+          )}
+          {/* Sidebar collapse toggle - desktop only */}
+          {onToggleCollapse && (
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              className="hidden lg:flex btn-ghost btn-sm -ml-1.5 mr-1"
+              aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {sidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
             </button>
           )}
           <div className="min-w-0">
@@ -271,11 +313,12 @@ export default function Header({ title, subtitle, onMenuClick }: HeaderProps) {
                       key={n.id}
                       className={clsx(
                         'px-4 py-3 cursor-pointer transition-colors',
-                        !n.read && 'bg-blue-500/5'
+                        !n.read ? 'bg-blue-500/5' : 'opacity-60'
                       )}
                       style={{ ':hover': { background: 'var(--border-subtle)' } } as any}
+                      onClick={() => handleMarkOneRead(n.id, n.read)}
                       onMouseEnter={e => (e.currentTarget.style.background = 'var(--border-subtle)')}
-                      onMouseLeave={e => (e.currentTarget.style.background = '')}
+                      onMouseLeave={e => (e.currentTarget.style.background = n.read ? '' : '')}
                     >
                       <div className="flex items-start gap-3">
                         <div className={clsx(

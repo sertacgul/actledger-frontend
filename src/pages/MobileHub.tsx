@@ -23,13 +23,7 @@ type FormType = 'checklist' | 'soru_cevap' | 'denetim' | 'sayisal' | 'coktan_sec
 type FormTemplate = { id: string; name: string; formType: FormType; fields: number; uses: number; dept: string; required: boolean }
 
 /* ── Mock form templates (no backend endpoint yet) ── */
-const FORM_TEMPLATES: FormTemplate[] = [
-  { id: 'f1', name: 'Gunluk Uretim Formu',          formType: 'checklist',      fields: 8,  uses: 42, dept: 'Uretim',           required: true  },
-  { id: 'f2', name: 'Makine Bakim Kontrol Formu',    formType: 'denetim',        fields: 12, uses: 18, dept: 'Bakim & Onarim',   required: true  },
-  { id: 'f3', name: 'Kalite Kontrol Muayene Formu',  formType: 'denetim',        fields: 15, uses: 31, dept: 'Kalite Kontrol',   required: false },
-  { id: 'f4', name: 'Depo Sayim Formu',              formType: 'sayisal',        fields: 6,  uses: 9,  dept: 'Lojistik',         required: false },
-  { id: 'f5', name: 'Olay / Kaza Bildirim Formu',    formType: 'soru_cevap',     fields: 20, uses: 3,  dept: 'Tum Departmanlar', required: true  },
-]
+const FORM_TEMPLATES: FormTemplate[] = []
 
 /* ── Message & contact types ── */
 interface SentMessage {
@@ -413,16 +407,16 @@ interface FormPreset {
 }
 
 const FORM_PRESETS: FormPreset[] = [
-  { name: 'Gunluk Vardiya Kontrol Listesi',     formType: 'checklist',      fields: 12, dept: 'Uretim',           required: true,  description: 'Vardiya basinda ve sonunda yapilacak kontrollerin listesi' },
-  { name: 'Arac Hareket Oncesi Kontrol',         formType: 'checklist',      fields: 8,  dept: 'Lojistik',         required: true,  description: 'Arac cikisi oncesi guvenlik ve mekanik kontroller' },
-  { name: 'ISG Saha Denetim Formu',              formType: 'denetim',        fields: 20, dept: 'ISG',              required: true,  description: 'Is guvenligi saha denetim ve degerlendirme formu' },
-  { name: 'Ekipman Muayene Formu',               formType: 'denetim',        fields: 15, dept: 'Bakim & Onarim',   required: false, description: 'Ekipman ve makine periyodik muayene degerlendirmesi' },
+  { name: 'Gunluk Vardiya Kontrol Listesi',     formType: 'checklist',      fields: 12, dept: 'Tum Departmanlar', required: true,  description: 'Vardiya basinda ve sonunda yapilacak kontrollerin listesi' },
+  { name: 'Arac Hareket Oncesi Kontrol',         formType: 'checklist',      fields: 8,  dept: 'Tum Departmanlar', required: true,  description: 'Arac cikisi oncesi guvenlik ve mekanik kontroller' },
+  { name: 'ISG Saha Denetim Formu',              formType: 'denetim',        fields: 20, dept: 'Tum Departmanlar', required: true,  description: 'Is guvenligi saha denetim ve degerlendirme formu' },
+  { name: 'Ekipman Muayene Formu',               formType: 'denetim',        fields: 15, dept: 'Tum Departmanlar', required: false, description: 'Ekipman ve makine periyodik muayene degerlendirmesi' },
   { name: 'Musteri Memnuniyet Anketi',            formType: 'soru_cevap',     fields: 10, dept: 'Tum Departmanlar', required: false, description: 'Musteri geri bildirim ve memnuniyet sorulari' },
   { name: 'Olay/Kaza Bildirim Formu',            formType: 'soru_cevap',     fields: 18, dept: 'Tum Departmanlar', required: true,  description: 'Is kazasi veya olay sonrasi detayli bildirim' },
-  { name: 'Uretim Hatti Olcum Kaydi',            formType: 'sayisal',        fields: 10, dept: 'Uretim',           required: true,  description: 'Sicaklik, basinc, hiz gibi uretim parametreleri' },
-  { name: 'Enerji Tuketim Takip Formu',          formType: 'sayisal',        fields: 6,  dept: 'Tesis Yönetimi',   required: false, description: 'Gunluk elektrik, su, dogalgaz sayac degerleri' },
-  { name: 'Kalite Seviye Degerlendirmesi',        formType: 'coktan_secmeli', fields: 12, dept: 'Kalite Kontrol',   required: false, description: 'Urun kalite seviyesi ve siniflandirma formu' },
-  { name: 'Personel Gorev Degerlendirmesi',       formType: 'coktan_secmeli', fields: 8,  dept: 'Insan Kaynaklari', required: false, description: 'Performans ve yetkinlik degerlendirme anketi' },
+  { name: 'Uretim Hatti Olcum Kaydi',            formType: 'sayisal',        fields: 10, dept: 'Tum Departmanlar', required: true,  description: 'Sicaklik, basinc, hiz gibi uretim parametreleri' },
+  { name: 'Enerji Tuketim Takip Formu',          formType: 'sayisal',        fields: 6,  dept: 'Tum Departmanlar', required: false, description: 'Gunluk elektrik, su, dogalgaz sayac degerleri' },
+  { name: 'Kalite Seviye Degerlendirmesi',        formType: 'coktan_secmeli', fields: 12, dept: 'Tum Departmanlar', required: false, description: 'Urun kalite seviyesi ve siniflandirma formu' },
+  { name: 'Personel Gorev Degerlendirmesi',       formType: 'coktan_secmeli', fields: 8,  dept: 'Tum Departmanlar', required: false, description: 'Performans ve yetkinlik degerlendirme anketi' },
   { name: 'Genel Saha Rapor Formu',              formType: 'serbest',        fields: 10, dept: 'Tum Departmanlar', required: false, description: 'Metin, sayi ve seceneklerin bir arada oldugu rapor' },
 ]
 
@@ -443,7 +437,7 @@ function saveFormTemplate(form: FormTemplate) {
   } catch { /* ignore */ }
 }
 
-function FormTemplates({ departments }: { departments: Department[] }) {
+function FormTemplates({ departments, users }: { departments: Department[]; users: User[] }) {
   const [templates, setTemplates] = useState<FormTemplate[]>(() => loadFormTemplates())
   const [showCreate, setShowCreate] = useState(false)
   const [selectedTemplate, setSelectedTemplate] = useState<FormTemplate | null>(null)
@@ -465,6 +459,7 @@ function FormTemplates({ departments }: { departments: Department[] }) {
       {showCreate && (
         <CreateFormTemplateModal
           departments={departments}
+          users={users}
           onClose={() => setShowCreate(false)}
           onCreated={(form) => {
             saveFormTemplate(form)
@@ -536,6 +531,17 @@ function FormTemplates({ departments }: { departments: Department[] }) {
                 </div>
               </div>
               <div className="flex gap-2 pt-2 border-t border-zinc-100">
+                <button type="button" onClick={() => {
+                  if (window.confirm(`"${selectedTemplate.name}" formunu silmek istediginize emin misiniz?`)) {
+                    try {
+                      const raw = localStorage.getItem(LS_FORM_TEMPLATES)
+                      const list: FormTemplate[] = raw ? JSON.parse(raw) : []
+                      localStorage.setItem(LS_FORM_TEMPLATES, JSON.stringify(list.filter(f => f.id !== selectedTemplate.id)))
+                    } catch {}
+                    setTemplates(t => t.filter(f => f.id !== selectedTemplate.id))
+                    setSelectedTemplate(null)
+                  }
+                }} className="btn-danger flex-1 justify-center text-[12px]">Sil</button>
                 <button type="button" onClick={() => setSelectedTemplate(null)} className="btn-secondary flex-1 justify-center text-[12px]">Kapat</button>
               </div>
             </div>
@@ -548,9 +554,10 @@ function FormTemplates({ departments }: { departments: Department[] }) {
 
 /* ── Create form template modal (2-step: type selection + customize) ── */
 function CreateFormTemplateModal({
-  departments, onClose, onCreated,
+  departments, users, onClose, onCreated,
 }: {
   departments: Department[]
+  users:       User[]
   onClose:     () => void
   onCreated:   (form: FormTemplate) => void
 }) {
@@ -560,6 +567,28 @@ function CreateFormTemplateModal({
   const [dept,     setDept]     = useState('Tum Departmanlar')
   const [fields,   setFields]   = useState(5)
   const [required, setRequired] = useState(false)
+  const [assignMode, setAssignMode] = useState<'all' | 'select'>('all')
+  const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set())
+
+  const MOBILE_ROLES = ['isci', 'teknisyen', 'muhendis', 'supervizor']
+  const mobileUsers = users.filter(u => u.active && MOBILE_ROLES.includes(u.role))
+  const platformUsers = users.filter(u => u.active && !MOBILE_ROLES.includes(u.role))
+
+  const toggleUser = (id: string) => {
+    setSelectedUserIds(prev => {
+      const s = new Set(prev)
+      s.has(id) ? s.delete(id) : s.add(id)
+      return s
+    })
+  }
+  const selectAllMobile = () => setSelectedUserIds(prev => {
+    const s = new Set(prev); mobileUsers.forEach(u => s.add(u.id)); return s
+  })
+  const selectAllPlatform = () => setSelectedUserIds(prev => {
+    const s = new Set(prev); platformUsers.forEach(u => s.add(u.id)); return s
+  })
+  const selectAll = () => setSelectedUserIds(new Set(users.filter(u => u.active).map(u => u.id)))
+  const clearAll = () => setSelectedUserIds(new Set())
 
   const canSave = name.trim().length > 0 && formType
 
@@ -727,6 +756,64 @@ function CreateFormTemplateModal({
                 className="rounded border-zinc-300 text-indigo-600" />
               <span className="text-[12px] text-zinc-700">Zorunlu form (her vardiyada doldurulur)</span>
             </label>
+
+            {/* Kullanici Atama */}
+            <div>
+              <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Form Atama</label>
+              <div className="flex gap-2 mb-2">
+                <button type="button" onClick={() => setAssignMode('all')}
+                  className={clsx('px-3 py-1.5 rounded-lg text-[11px] font-semibold border transition-colors', assignMode === 'all' ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'border-zinc-200 text-zinc-500')}>
+                  Herkese
+                </button>
+                <button type="button" onClick={() => setAssignMode('select')}
+                  className={clsx('px-3 py-1.5 rounded-lg text-[11px] font-semibold border transition-colors', assignMode === 'select' ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'border-zinc-200 text-zinc-500')}>
+                  Secili Kullanicilara
+                </button>
+              </div>
+              {assignMode === 'select' && (
+                <div className="border border-zinc-200 rounded-xl overflow-hidden max-h-[200px] overflow-y-auto">
+                  <div className="flex gap-1.5 p-2 border-b border-zinc-100 bg-zinc-50">
+                    <button type="button" onClick={selectAll} className="text-[10px] text-indigo-600 font-semibold hover:underline">Hepsini Sec</button>
+                    <span className="text-zinc-300">|</span>
+                    <button type="button" onClick={clearAll} className="text-[10px] text-zinc-500 font-semibold hover:underline">Temizle</button>
+                  </div>
+                  {mobileUsers.length > 0 && (
+                    <>
+                      <div className="flex items-center justify-between px-3 py-1.5 bg-cyan-50 border-b border-zinc-100">
+                        <span className="text-[10px] font-bold text-cyan-700">Mobil Kullanicilar ({mobileUsers.length})</span>
+                        <button type="button" onClick={selectAllMobile} className="text-[9px] text-cyan-600 font-semibold hover:underline">Tumunu Sec</button>
+                      </div>
+                      {mobileUsers.map(u => (
+                        <label key={u.id} className="flex items-center gap-2 px-3 py-1.5 hover:bg-zinc-50 cursor-pointer">
+                          <input type="checkbox" checked={selectedUserIds.has(u.id)} onChange={() => toggleUser(u.id)} className="rounded border-zinc-300 text-cyan-600" />
+                          <span className="text-[11px] text-zinc-700 truncate">{u.name}</span>
+                          <span className="text-[9px] text-zinc-400 ml-auto">{u.role}</span>
+                        </label>
+                      ))}
+                    </>
+                  )}
+                  {platformUsers.length > 0 && (
+                    <>
+                      <div className="flex items-center justify-between px-3 py-1.5 bg-indigo-50 border-b border-zinc-100">
+                        <span className="text-[10px] font-bold text-indigo-700">Platform Kullanicilari ({platformUsers.length})</span>
+                        <button type="button" onClick={selectAllPlatform} className="text-[9px] text-indigo-600 font-semibold hover:underline">Tumunu Sec</button>
+                      </div>
+                      {platformUsers.map(u => (
+                        <label key={u.id} className="flex items-center gap-2 px-3 py-1.5 hover:bg-zinc-50 cursor-pointer">
+                          <input type="checkbox" checked={selectedUserIds.has(u.id)} onChange={() => toggleUser(u.id)} className="rounded border-zinc-300 text-indigo-600" />
+                          <span className="text-[11px] text-zinc-700 truncate">{u.name}</span>
+                          <span className="text-[9px] text-zinc-400 ml-auto">{u.role}</span>
+                        </label>
+                      ))}
+                    </>
+                  )}
+                </div>
+              )}
+              {assignMode === 'select' && selectedUserIds.size > 0 && (
+                <p className="text-[10px] text-zinc-500 mt-1">{selectedUserIds.size} kullanici secildi</p>
+              )}
+            </div>
+
             <div className="flex gap-2 pt-2 border-t border-zinc-100">
               <button type="button" onClick={() => { setStep('type'); setFormType(null); setName(''); setDept('Tum Departmanlar'); setFields(5); setRequired(false) }}
                 className="btn-secondary flex-1 justify-center text-[12px]">
@@ -1324,21 +1411,37 @@ function Messaging({ departments }: { departments: Department[] }) {
 
 /* ── TAB: Devices ── */
 function Devices({ users, departments }: { users: User[]; departments: Department[] }) {
-  // Simulate sync metadata (no real device status endpoint yet)
-  const mobileUsers = users
-    .filter(u => ['supervizor', 'muhendis', 'teknisyen', 'isci'].includes(u.role))
-    .map((u, i) => ({
+  const [onlineIds, setOnlineIds] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    const token = localStorage.getItem('actledger_token')
+    if (!token) return
+    let sock: any
+    import('socket.io-client').then(({ io }) => {
+      const apiBase = import.meta.env.VITE_API_URL || ''
+      const serverBase = apiBase.replace('/api', '')
+      sock = io(serverBase, { auth: { token }, transports: ['websocket', 'polling'], reconnection: true })
+      sock.on('user:online', (data: { userId: string }) => {
+        setOnlineIds(prev => new Set(prev).add(data.userId))
+      })
+      sock.on('user:offline', (data: { userId: string }) => {
+        setOnlineIds(prev => { const s = new Set(prev); s.delete(data.userId); return s })
+      })
+    })
+    return () => { if (sock) sock.disconnect() }
+  }, [])
+
+  const allUsers = users
+    .filter(u => u.active)
+    .map(u => ({
       ...u,
-      lastSync:     i === 0 ? new Date().toISOString()
-                  : i === 1 ? new Date(Date.now() - 12 * 60000).toISOString()
-                  :           new Date(Date.now() - 180 * 60000).toISOString(),
-      pendingTasks: i % 3,
-      appVersion:   i < 2 ? '1.2.0' : '1.1.4',
-      isOnline:     i < 2,
+      lastSync: (u as any).lastSyncAt || '',
+      appVersion: (u as any).mobileAppVersion || '',
+      isOnline: onlineIds.has(u.id),
     }))
 
-  const onlineCount  = mobileUsers.filter(u => u.isOnline).length
-  const offlineCount = mobileUsers.filter(u => !u.isOnline).length
+  const onlineCount  = allUsers.filter(u => u.isOnline).length
+  const offlineCount = allUsers.filter(u => !u.isOnline).length
 
   return (
     <div className="space-y-4">
@@ -1352,7 +1455,7 @@ function Devices({ users, departments }: { users: User[]; departments: Departmen
       </div>
 
       <div className="surface divide-y divide-zinc-100">
-        {mobileUsers.map(u => {
+        {allUsers.map(u => {
           const dept = departments.find(d => d.id === u.departmentId)
           return (
             <div key={u.id} className="flex items-center gap-4 px-4 py-3.5 hover:bg-zinc-50/60 transition-colors">
@@ -1395,15 +1498,14 @@ export default function MobileHub() {
 
   const { tasks,       loading: tasksLoading, refetch: refetchTasks } = useTasks()
   const { departments, loading: deptsLoading } = useDepartments()
-  const { users,       loading: usersLoading } = useUsers()
+  const { users,       loading: usersLoading } = useUsers({ includeMobile: true })
 
   // Fetch unread message count for status bar & tab badge
   useEffect(() => {
-    api.get<any>('/messages?pageSize=50')
+    api.get<any>('/messages/unread-count')
       .then((res: any) => {
         const data = res.data ?? res
-        const items = Array.isArray(data) ? data : []
-        setUnreadMsgCount(items.filter((m: any) => !m.readAt && !m.isBroadcast).length)
+        setUnreadMsgCount(data?.total ?? data?.direct ?? 0)
       })
       .catch(() => {})
   }, [])
@@ -1484,7 +1586,7 @@ export default function MobileHub() {
             ? <div className="surface h-40 animate-pulse" />
             : <TaskBroadcast tasks={tasks} departments={departments} users={users} onRefetch={refetchTasks} />
         )}
-        {activeTab === 'forms'    && <FormTemplates departments={departments} />}
+        {activeTab === 'forms'    && <FormTemplates departments={departments} users={users} />}
         {activeTab === 'platform_messages' && <PlatformMessagesEmbed />}
         {activeTab === 'devices'  && (
           usersLoading || deptsLoading

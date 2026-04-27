@@ -13,11 +13,12 @@ import BrandMark from '../ui/BrandMark'
 import type { TranslationKey } from '../../i18n/translations'
 
 interface SidebarProps {
-  open?:    boolean
-  onClose?: () => void
+  open?:      boolean
+  collapsed?: boolean
+  onClose?:   () => void
 }
 
-export default function Sidebar({ open = false, onClose }: SidebarProps) {
+export default function Sidebar({ open = false, collapsed = false, onClose }: SidebarProps) {
   const { user, logout } = useAuth()
   const { config, sector } = useCompany()
   const { t, lang } = useLanguage()
@@ -68,7 +69,7 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
   ]
 
   return (
-    <aside className={clsx('sidebar', open && 'is-open')}>
+    <aside className={clsx('sidebar', open && 'is-open', collapsed && 'is-collapsed')}>
       {/* Logo */}
       <div className="sidebar-logo">
         <BrandMark version={config?.appVersion} />

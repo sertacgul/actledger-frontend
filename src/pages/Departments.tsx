@@ -14,6 +14,7 @@ import { exportToExcel } from '../lib/excelExport'
 import { useToolbarActions } from '../lib/useToolbarActions'
 import { useLanguage, useBi } from '../context/LanguageContext'
 import { useAuth } from '../context/AuthContext'
+import { useCompany } from '../context/CompanyContext'
 import { KPI_LAYER_LABELS, KPI_LAYER_ORDER, type KpiLayer as TplKpiLayer } from '../data/sectorTemplates'
 
 function DepartmentCard({ dept, onSelect }: { dept: Department; onSelect: (d: Department) => void }) {
@@ -370,8 +371,14 @@ function CreateDeptModal({ onClose, onCreated }: { onClose: () => void; onCreate
     try {
       await createDeptApi({ name: name.trim(), code: code.trim().toUpperCase(), color })
       onCreated()
-    } catch (e: any) { setErr(e.message ?? 'Error') }
-    finally { setBusy(false) }
+    } catch (e: any) {
+      const msg = e.message ?? ''
+      if (msg.includes('limit') || msg.includes('Limit') || e.status === 403) {
+        setErr('Departman limitine ulasildi. Yeni departman eklemek icin ActLedger yetkilisi ile iletisime gecin.')
+      } else {
+        setErr(msg || 'Departman olusturulamadi')
+      }
+    } finally { setBusy(false) }
   }
 
   return (
@@ -570,7 +577,9 @@ export default function Departments() {
   const [showCreate, setShowCreate] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
 
+  const { config } = useCompany()
   const { departments, loading, refetch } = useDepartments()
+  const atLimit = departments.length >= (config?.maxDepartments ?? Infinity)
 
   const handleExportExcel = () => {
     exportToExcel({
@@ -642,8 +651,9 @@ export default function Departments() {
           />
         </div>
         {isAdmin && (
-          <button type="button" className="btn-dark btn-sm" onClick={() => setShowCreate(true)}>
-            <Plus size={14} /> {t('toolbar_new_department')}
+          <button type="button" className={clsx('btn-dark btn-sm', atLimit && 'opacity-50 cursor-not-allowed')} onClick={() => !atLimit && setShowCreate(true)} disabled={atLimit}
+            title={atLimit ? `Departman limiti: ${config?.maxDepartments}` : ''}>
+            <Plus size={14} /> {t('toolbar_new_department')} {config?.maxDepartments ? `(${departments.length}/${config.maxDepartments})` : ''}
           </button>
         )}
       </div>

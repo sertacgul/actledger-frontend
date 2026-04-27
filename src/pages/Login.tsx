@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   Eye, EyeOff, ArrowRight, AlertCircle, ExternalLink,
-  Sparkles, TrendingUp, Activity, MapPin, CheckCircle2,
+  Sparkles, TrendingUp, Activity, MapPin, CheckCircle2, Monitor, Smartphone,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useCompany } from '../context/CompanyContext'
@@ -158,11 +158,51 @@ const LANG_OPTIONS: { code: Lang; label: string; Flag: typeof FlagTR }[] = [
   { code: 'en', label: 'English', Flag: FlagUS },
 ]
 
+function isMobileDevice(): boolean {
+  if (typeof navigator === 'undefined') return false
+  const ua = navigator.userAgent || ''
+  const mobilePattern = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet|Kindle|Silk/i
+  const isSmallScreen = typeof window !== 'undefined' && window.innerWidth < 1024
+  const isTouchOnly = typeof window !== 'undefined' && 'ontouchstart' in window && navigator.maxTouchPoints > 0 && !window.matchMedia('(pointer: fine)').matches
+  return mobilePattern.test(ua) || (isSmallScreen && isTouchOnly)
+}
+
 export default function Login() {
   const { login, error: authError } = useAuth()
   const { config } = useCompany()
   const { lang, setLang } = useLanguage()
   const navigate = useNavigate()
+
+  // Block mobile devices from platform login
+  if (isMobileDevice()) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: '#0f172a' }}>
+        <div className="max-w-md w-full text-center space-y-6">
+          <BrandMark size={48} />
+          <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto">
+            <Smartphone size={28} className="text-red-400" />
+          </div>
+          <h1 className="text-xl font-bold text-white">
+            {lang === 'tr' ? 'Platform Girisi Sadece Bilgisayardan Yapilabilir' : 'Platform Login Available on Desktop Only'}
+          </h1>
+          <p className="text-sm text-slate-400">
+            {lang === 'tr'
+              ? 'Telefon, tablet ve kiosk cihazlarindan platforma giris yapilamaz. Masaustu veya laptop bilgisayar kullanin.'
+              : 'Platform login is not available from phones, tablets, or kiosk devices. Use a desktop or laptop computer.'}
+          </p>
+          <div className="flex items-center gap-3 justify-center text-slate-500">
+            <Monitor size={20} />
+            <span className="text-xs font-medium">{lang === 'tr' ? 'Windows / macOS / Linux' : 'Windows / macOS / Linux'}</span>
+          </div>
+          <div className="pt-4 border-t border-slate-800">
+            <Link to="/m/giris" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-cyan-600 text-white text-sm font-semibold hover:bg-cyan-500 transition-colors">
+              <Smartphone size={14} /> {lang === 'tr' ? 'Mobil Girise Git' : 'Go to Mobile Login'}
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const [email,       setEmail]       = useState(() => localStorage.getItem('actledger_remember_email') ?? DEMO_USERS[0].email)
   const [password,    setPassword]    = useState(DEMO_PASSWORD)
@@ -171,6 +211,8 @@ export default function Login() {
   const [selectedIdx, setSelectedIdx] = useState(0)
   const [loading,     setLoading]     = useState(false)
   const [formError,   setFormError]   = useState<string | null>(null)
+  const [needs2FA,    setNeeds2FA]    = useState(false)
+  const [twoFACode,   setTwoFACode]  = useState('')
 
   const phrases = ['Sahadan kontrol odasına.', 'Veri konuşur, eylem doğar.', 'Operasyonun yeni katmanı.', 'Her departman, tek ekran.']
   const [phraseIdx, setPhraseIdx] = useState(0)
@@ -197,10 +239,15 @@ export default function Login() {
       } else {
         localStorage.removeItem('actledger_remember_email')
       }
-      const loggedInUser = await login(email, password)
-      navigate(loggedInUser?.role === 'platform_admin' ? '/admin' : '/panel')
+      const result = await login(email, password, needs2FA ? twoFACode : undefined)
+      if (result && 'requiresTwoFactor' in result) {
+        setNeeds2FA(true)
+        setLoading(false)
+        return
+      }
+      navigate(result?.role === 'platform_admin' ? '/admin' : '/panel')
     } catch (e: any) {
-      setFormError(e.message ?? 'Giriş yapılamadı')
+      setFormError(e.message ?? 'Giris yapilamadi')
     } finally {
       setLoading(false)
     }
@@ -401,6 +448,26 @@ export default function Login() {
                     </button>
                   </div>
                 </div>
+
+                {/* 2FA Code Input */}
+                {needs2FA && (
+                  <div>
+                    <label className="block text-[11px] font-bold text-cyan-700 uppercase tracking-wider mb-1.5">
+                      2FA Dogrulama Kodu
+                    </label>
+                    <input
+                      type="text"
+                      value={twoFACode}
+                      onChange={e => { setTwoFACode(e.target.value.replace(/\D/g, '')); setFormError(null) }}
+                      placeholder="6 haneli kod"
+                      maxLength={6}
+                      autoFocus
+                      className="w-full px-4 py-3 rounded-lg bg-cyan-50 border border-cyan-300 text-zinc-900 text-[18px] text-center tracking-[0.3em] font-mono placeholder-zinc-400
+                        focus:outline-none focus:border-cyan-400 focus:bg-white focus:ring-2 focus:ring-cyan-100 transition-all"
+                    />
+                    <p className="text-[10px] text-zinc-500 mt-1">Authenticator uygulamanızdaki kodu girin</p>
+                  </div>
+                )}
 
                 {/* Remember me */}
                 <label className="flex items-center gap-2 cursor-pointer">

@@ -13,7 +13,7 @@ export interface WidgetMeta {
 
 export const WIDGET_REGISTRY: WidgetMeta[] = [
   { id: 'kpi_cards',        label: 'KPI Kartları',          description: 'Toplam / tamamlanan / devam eden / gecikmiş',  span: 'full',   filterOptions: ['departmentId', 'date'] },
-  { id: 'production_chart', label: 'Üretim Performansı',    description: 'Hedef vs gerçekleşen çizgi grafik',            span: 'wide',   filterOptions: ['date'] },
+  { id: 'production_chart', label: 'Departman Performansı',  description: 'Departman bazlı görev tamamlanma oranı',    span: 'wide',   filterOptions: ['departmentId'] },
   { id: 'task_pie',         label: 'Görev Dağılımı',        description: 'Duruma göre dağılım (donut)',                  span: 'narrow', filterOptions: ['departmentId', 'priority'] },
   { id: 'dept_performance', label: 'Departman Performansı', description: 'Bar grafik + tablo',                           span: 'wide',   filterOptions: ['departmentId'] },
   { id: 'activity_feed',    label: 'Son Aktiviteler',       description: 'Saha raporları aktivite akışı',                span: 'narrow', filterOptions: ['departmentId', 'date'] },
@@ -27,7 +27,7 @@ export const WIDGET_REGISTRY: WidgetMeta[] = [
 export const DEFAULT_DASHBOARD_ID = 'default'
 
 const DEFAULT_WIDGETS: string[] = [
-  'kpi_cards', 'production_chart', 'task_pie',
+  'kpi_cards', 'task_pie',
   'dept_performance', 'activity_feed', 'task_map', 'operiq',
 ]
 

@@ -43,6 +43,7 @@ import MobileTasks from './pages/mobile/MobileTasks'
 import MobileTaskDetail from './pages/mobile/MobileTaskDetail'
 import MobileForms from './pages/mobile/MobileForms'
 import MobileFormFill from './pages/mobile/MobileFormFill'
+import MobileReportAction from './pages/mobile/MobileReportAction'
 import MobileMessages from './pages/mobile/MobileMessages'
 import MobileNotifications from './pages/mobile/MobileNotifications'
 import MobileProfile from './pages/mobile/MobileProfile'
@@ -169,6 +170,7 @@ function AppRoutes() {
           <Route path="gorev/:id"        element={<MobileTaskDetail />} />
           <Route path="formlar"          element={<MobileForms />} />
           <Route path="form/:id"         element={<MobileFormFill />} />
+          <Route path="rapor/:id"       element={<MobileReportAction />} />
           <Route path="mesajlar"         element={<MobileMessages />} />
           <Route path="bildirimler"      element={<MobileNotifications />} />
           <Route path="profil"           element={<MobileProfile />} />

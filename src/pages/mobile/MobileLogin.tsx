@@ -16,8 +16,9 @@ export default function MobileLogin() {
     const seen = sessionStorage.getItem('actledger_mobile_splash_seen')
     return !seen
   })
-  const [code, setCode] = useState('')
-  const [password, setPassword] = useState('')
+  const [code, setCode] = useState(() => localStorage.getItem('actledger_mobile_code') ?? '')
+  const [password, setPassword] = useState(() => localStorage.getItem('actledger_mobile_pass') ?? '')
+  const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem('actledger_mobile_code'))
   const [showPass, setShowPass] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -29,6 +30,14 @@ export default function MobileLogin() {
     setError(null)
     try {
       const result = await mobileLogin(code.trim(), password)
+      // Save credentials if remember me is checked
+      if (rememberMe) {
+        localStorage.setItem('actledger_mobile_code', code.trim())
+        localStorage.setItem('actledger_mobile_pass', password)
+      } else {
+        localStorage.removeItem('actledger_mobile_code')
+        localStorage.removeItem('actledger_mobile_pass')
+      }
       if (result.mustChangePassword) {
         navigate('/m/sifre-degistir', { replace: true })
       } else {
@@ -98,6 +107,17 @@ export default function MobileLogin() {
               </button>
             </div>
           </div>
+
+          {/* Remember Me */}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={e => setRememberMe(e.target.checked)}
+              className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-cyan-500 focus:ring-cyan-500"
+            />
+            <span className="text-sm text-slate-400">{lang === 'tr' ? 'Beni Hatirla' : 'Remember Me'}</span>
+          </label>
 
           {/* Error */}
           {error && (

@@ -1329,9 +1329,6 @@ export default function Landing() {
   const [loginRemember, setLoginRemember] = useState(() => !!localStorage.getItem('actledger_remember_email'))
   const [loginLoading, setLoginLoading] = useState(false)
   const [loginError, setLoginError] = useState<string | null>(null)
-  const [login2fa, setLogin2fa] = useState(false)
-  const [login2faCode, setLogin2faCode] = useState('')
-  const [login2faSent, setLogin2faSent] = useState(false)
 
   // Contact form state
   const [contactOpen, setContactOpen] = useState(false)
@@ -1366,13 +1363,6 @@ export default function Landing() {
     if (!loginEmail || !loginPass) { setLoginError(lang === 'tr' ? 'E-posta ve sifre zorunludur' : 'Email and password are required'); return }
     setLoginLoading(true); setLoginError(null)
     try {
-      // 2FA flow: first login attempt triggers code send
-      if (login2fa && !login2faSent) {
-        // Simulate sending 2FA code via email
-        setLogin2faSent(true)
-        setLoginLoading(false)
-        return
-      }
       if (loginRemember) localStorage.setItem('actledger_remember_email', loginEmail)
       else localStorage.removeItem('actledger_remember_email')
       const u = await login(loginEmail, loginPass)
@@ -3223,7 +3213,7 @@ export default function Landing() {
                   <p className="text-[12px]" style={{ color: 'rgba(15,43,61,0.5)' }}>ActLedger</p>
                 </div>
               </div>
-              <button type="button" onClick={() => { setLoginOpen(false); setLoginError(null); setLogin2fa(false); setLogin2faSent(false) }} className="p-1.5 rounded-lg hover:bg-zinc-100 transition-colors">
+              <button type="button" onClick={() => { setLoginOpen(false); setLoginError(null) }} className="p-1.5 rounded-lg hover:bg-zinc-100 transition-colors">
                 <X size={18} style={{ color: '#64748b' }} />
               </button>
             </div>
@@ -3267,29 +3257,8 @@ export default function Landing() {
                 </div>
               </div>
 
-              {/* 2FA Code (if enabled and sent) */}
-              {login2fa && login2faSent && (
-                <div>
-                  <label className="block text-[12px] font-semibold mb-1.5" style={{ color: '#334155' }}>
-                    {lang === 'tr' ? 'Dogrulama Kodu' : 'Verification Code'}
-                  </label>
-                  <input
-                    className="w-full px-4 py-3 rounded-xl text-[14px] border outline-none transition-all focus:ring-2 focus:ring-cyan-400/30 focus:border-cyan-400 text-center tracking-[0.3em] font-mono"
-                    style={{ borderColor: '#e2e8f0', background: '#f8fafc' }}
-                    placeholder="------"
-                    maxLength={6}
-                    value={login2faCode}
-                    onChange={e => setLogin2faCode(e.target.value.replace(/\D/g, ''))}
-                    onKeyDown={e => e.key === 'Enter' && handleLogin()}
-                  />
-                  <p className="text-[11px] mt-1.5" style={{ color: '#06b6d4' }}>
-                    {lang === 'tr' ? `Dogrulama kodu ${loginEmail} adresine gonderildi.` : `Verification code sent to ${loginEmail}.`}
-                  </p>
-                </div>
-              )}
-
-              {/* Remember me + 2FA toggle */}
-              <div className="flex items-center justify-between">
+              {/* Remember me */}
+              <div className="flex items-center">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -3299,17 +3268,6 @@ export default function Landing() {
                   />
                   <span className="text-[12px] font-medium" style={{ color: '#475569' }}>
                     {lang === 'tr' ? 'Beni Hatirla' : 'Remember Me'}
-                  </span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={login2fa}
-                    onChange={e => { setLogin2fa(e.target.checked); setLogin2faSent(false); setLogin2faCode('') }}
-                    className="w-4 h-4 rounded border-zinc-300 text-cyan-600 focus:ring-cyan-500"
-                  />
-                  <span className="text-[12px] font-medium" style={{ color: '#475569' }}>
-                    {lang === 'tr' ? '2 Faktorlu Giris' : '2-Factor Auth'}
                   </span>
                 </label>
               </div>
@@ -3336,10 +3294,7 @@ export default function Landing() {
               >
                 {loginLoading ? <Loader2 size={18} className="animate-spin" /> : (
                   <>
-                    {login2fa && !login2faSent
-                      ? (lang === 'tr' ? 'Kod Gonder' : 'Send Code')
-                      : (lang === 'tr' ? 'Giris Yap' : 'Sign In')
-                    }
+                    {lang === 'tr' ? 'Giris Yap' : 'Sign In'}
                     <ArrowRight size={16} />
                   </>
                 )}

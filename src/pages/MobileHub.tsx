@@ -60,8 +60,14 @@ interface ThreadMessage {
 type Tab = 'tasks' | 'forms' | 'devices' | 'platform_messages'
 
 function SyncBadge({ lastSync, isOnline }: { lastSync: string; isOnline: boolean }) {
-  const diff = Math.floor((Date.now() - new Date(lastSync).getTime()) / 60000)
-  const label = diff < 1 ? 'Az önce' : diff < 60 ? `${diff}dk önce` : `${Math.floor(diff / 60)}sa önce`
+  const ts = lastSync ? new Date(lastSync).getTime() : 0
+  const valid = ts > 0 && !isNaN(ts)
+  const diff = valid ? Math.floor((Date.now() - ts) / 60000) : -1
+  const label = !valid ? 'Henuz baglanti yok'
+    : diff < 1 ? 'Az once'
+    : diff < 60 ? `${diff}dk once`
+    : diff < 1440 ? `${Math.floor(diff / 60)}sa once`
+    : new Date(lastSync).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
   return (
     <div className={clsx(
       'flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full',
@@ -1437,7 +1443,7 @@ function Devices({ users, departments }: { users: User[]; departments: Departmen
       ...u,
       lastSync: (u as any).lastSyncAt || '',
       appVersion: (u as any).mobileAppVersion || '',
-      isOnline: onlineIds.has(u.id),
+      isOnline: onlineIds.has(u.id) || (u as any).isOnline === true,
     }))
 
   const onlineCount  = allUsers.filter(u => u.isOnline).length

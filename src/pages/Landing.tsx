@@ -89,8 +89,15 @@ const T = {
     ctaDemo: 'Demo Talep Et',
     ctaSignIn: 'Giri\u015f Yap',
     cookieText: 'Bu site \u00e7erezleri kullan\u0131r. Devam ederek \u00e7erez politikam\u0131z\u0131 kabul etmi\u015f olursunuz.',
-    cookieAccept: 'Kabul Et',
+    cookieAccept: 'T\u00fcm\u00fcn\u00fc Kabul Et',
+    cookieAcceptSelected: 'Se\u00e7ilenleri Kabul Et',
     cookieDecline: 'Reddet',
+    cookieNecessaryTitle: 'Zorunlu \u00c7erezler',
+    cookieNecessaryDesc: 'Site\u2019nin d\u00fczg\u00fcn \u00e7al\u0131\u015fmas\u0131 i\u00e7in gereklidir. Oturum y\u00f6netimi, g\u00fcvenlik ve temel i\u015flevler bu \u00e7erezlere ba\u011fl\u0131d\u0131r. Devre d\u0131\u015f\u0131 b\u0131rak\u0131lamaz.',
+    cookieOptionalTitle: '\u0130ste\u011fe Ba\u011fl\u0131 \u00c7erezler',
+    cookieOptionalDesc: 'Kullan\u0131c\u0131 deneyimini iyile\u015ftirmek, site kullan\u0131m istatistiklerini toplamak ve ki\u015fiselle\u015ftirilmi\u015f i\u00e7erik sunmak amac\u0131yla kullan\u0131l\u0131r.',
+    cookiePolicyDetail: '\u00c7erez politikam\u0131z hakk\u0131nda detayl\u0131 bilgi i\u00e7in Gizlilik Politikas\u0131 sayfam\u0131z\u0131 inceleyebilirsiniz. \u00c7erez tercihlerinizi istedi\u011finiz zaman de\u011fi\u015ftirebilirsiniz.',
+    cookieAlwaysOn: 'Her zaman a\u00e7\u0131k',
     footerDev: 'ATAOL AI Techs\'e aittir.',
     footerRights: 'T\u00fcm haklar\u0131',
     footerPrivacy: 'Gizlilik Politikas\u0131',
@@ -108,7 +115,7 @@ const T = {
     pf3Body: 'G\u00f6rev olu\u015fturun, ekip \u00fcyelerine atay\u0131n, ilerlemeyi takip edin. Otomatik hat\u0131rlatmalar ve eskalasyon kurallar\u0131 sa\u011flar.',
     pf3Benefit: 'G\u00f6rev tamamlanma oran\u0131n\u0131 %45 art\u0131r\u0131n',
     pf4Title: 'Foto\u011fraf ile Saha Raporlar\u0131',
-    pf4Body: 'Saha g\u00f6rselleri ile zenginle\u015ftirilmi\u015f raporlar. Konum ve zaman damgas\u0131 ile do\u011frulanm\u0131\u015f veriler.',
+    pf4Body: 'Saha g\u00f6rselleri ile zenginle\u015ftirilmi\u015f raporlar. Konum ve zaman damgas\u0131 ile do\u011frulanm\u0131\u015f veriler sa\u011flar.',
     pf4Benefit: 'Raporlama s\u00fcresini %70 k\u0131salt\u0131n',
     pf5Title: 'OperIQ AI Analitik & \u0130\u00e7g\u00f6r\u00fcler',
     pf5Body: 'Yapay zeka motorumuz t\u00fcm saha verilerini analiz eder, anomalileri tespit eder, risk skorlar\u0131 \u00fcretir ve aksiyon \u00f6nerir.',
@@ -120,7 +127,7 @@ const T = {
     pf7Body: '7800+ haz\u0131r KPI \u015fablonu. Stratejik, taktik, operasyonel, bireysel ve AI katmanlar\u0131 ile kapsaml\u0131 \u00f6l\u00e7\u00fcm.',
     pf7Benefit: 'Performans g\u00f6r\u00fcn\u00fcrl\u00fc\u011f\u00fcn\u00fc %100 art\u0131r\u0131n',
     pf8Title: 'Verimlilik ve Emniyet',
-    pf8Body: 'Acil durumlara anl\u0131k m\u00fcdahale ile operasyonun, \u00e7al\u0131\u015fanlar\u0131n, bina, ekipman ve tesislerin emniyetine katk\u0131 sa\u011flar. Proaktif uyar\u0131 sistemi riskleri \u00f6nceden tespit ederek verimlili\u011fin art\u0131r\u0131r.',
+    pf8Body: 'Acil durumlara anl\u0131k m\u00fcdahale ile operasyonun, \u00e7al\u0131\u015fanlar\u0131n, bina, ekipman ve tesislerin emniyetine katk\u0131 sa\u011flar. Proaktif uyar\u0131 sistemi riskleri \u00f6nceden tespit ederek verimlili\u011fi art\u0131r\u0131r.',
     pf8Benefit: 'Operasyonel emniyet seviyesini en \u00fcst d\u00fczeye \u00e7\u0131kar\u0131n',
     pf9Title: 'Departman & Kullan\u0131c\u0131 Y\u00f6netimi',
     pf9Body: 'Organizasyon a\u011fac\u0131n\u0131z\u0131 olu\u015fturun, departmanlar\u0131 yap\u0131land\u0131r\u0131n, kullan\u0131c\u0131lar\u0131 y\u00f6netin.',
@@ -268,8 +275,15 @@ const T = {
     ctaDemo: 'Request Demo',
     ctaSignIn: 'Sign In',
     cookieText: 'This site uses cookies. By continuing, you accept our cookie policy.',
-    cookieAccept: 'Accept',
+    cookieAccept: 'Accept All',
+    cookieAcceptSelected: 'Accept Selected',
     cookieDecline: 'Decline',
+    cookieNecessaryTitle: 'Necessary Cookies',
+    cookieNecessaryDesc: 'Required for the site to function properly. Session management, security, and core features depend on these cookies. Cannot be disabled.',
+    cookieOptionalTitle: 'Optional Cookies',
+    cookieOptionalDesc: 'Used to improve user experience, collect site usage statistics, and deliver personalized content.',
+    cookiePolicyDetail: 'For detailed information about our cookie policy, please visit our Privacy Policy page. You can change your cookie preferences at any time.',
+    cookieAlwaysOn: 'Always on',
     footerDev: 'Belongs to ATAOL AI Techs.',
     footerRights: 'All rights',
     footerPrivacy: 'Privacy Policy',
@@ -404,15 +418,18 @@ function ScrollGrowVideo({ src }: { src: string }) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const scale = 0.55 + progress * 0.45
-  const radius = Math.max(0, 16 - progress * 16)
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const baseScale = isMobile ? 0.95 : 0.55
+  const baseWidth = isMobile ? 98 : 60
+  const scale = baseScale + progress * (1 - baseScale)
+  const radius = Math.max(0, (isMobile ? 8 : 16) - progress * (isMobile ? 8 : 16))
 
   return (
-    <div ref={ref} className="relative w-full flex justify-center" style={{ minHeight: '60vh' }}>
+    <div ref={ref} className="relative w-full flex justify-center" style={{ minHeight: isMobile ? 'auto' : '60vh' }}>
       <div
         className="relative overflow-hidden"
         style={{
-          width: `${60 + progress * 40}%`,
+          width: `${baseWidth + progress * (100 - baseWidth)}%`,
           maxWidth: progress > 0.95 ? '100vw' : '1400px',
           transform: `scale(${scale})`,
           transition: 'transform 0.12s ease-out, width 0.12s ease-out, border-radius 0.12s ease-out',
@@ -754,7 +771,7 @@ function DashboardMockup() {
               <Activity size={14} className="text-white" />
             </div>
             <div>
-              <p className="text-base font-bold text-white">Operations Cockpit</p>
+              <p className="text-base font-bold" style={{ color: '#0f2b3d' }}>Operations Cockpit</p>
               <p className="text-[15px]" style={{ color: 'rgba(6,182,212,0.7)' }}>Manufacturing Sector</p>
             </div>
           </div>
@@ -825,7 +842,7 @@ function DashboardMockup() {
           <Activity size={14} style={{ color: '#22d3ee' }} />
         </div>
         <div>
-          <p className="text-[14px] font-bold uppercase" style={{ color: 'rgba(15,43,61,0.55)' }}>Efficiency</p>
+          <p className="text-[14px] font-bold" style={{ color: '#ffffff' }}>Efficiency</p>
           <p className="text-lg font-extrabold leading-none" style={{ color: '#22d3ee' }}>+12.4%</p>
         </div>
       </div>
@@ -844,7 +861,7 @@ function DashboardMockup() {
           <BarChart3 size={14} style={{ color: '#14b8a6' }} />
         </div>
         <div>
-          <p className="text-[14px] font-bold uppercase" style={{ color: 'rgba(15,43,61,0.55)' }}>KPIs Active</p>
+          <p className="text-[14px] font-bold" style={{ color: '#ffffff' }}>KPI's Active</p>
           <p className="text-lg font-extrabold leading-none" style={{ color: '#14b8a6' }}>576+</p>
         </div>
       </div>
@@ -1296,8 +1313,11 @@ export default function Landing() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const handleCookie = useCallback((accepted: boolean) => {
+  const [optionalCookies, setOptionalCookies] = useState(true)
+
+  const handleCookie = useCallback((accepted: boolean, optionalAccepted = true) => {
     localStorage.setItem('actledger_cookies', String(accepted))
+    if (accepted) localStorage.setItem('actledger_cookies_optional', String(optionalAccepted))
     setCookieConsent(accepted)
   }, [])
 
@@ -1373,7 +1393,7 @@ export default function Landing() {
   ]
 
   return (
-    <div className="min-h-screen antialiased relative overflow-hidden" style={{ background: 'linear-gradient(180deg, #f0fafa 0%, #e8f5f0 20%, #f5f0e8 40%, #edf7f7 60%, #f8f4ec 80%, #e6f3f0 100%)', color: '#1a2e3b' }}>
+    <div className="min-h-screen antialiased relative overflow-x-auto overflow-y-hidden" style={{ background: 'linear-gradient(180deg, #f0fafa 0%, #e8f5f0 20%, #f5f0e8 40%, #edf7f7 60%, #f8f4ec 80%, #e6f3f0 100%)', color: '#1a2e3b' }}>
 
       {/* -- CSS Animations ------------------------------------------------ */}
       <style>{`
@@ -1608,15 +1628,15 @@ export default function Landing() {
           borderBottom: '1px solid rgba(6,182,212,0.2)',
         }}
       >
-        <div className="w-full px-6 lg:px-12 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <BrandMark size={36} variant="dark" />
+        <div className="w-full px-4 sm:px-6 lg:px-12 py-4 flex items-center justify-between overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="flex items-center gap-4 flex-shrink-0">
+            <div className="[&>div]:gap-1 lg:[&>div]:gap-2.5"><BrandMark size={36} variant="dark" /></div>
             <span className="hidden lg:block text-[15px] font-bold" style={{ color: '#ffffff' }}>
               ATAOL AI Techs taraf{'\u0131'}ndan geli{'\u015f'}tirildi.
             </span>
           </div>
 
-          <div className="hidden md:flex items-center gap-8 text-lg font-bold" style={{ color: '#ffffff' }}>
+          <div className="hidden md:flex items-center gap-8 text-lg font-bold flex-nowrap whitespace-nowrap" style={{ color: '#ffffff' }}>
             <a href="#platform" className="hover:text-cyan-300 transition-colors duration-300">{t.navPlatform}</a>
             <a href="#sectors" className="hover:text-cyan-300 transition-colors duration-300">{t.navSectors}</a>
             <a href="#features" className="hover:text-cyan-300 transition-colors duration-300">{t.navFeatures}</a>
@@ -1628,12 +1648,12 @@ export default function Landing() {
             <a href="#contact" className="hover:text-cyan-300 transition-colors duration-300">{t.navContact}</a>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1 px-1.5 py-1 rounded-lg" style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)' }}>
+          <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
+            <div className="flex items-center gap-1 px-1 py-0.5 rounded-lg flex-shrink-0" style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)' }}>
               <button
                 type="button"
                 onClick={() => setLang('tr')}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-all duration-300"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-md transition-all duration-300"
                 style={{
                   background: lang === 'tr' ? 'rgba(6,182,212,0.25)' : 'transparent',
                   boxShadow: lang === 'tr' ? '0 1px 4px rgba(0,0,0,0.15)' : 'none',
@@ -1645,7 +1665,7 @@ export default function Landing() {
               <button
                 type="button"
                 onClick={() => setLang('en')}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-all duration-300"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-md transition-all duration-300"
                 style={{
                   background: lang === 'en' ? 'rgba(6,182,212,0.25)' : 'transparent',
                   boxShadow: lang === 'en' ? '0 1px 4px rgba(0,0,0,0.15)' : 'none',
@@ -1657,19 +1677,19 @@ export default function Landing() {
             </div>
             <Link
               to="/m/giris"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-bold text-base transition-all duration-300 hover:scale-105"
+              className="md:hidden flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all duration-300 hover:scale-105"
               style={{
                 background: 'rgba(6,182,212,0.15)',
                 color: '#22d3ee',
                 border: '1px solid rgba(6,182,212,0.3)',
               }}
             >
-              <Smartphone size={16} /> {t.mobileLogin}
+              <Smartphone size={14} /> {t.mobileLogin}
             </Link>
             <button
               type="button"
               onClick={() => setLoginOpen(true)}
-              className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-lg transition-all duration-300 hover:scale-105"
+              className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all duration-300 hover:scale-105"
               style={{
                 background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
                 color: '#ffffff',
@@ -1685,14 +1705,14 @@ export default function Landing() {
       {/* ================================================================
           2. HERO
           ================================================================ */}
-      <section className="relative z-10 w-full min-h-screen flex items-center pt-20">
+      <section className="relative z-10 w-full min-h-screen flex items-start lg:items-center pt-24 sm:pt-28 lg:pt-20">
         <div className="w-full px-6 lg:px-12 xl:px-20">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20 items-center">
             {/* Left: Text */}
             <div>
               <Reveal>
                 {/* ActLedger logo with dark background */}
-                <div className="inline-flex items-center justify-center mb-5 px-4 py-2.5 rounded-xl" style={{ background: '#0f172a' }}>
+                <div className="inline-flex items-center justify-center mt-8 sm:mt-12 lg:mt-0 mb-5 px-4 py-2.5 rounded-xl" style={{ background: '#0f172a' }}>
                   <BrandMark size={48} />
                 </div>
                 <h1
@@ -2071,11 +2091,11 @@ export default function Landing() {
             </div>
           </Reveal>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="flex flex-wrap justify-center gap-4">
             {SECTORS.map((sector, i) => (
-              <Reveal key={sector.id} delay={i * 60}>
+              <Reveal key={sector.id} delay={i * 60} className="w-[calc(50%-8px)] sm:w-[calc(33.333%-11px)] lg:w-[calc(20%-13px)]">
                 <div
-                  className="group relative rounded-xl p-5 cursor-default transition-all duration-400 hover:scale-105"
+                  className="group relative rounded-xl p-5 cursor-default transition-all duration-400 hover:scale-105 h-full"
                   style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.2)' }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.borderColor = sector.accentColor
@@ -2097,7 +2117,7 @@ export default function Landing() {
                       <polyline fill="none" stroke={sector.accentColor} strokeWidth="2" points="0,35 30,28 60,32 90,18 120,24 150,12 180,20 200,8" />
                     </svg>
                   </div>
-                  <p className="text-xl font-bold" style={{ color: '#0f2b3d' }}>{sector.name}</p>
+                  <p className="text-base sm:text-xl font-bold min-h-[3rem] flex items-center" style={{ color: '#0f2b3d' }}>{sector.name}</p>
                   <p className="text-lg mt-1" style={{ color: 'rgba(15,43,61,0.55)' }}>
                     {sector.id === 'manufacturing' ? 56 : (SECTOR_TEMPLATES[sector.id]?.departments?.length ?? sector.departmentTemplates.length)} {t.deptCount}
                   </p>
@@ -2133,9 +2153,9 @@ export default function Landing() {
               { icon: Shield, title: t.f5Title, body: t.f5Body, color: '#06b6d4' },
               { icon: Activity, title: t.f6Title, body: t.f6Body, color: '#14b8a6' },
             ].map((feat, i) => (
-              <Reveal key={i} delay={i * 100}>
+              <Reveal key={i} delay={i * 100} className="h-full">
                 <div
-                  className="group relative rounded-2xl p-7 transition-all duration-500 hover:-translate-y-1"
+                  className="group relative rounded-2xl p-7 transition-all duration-500 hover:-translate-y-1 h-full"
                   style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.2)' }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.borderColor = `${feat.color}55`
@@ -2190,8 +2210,7 @@ export default function Landing() {
                     <img src={item.img} alt={item.label} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-5">
-                      <p className="text-2xl font-bold text-white mb-1">{item.label}</p>
-                      <p className="text-lg text-white/70">{item.sub}</p>
+                      <p className="text-2xl font-bold text-white">{item.label}</p>
                     </div>
                     <div className="absolute top-3 right-3 w-3 h-3 rounded-full animate-pulse" style={{ background: item.color, boxShadow: `0 0 12px ${item.color}` }} />
                   </div>
@@ -3103,34 +3122,78 @@ export default function Landing() {
           ================================================================ */}
       {cookieConsent === null && (
         <div
-          className="fixed bottom-0 left-0 right-0 z-50 p-4 transition-all duration-500"
+          className="fixed bottom-0 left-0 right-0 z-50 p-4 sm:p-6 transition-all duration-500"
           style={{
             background: 'rgba(10,22,40,0.98)',
             borderTop: '1px solid rgba(6,182,212,0.2)',
             backdropFilter: 'blur(12px)',
           }}
         >
-          <div className="w-full px-6 lg:px-12 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Cookie size={20} style={{ color: '#22d3ee' }} />
-              <p className="text-lg" style={{ color: 'rgba(15,43,61,0.7)' }}>{t.cookieText}</p>
+          <div className="w-full px-4 sm:px-6 lg:px-12 max-w-5xl mx-auto">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-4">
+              <Cookie size={22} style={{ color: '#22d3ee' }} />
+              <p className="text-lg font-bold" style={{ color: '#ffffff' }}>{t.cookieText}</p>
             </div>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => handleCookie(true)}
-                className="px-5 py-2 rounded-lg font-bold text-lg transition-all duration-300 hover:scale-105"
-                style={{ background: 'linear-gradient(135deg, #06b6d4, #0891b2)', color: '#0f2b3d' }}
-              >
-                {t.cookieAccept}
-              </button>
+
+            {/* Cookie categories */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+              {/* Zorunlu cerezler */}
+              <div className="rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(6,182,212,0.15)' }}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-base font-bold" style={{ color: '#22d3ee' }}>{t.cookieNecessaryTitle}</p>
+                  <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: 'rgba(6,182,212,0.2)', color: '#22d3ee' }}>{t.cookieAlwaysOn}</span>
+                </div>
+                <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.7)' }}>{t.cookieNecessaryDesc}</p>
+              </div>
+              {/* Opsiyonel cerezler */}
+              <div className="rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(6,182,212,0.15)' }}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-base font-bold" style={{ color: '#22d3ee' }}>{t.cookieOptionalTitle}</p>
+                  <button
+                    type="button"
+                    onClick={() => setOptionalCookies(!optionalCookies)}
+                    className="relative w-10 h-5 rounded-full transition-all duration-300"
+                    style={{ background: optionalCookies ? '#06b6d4' : 'rgba(255,255,255,0.15)' }}
+                  >
+                    <span
+                      className="absolute top-0.5 w-4 h-4 rounded-full transition-all duration-300"
+                      style={{ background: '#ffffff', left: optionalCookies ? '22px' : '2px' }}
+                    />
+                  </button>
+                </div>
+                <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.7)' }}>{t.cookieOptionalDesc}</p>
+              </div>
+            </div>
+
+            {/* Policy detail */}
+            <p className="text-xs mb-4 leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{t.cookiePolicyDetail}</p>
+
+            {/* Buttons */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => handleCookie(false)}
-                className="px-5 py-2 rounded-lg font-bold text-lg transition-all duration-300"
-                style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(15,43,61,0.7)', border: '1px solid rgba(255,255,255,0.15)' }}
+                className="px-5 py-2 rounded-lg font-bold text-base transition-all duration-300 hover:scale-105"
+                style={{ background: 'rgba(255,255,255,0.08)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.2)' }}
               >
                 {t.cookieDecline}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCookie(true, optionalCookies)}
+                className="px-5 py-2 rounded-lg font-bold text-base transition-all duration-300 hover:scale-105"
+                style={{ background: 'rgba(255,255,255,0.12)', color: '#ffffff', border: '1px solid rgba(6,182,212,0.3)' }}
+              >
+                {t.cookieAcceptSelected}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCookie(true, true)}
+                className="px-5 py-2 rounded-lg font-bold text-base transition-all duration-300 hover:scale-105"
+                style={{ background: 'linear-gradient(135deg, #06b6d4, #0891b2)', color: '#ffffff' }}
+              >
+                {t.cookieAccept}
               </button>
             </div>
           </div>
@@ -3313,9 +3376,9 @@ export default function Landing() {
                   <Mail size={14} style={{ color: '#22d3ee' }} />
                   support@strategythrust.com
                 </a>
-                <a href="mailto:sales@strategythrust.com" className="flex items-center gap-2 text-lg transition-colors duration-300 hover:text-cyan-400" style={{ color: '#ffffff' }}>
+                <a href="mailto:support@strategythrust.com" className="flex items-center gap-2 text-lg transition-colors duration-300 hover:text-cyan-400" style={{ color: '#ffffff' }}>
                   <Mail size={14} style={{ color: '#14b8a6' }} />
-                  sales@strategythrust.com
+                  support@strategythrust.com
                 </a>
                 <a href="tel:+905322013416" className="flex items-center gap-2 text-lg transition-colors duration-300 hover:text-cyan-400" style={{ color: '#ffffff' }}>
                   <Phone size={14} style={{ color: '#ffffff' }} />
@@ -3327,10 +3390,10 @@ export default function Landing() {
             <div>
               <h4 className="text-lg font-bold mb-4" style={{ color: '#ffffff' }}>Links</h4>
               <div className="space-y-3">
-                <Link to="/privacy" className="block text-lg transition-colors duration-300 hover:text-cyan-400" style={{ color: '#ffffff' }}>
+                <Link to={`/privacy?lang=${lang}`} className="block text-lg transition-colors duration-300 hover:text-cyan-400" style={{ color: '#ffffff' }}>
                   {t.footerPrivacy}
                 </Link>
-                <Link to="/terms" className="block text-lg transition-colors duration-300 hover:text-cyan-400" style={{ color: '#ffffff' }}>
+                <Link to={`/terms?lang=${lang}`} className="block text-lg transition-colors duration-300 hover:text-cyan-400" style={{ color: '#ffffff' }}>
                   {t.footerTerms}
                 </Link>
                 <a href="https://www.ataolai.tech" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-lg transition-colors duration-300 hover:text-cyan-400" style={{ color: '#ffffff' }}>

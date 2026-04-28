@@ -114,6 +114,7 @@ export default function ToolsBar() {
 
       {/* Data ops */}
       <ToolButton icon={<Search       size={16} />} label={t('toolbar_search')} shortLabel={t('toolbar_search_short')} onClick={() => dispatch(TOOLBAR_EVENTS.search)} />
+      <ToolButton icon={<RefreshCw      size={16} />} label={t('toolbar_refresh')}                                        onClick={() => dispatch(TOOLBAR_EVENTS.refresh)} />
       <ToolButton icon={<FileSpreadsheet size={16}/>} label={t('toolbar_export')} shortLabel={t('toolbar_export_short')}   onClick={() => dispatch(TOOLBAR_EVENTS.exportExcel)} />
       <ToolButton icon={<Printer        size={16} />} label={t('toolbar_print')}                                           onClick={handlePrint} />
 

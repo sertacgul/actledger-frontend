@@ -128,6 +128,8 @@ export function mapUser(u: any): User {
     createdAt:    u.createdAt,
     isOnline:     u.isOnline ?? false,
     lastSyncAt:   u.lastSyncAt ?? null,
+    isMobileUser: u.isMobileUser ?? false,
+    mobileAppVersion: u.mobileAppVersion ?? null,
   }
 }
 

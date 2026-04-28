@@ -1442,7 +1442,7 @@ function Devices({ users, departments }: { users: User[]; departments: Departmen
     .map(u => ({
       ...u,
       lastSync: u.lastSyncAt || '',
-      appVersion: (u as any).mobileAppVersion || '',
+      appVersion: u.mobileAppVersion || '',
       isOnline: onlineIds.has(u.id) || u.isOnline === true,
     }))
 
@@ -1477,7 +1477,12 @@ function Devices({ users, departments }: { users: User[]; departments: Departmen
                 )} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold text-zinc-900">{u.name}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-[13px] font-semibold text-zinc-900">{u.name}</p>
+                  {u.isMobileUser && (
+                    <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-700 border border-cyan-200 uppercase tracking-wider">Mobil</span>
+                  )}
+                </div>
                 <p className="text-[11px] text-zinc-400 truncate">{dept?.name}</p>
               </div>
               <div className="text-right flex-shrink-0 space-y-1">

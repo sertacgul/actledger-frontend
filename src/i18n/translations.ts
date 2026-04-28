@@ -74,7 +74,7 @@ export const translations = {
     toolbar_search_short:    'Ara',
     toolbar_filter:          'Filtre Paneli',
     toolbar_filter_short:    'Filtre',
-    toolbar_refresh:         'Yenile',
+    toolbar_refresh:         'Senkronize Et',
     toolbar_export:          'Excel Dışa Aktar',
     toolbar_export_short:    'Excel',
     toolbar_print:           'Yazdır',

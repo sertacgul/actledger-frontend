@@ -48,6 +48,8 @@ export interface User {
   createdAt: string
   isOnline?: boolean
   lastSyncAt?: string | null
+  isMobileUser?: boolean
+  mobileAppVersion?: string | null
 }
 
 export interface Department {

@@ -63,7 +63,7 @@ function SyncBadge({ lastSync, isOnline }: { lastSync: string; isOnline: boolean
   const ts = lastSync ? new Date(lastSync).getTime() : 0
   const valid = ts > 0 && !isNaN(ts)
   const diff = valid ? Math.floor((Date.now() - ts) / 60000) : -1
-  const label = !valid ? 'Henuz baglanti yok'
+  const offlineLabel = !valid ? 'Henuz baglanti yok'
     : diff < 1 ? 'Az once'
     : diff < 60 ? `${diff}dk once`
     : diff < 1440 ? `${Math.floor(diff / 60)}sa once`
@@ -75,8 +75,8 @@ function SyncBadge({ lastSync, isOnline }: { lastSync: string; isOnline: boolean
                : 'bg-zinc-100 text-zinc-500 border border-zinc-200'
     )}>
       {isOnline
-        ? <><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />{label}</>
-        : <><WifiOff size={9} />{label}</>
+        ? <><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />Cevrimici</>
+        : <><WifiOff size={9} />{offlineLabel}</>
       }
     </div>
   )

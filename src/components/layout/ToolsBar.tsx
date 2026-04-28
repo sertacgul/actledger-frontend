@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   FilePlus2, Search, Printer, RefreshCw, FileSpreadsheet,
@@ -61,6 +62,28 @@ function ToolButton({ icon, label, shortLabel, onClick, disabled, variant = 'def
   )
 }
 
+function SyncButton({ label, onClick }: { label: string; onClick: () => void }) {
+  const [spinning, setSpinning] = useState(false)
+  const handleClick = () => {
+    setSpinning(true)
+    onClick()
+    setTimeout(() => setSpinning(false), 1500)
+  }
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      disabled={spinning}
+      title={label}
+      aria-label={label}
+      className="flex items-center gap-1.5 h-8 px-2 rounded-md font-semibold text-[13px] transition-colors text-zinc-700 hover:bg-zinc-100 hover:text-indigo-700 dark:text-zinc-100 dark:hover:bg-white/10 dark:hover:text-indigo-300 disabled:opacity-60"
+    >
+      <RefreshCw size={16} className={spinning ? 'animate-spin' : ''} />
+      <span className="hidden xl:inline">{label}</span>
+    </button>
+  )
+}
+
 function Divider() {
   return <div className="w-px h-6 mx-1.5" style={{ background: 'var(--border)' }} />
 }
@@ -114,7 +137,7 @@ export default function ToolsBar() {
 
       {/* Data ops */}
       <ToolButton icon={<Search       size={16} />} label={t('toolbar_search')} shortLabel={t('toolbar_search_short')} onClick={() => dispatch(TOOLBAR_EVENTS.search)} />
-      <ToolButton icon={<RefreshCw      size={16} />} label={t('toolbar_refresh')}                                        onClick={() => dispatch(TOOLBAR_EVENTS.refresh)} />
+      <SyncButton label={t('toolbar_refresh')} onClick={() => dispatch(TOOLBAR_EVENTS.refresh)} />
       <ToolButton icon={<FileSpreadsheet size={16}/>} label={t('toolbar_export')} shortLabel={t('toolbar_export_short')}   onClick={() => dispatch(TOOLBAR_EVENTS.exportExcel)} />
       <ToolButton icon={<Printer        size={16} />} label={t('toolbar_print')}                                           onClick={handlePrint} />
 

@@ -114,7 +114,7 @@ export default function DashboardSwitcher({
               className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] font-medium text-indigo-600 hover:bg-indigo-50 transition-colors"
             >
               <Plus size={13} />
-              Dashboard Kisiselleştirme
+              Yeni Dashboard
             </button>
           </div>
         </div>

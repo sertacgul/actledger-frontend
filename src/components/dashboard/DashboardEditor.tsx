@@ -89,7 +89,7 @@ export default function DashboardEditor({ dashboard, onSave, onClose }: Props) {
 
   return (
     <DraggableModal
-      title={isEdit ? 'Dashboard Kisiselleştirme' : 'Yeni Dashboard'}
+      title={isEdit ? 'Dashboard Kişiselleştirme' : 'Yeni Dashboard'}
       icon={<LayoutDashboard size={13} />}
       onClose={onClose}
       width={520}
@@ -97,7 +97,7 @@ export default function DashboardEditor({ dashboard, onSave, onClose }: Props) {
         <>
           <button type="button" onClick={onClose} className="btn-secondary">Iptal</button>
           <button type="button" onClick={handleSave} className="btn-primary">
-            <Check size={13} /> {isEdit ? 'Kaydet' : 'Olustur'}
+            <Check size={13} /> {isEdit ? 'Kaydet' : 'Oluştur'}
           </button>
         </>
       }

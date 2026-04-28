@@ -1169,15 +1169,15 @@ function DashboardInner() {
   const isDefault = store.activeDashboard.id === DEFAULT_DASHBOARD_ID
 
   // When an NL widget is generated, attach it to a dashboard.
-  // Default dashboard is read-only, so create or reuse an "Dashboard Kisiselleştirme" dashboard.
+  // Default dashboard is read-only, so create or reuse an "Dashboard Kişiselleştirme" dashboard.
   const handleNLCreated = (widgetId: string) => {
     if (isDefault) {
-      const existing = store.dashboards.find(d => d.name === 'Dashboard Kisiselleştirme')
+      const existing = store.dashboards.find(d => d.name === 'Dashboard Kişiselleştirme')
       if (existing) {
         store.updateDashboard(existing.id, { widgets: [...existing.widgets, widgetId] })
         store.setActiveId(existing.id)
       } else {
-        store.createDashboard('Dashboard Kisiselleştirme', [widgetId])
+        store.createDashboard('Dashboard Kişiselleştirme', [widgetId])
       }
     } else {
       store.updateDashboard(store.activeDashboard.id, {

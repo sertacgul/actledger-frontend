@@ -1424,8 +1424,8 @@ function Devices({ users, departments }: { users: User[]; departments: Departmen
     if (!token) return
     let sock: any
     import('socket.io-client').then(({ io }) => {
-      const apiBase = import.meta.env.VITE_API_URL || ''
-      const serverBase = apiBase.replace('/api', '')
+      const apiBase = import.meta.env.VITE_API_BASE ?? 'http://localhost:3001/api/v1'
+      const serverBase = apiBase.replace(/\/api\/v1$/, '')
       sock = io(serverBase, { auth: { token }, transports: ['websocket', 'polling'], reconnection: true })
       sock.on('user:online', (data: { userId: string }) => {
         setOnlineIds(prev => new Set(prev).add(data.userId))
@@ -1441,9 +1441,9 @@ function Devices({ users, departments }: { users: User[]; departments: Departmen
     .filter(u => u.active)
     .map(u => ({
       ...u,
-      lastSync: (u as any).lastSyncAt || '',
+      lastSync: u.lastSyncAt || '',
       appVersion: (u as any).mobileAppVersion || '',
-      isOnline: onlineIds.has(u.id) || (u as any).isOnline === true,
+      isOnline: onlineIds.has(u.id) || u.isOnline === true,
     }))
 
   const onlineCount  = allUsers.filter(u => u.isOnline).length

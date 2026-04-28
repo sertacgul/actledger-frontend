@@ -91,7 +91,7 @@ export default function MobileProfile() {
           onClick={() => setShowGuide(true)}
           className="w-full bg-cyan-50 rounded-xl border border-cyan-200 p-4 flex items-center justify-between active:bg-cyan-100"
         >
-          <span className="text-sm font-semibold text-cyan-700 flex items-center gap-2"><BookOpen size={16} /> {lang === 'tr' ? 'Mobil Kullanim Kılavuzu' : 'Mobile User Guide'}</span>
+          <span className="text-sm font-semibold text-cyan-700 flex items-center gap-2"><BookOpen size={16} /> {lang === 'tr' ? 'Mobil Kullanım Kılavuzu' : 'Mobile User Guide'}</span>
           <ChevronRight size={16} className="text-cyan-300" />
         </button>
 
@@ -123,7 +123,7 @@ export default function MobileProfile() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center">
           <div className="bg-white w-full max-h-[85vh] rounded-t-2xl overflow-y-auto animate-slideUp">
             <div className="sticky top-0 bg-white border-b border-slate-100 px-4 py-3 flex items-center justify-between z-10">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2"><BookOpen size={18} className="text-cyan-600" /> {lang === 'tr' ? 'Mobil Kullanim Kılavuzu' : 'Mobile User Guide'}</h3>
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2"><BookOpen size={18} className="text-cyan-600" /> {lang === 'tr' ? 'Mobil Kullanım Kılavuzu' : 'Mobile User Guide'}</h3>
               <button type="button" onClick={() => setShowGuide(false)} className="p-1 rounded-full bg-slate-100"><ChevronRight size={16} className="rotate-90 text-slate-500" /></button>
             </div>
             <div className="p-4 space-y-4 text-[13px] text-slate-700">

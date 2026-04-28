@@ -114,7 +114,6 @@ export default function ToolsBar() {
 
       {/* Data ops */}
       <ToolButton icon={<Search       size={16} />} label={t('toolbar_search')} shortLabel={t('toolbar_search_short')} onClick={() => dispatch(TOOLBAR_EVENTS.search)} />
-      <ToolButton icon={<RefreshCw      size={16} />} label={t('toolbar_refresh')}                                        onClick={() => dispatch(TOOLBAR_EVENTS.refresh)} />
       <ToolButton icon={<FileSpreadsheet size={16}/>} label={t('toolbar_export')} shortLabel={t('toolbar_export_short')}   onClick={() => dispatch(TOOLBAR_EVENTS.exportExcel)} />
       <ToolButton icon={<Printer        size={16} />} label={t('toolbar_print')}                                           onClick={handlePrint} />
 
@@ -122,7 +121,7 @@ export default function ToolsBar() {
 
       {/* Utility */}
       <ToolButton icon={<FolderOpen     size={16} />} label={t('toolbar_files')}                                           onClick={() => navigate('/dosyalar')} />
-      <ToolButton icon={<BookOpen       size={16} />} label={lang === 'tr' ? 'Kullanim Kılavuzu' : 'User Guide'}          onClick={() => navigate('/manuel')} />
+      <ToolButton icon={<BookOpen       size={16} />} label={lang === 'tr' ? 'Kullanım Kılavuzu' : 'User Guide'}          onClick={() => navigate('/manuel')} />
       <ToolButton icon={<HelpCircle     size={16} />} label={t('toolbar_shortcuts')} shortLabel={t('toolbar_help')}        onClick={() => setHelpOpen(true)} />
 
       {/* Right side - current path breadcrumb */}

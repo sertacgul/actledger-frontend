@@ -126,6 +126,8 @@ export function mapUser(u: any): User {
     avatar:       u.avatarUrl ?? undefined,
     active:       u.active,
     createdAt:    u.createdAt,
+    isOnline:     u.isOnline ?? false,
+    lastSyncAt:   u.lastSyncAt ?? null,
   }
 }
 

@@ -122,8 +122,12 @@ function load(): DashboardConfig[] {
     const raw = localStorage.getItem(LS_DASHBOARDS)
     if (raw) {
       const parsed = JSON.parse(raw) as DashboardConfig[]
-      // migrate old configs that lack widgetFilters
-      return parsed.map(d => ({ ...d, widgetFilters: d.widgetFilters ?? {} }))
+      // migrate old configs that lack widgetFilters + rename old dashboard names
+      return parsed.map(d => ({
+        ...d,
+        name: d.name === 'AI Görselleştirmeler' ? 'Dashboard Kişiselleştirme' : d.name,
+        widgetFilters: d.widgetFilters ?? {},
+      }))
     }
   } catch { /* ignore */ }
   return [{ id: DEFAULT_DASHBOARD_ID, name: 'Ana Ekran', widgets: DEFAULT_WIDGETS, widgetFilters: {} }]

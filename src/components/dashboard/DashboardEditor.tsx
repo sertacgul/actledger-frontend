@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { X, GripVertical, Check, LayoutDashboard } from 'lucide-react'
 import clsx from 'clsx'
 import { WIDGET_REGISTRY, DEFAULT_DASHBOARD_ID, type DashboardConfig } from '../../lib/dashboardStore'
+import DraggableModal from '../ui/DraggableModal'
 
 interface Props {
   /** null = create mode, DashboardConfig = edit mode */
@@ -87,29 +88,21 @@ export default function DashboardEditor({ dashboard, onSave, onClose }: Props) {
   const unselected = WIDGET_REGISTRY.filter(w => !selected.includes(w.id))
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70] p-4">
-      <div className="bg-white rounded-xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh]">
-
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 flex-shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded bg-indigo-50 border border-indigo-200 flex items-center justify-center">
-              <LayoutDashboard size={13} className="text-indigo-600" />
-            </div>
-            <div>
-              <p className="text-[13px] font-semibold text-zinc-900">
-                {isEdit ? 'Dashboard Düzenle' : 'Yeni Dashboard'}
-              </p>
-              <p className="text-[10px] text-zinc-400">Widget seçin ve sıralayın</p>
-            </div>
-          </div>
-          <button type="button" onClick={onClose} className="text-zinc-400 hover:text-zinc-600 transition-colors">
-            <X size={16} />
+    <DraggableModal
+      title={isEdit ? 'Dashboard Kisiselleştirme' : 'Yeni Dashboard'}
+      icon={<LayoutDashboard size={13} />}
+      onClose={onClose}
+      width={520}
+      footer={
+        <>
+          <button type="button" onClick={onClose} className="btn-secondary">Iptal</button>
+          <button type="button" onClick={handleSave} className="btn-primary">
+            <Check size={13} /> {isEdit ? 'Kaydet' : 'Olustur'}
           </button>
-        </div>
-
-        {/* Body */}
-        <div className="overflow-y-auto flex-1 p-5 space-y-5">
+        </>
+      }
+    >
+        <div className="overflow-y-auto max-h-[60vh] p-5 space-y-5">
 
           {/* Name */}
           <div>
@@ -235,14 +228,6 @@ export default function DashboardEditor({ dashboard, onSave, onClose }: Props) {
           )}
         </div>
 
-        {/* Footer */}
-        <div className="flex gap-2 px-5 py-4 border-t border-zinc-100 flex-shrink-0">
-          <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center">İptal</button>
-          <button type="button" onClick={handleSave} className="btn-primary flex-1 justify-center">
-            <Check size={13} /> {isEdit ? 'Kaydet' : 'Oluştur'}
-          </button>
-        </div>
-      </div>
-    </div>
+    </DraggableModal>
   )
 }

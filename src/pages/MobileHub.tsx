@@ -1455,9 +1455,6 @@ function Devices({ users, departments }: { users: User[]; departments: Departmen
         <p className="text-[12px] text-zinc-500">
           {onlineCount} aktif · {offlineCount} çevrimdışı
         </p>
-        <button type="button" className="btn-default btn-sm">
-          <RefreshCw size={13} /> Tümünü Senkronize Et
-        </button>
       </div>
 
       <div className="surface divide-y divide-zinc-100">

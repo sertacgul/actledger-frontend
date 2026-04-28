@@ -279,7 +279,7 @@ export default function MobileMessages() {
   // ── Conversation Screen ───────────────────────────────────────
   if (screen === 'conversation' && chatTarget) {
     return (
-      <div className="flex flex-col bg-slate-50" style={{ height: '100dvh', maxHeight: '100dvh', overflow: 'hidden' }}>
+      <div className="fixed inset-0 z-50 flex flex-col bg-slate-50">
         {/* Header */}
         <div className="bg-slate-800 text-white px-3 py-2.5 flex items-center gap-3 flex-shrink-0">
           <button onClick={() => { setScreen('chats'); setChatTarget(null); loadAllMessages() }} className="p-1"><ArrowLeft size={20} /></button>

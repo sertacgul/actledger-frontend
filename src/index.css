@@ -322,6 +322,8 @@
   .sidebar.is-collapsed .border-t .w-9 { width: 32px; height: 32px; }
   .sidebar.is-collapsed + .sidebar-backdrop + .app-content,
   .sidebar-collapsed.app-content { margin-left: 64px !important; }
+  .sidebar.is-collapsed + .sidebar-backdrop + .app-content .app-header,
+  .sidebar-collapsed .app-header { left: 64px !important; }
 }
 
 .sidebar-logo {
@@ -478,7 +480,7 @@
   justify-content: space-between;
   padding: 0 24px;
   z-index: 30;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, left 0.2s ease;
 }
 [data-theme="dark"] .app-header {
   background: rgba(13,17,23,0.9);

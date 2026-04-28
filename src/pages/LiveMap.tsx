@@ -261,6 +261,17 @@ export default function LiveMap() {
     try { await api.delete(`/locations/facilities/${id}`); setFacilities(prev => prev.filter(f => f.id !== id)) } catch {}
   }
 
+  const handleDeleteEntity = async (id: string, type: string) => {
+    if (!confirm('Bu kaydi silmek istediginize emin misiniz?')) return
+    try { await api.delete(`/map/${id}`); loadData() } catch {}
+  }
+
+  const handleEditEntity = async (id: string, field: string, currentValue: string) => {
+    const newValue = prompt(`Yeni deger (${field}):`, currentValue)
+    if (!newValue || newValue === currentValue) return
+    try { await api.patch(`/map/${id}`, { [field]: newValue }); loadData() } catch {}
+  }
+
   return (
     <div className="space-y-4">
       {/* Page title + Tab switcher */}
@@ -450,6 +461,10 @@ export default function LiveMap() {
                     {e.metadata?.role && <p className="text-slate-500">{e.metadata.role}</p>}
                     {e.metadata?.phone && <p className="text-slate-400">{e.metadata.phone}</p>}
                     <p className="text-[10px] text-slate-400 font-mono mt-1">{e.latitude.toFixed(4)}, {e.longitude.toFixed(4)}</p>
+                    <div className="flex gap-2 mt-1.5 pt-1.5 border-t border-slate-100">
+                      <button type="button" onClick={() => handleEditEntity(e.id, 'name', e.name)} className="text-blue-500 text-[10px] font-semibold hover:underline">Duzenle</button>
+                      <button type="button" onClick={() => handleDeleteEntity(e.id, 'personnel')} className="text-red-500 text-[10px] font-semibold hover:underline">Sil</button>
+                    </div>
                   </div>
                 </Popup>
               </CircleMarker>
@@ -471,6 +486,10 @@ export default function LiveMap() {
                     {e.metadata?.vehicleType && <p className="text-slate-500">{e.metadata.vehicleType}</p>}
                     {e.metadata?.driver && <p className="text-slate-400">Sofor: {e.metadata.driver}</p>}
                     <p className="text-[10px] text-slate-400 font-mono mt-1">{e.latitude.toFixed(4)}, {e.longitude.toFixed(4)}</p>
+                    <div className="flex gap-2 mt-1.5 pt-1.5 border-t border-slate-100">
+                      <button type="button" onClick={() => handleEditEntity(e.id, 'name', e.name)} className="text-blue-500 text-[10px] font-semibold hover:underline">Duzenle</button>
+                      <button type="button" onClick={() => handleDeleteEntity(e.id, 'vehicle')} className="text-red-500 text-[10px] font-semibold hover:underline">Sil</button>
+                    </div>
                   </div>
                 </Popup>
               </Marker>
@@ -492,6 +511,10 @@ export default function LiveMap() {
                     {e.metadata?.equipmentType && <p className="text-slate-500">{e.metadata.equipmentType}</p>}
                     {e.metadata?.serial && <p className="text-slate-400">SN: {e.metadata.serial}</p>}
                     <p className="text-[10px] text-slate-400 font-mono mt-1">{e.latitude.toFixed(4)}, {e.longitude.toFixed(4)}</p>
+                    <div className="flex gap-2 mt-1.5 pt-1.5 border-t border-slate-100">
+                      <button type="button" onClick={() => handleEditEntity(e.id, 'name', e.name)} className="text-blue-500 text-[10px] font-semibold hover:underline">Duzenle</button>
+                      <button type="button" onClick={() => handleDeleteEntity(e.id, 'equipment')} className="text-red-500 text-[10px] font-semibold hover:underline">Sil</button>
+                    </div>
                   </div>
                 </Popup>
               </Marker>
@@ -506,10 +529,12 @@ export default function LiveMap() {
                     <p className="text-slate-500 capitalize">{FACILITY_TYPES.find(t => t.value === f.type)?.label ?? f.type}</p>
                     {f.address && <p className="text-slate-500 mt-0.5">{f.address}</p>}
                     <p className="text-[10px] text-slate-400 font-mono mt-1">{f.latitude.toFixed(4)}, {f.longitude.toFixed(4)}</p>
-                    <button type="button" onClick={() => handleDeleteFacility(f.id)}
-                      className="text-red-500 text-[10px] font-semibold mt-1 flex items-center gap-1 hover:underline">
-                      <Trash2 size={10} /> Sil
-                    </button>
+                    <div className="flex gap-2 mt-1.5 pt-1.5 border-t border-slate-100">
+                      <button type="button" onClick={() => { const n = prompt('Yeni tesis adi:', f.name); if (n && n !== f.name) api.patch(`/locations/facilities/${f.id}`, { name: n }).then(() => loadData()).catch(() => {}) }}
+                        className="text-blue-500 text-[10px] font-semibold hover:underline">Duzenle</button>
+                      <button type="button" onClick={() => handleDeleteFacility(f.id)}
+                        className="text-red-500 text-[10px] font-semibold hover:underline">Sil</button>
+                    </div>
                   </div>
                 </Popup>
               </Marker>

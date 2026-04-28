@@ -246,17 +246,6 @@ export default function Header({ title, subtitle, onMenuClick, onToggleCollapse,
             }
           </button>
 
-          {/* Sync */}
-          <button
-            type="button"
-            onClick={handleSync}
-            className={clsx('btn-ghost btn-sm', syncing && 'pointer-events-none')}
-            title={t('header_sync')}
-          >
-            <RefreshCw size={13} className={syncing ? 'animate-spin' : ''} />
-            <span className="hidden lg:inline text-[11px]">{t('header_sync')}</span>
-          </button>
-
           {/* Print */}
           <button
             type="button"

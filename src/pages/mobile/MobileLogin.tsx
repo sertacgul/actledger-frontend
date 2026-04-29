@@ -55,7 +55,7 @@ export default function MobileLogin() {
   }
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-slate-900" style={{ maxWidth: 480, margin: '0 auto' }}>
+    <div className="min-h-[100dvh] flex flex-col bg-slate-900" style={{ maxWidth: 480, margin: '0 auto', overflowX: 'hidden' }}>
       {/* Header */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-10">
         {/* Brand */}

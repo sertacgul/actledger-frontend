@@ -17,7 +17,7 @@ export default defineConfig({
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
-        start_url: '/m/gorevler',
+        start_url: '/m/giris',
         icons: [
           { src: '/images/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: '/images/icon-512.png', sizes: '512x512', type: 'image/png' },

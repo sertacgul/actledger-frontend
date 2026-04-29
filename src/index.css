@@ -118,6 +118,7 @@
 
   html {
     font-size: 14px;
+    overflow-x: hidden;
     /* smooth theme transitions */
     transition: background-color 0.2s ease, color 0.2s ease;
   }

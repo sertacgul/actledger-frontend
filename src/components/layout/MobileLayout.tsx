@@ -10,7 +10,7 @@ import { api } from '../../lib/api'
 
 export default function MobileLayout() {
   const { t } = useLanguage()
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [online, setOnline] = useState(navigator.onLine)
 
@@ -19,6 +19,7 @@ export default function MobileLayout() {
   const [locationDismissed, setLocationDismissed] = useState(false)
 
   useEffect(() => {
+    if (authLoading) return // wait for session restore
     if (!user) { navigate('/m/giris', { replace: true }); return }
     const on = () => setOnline(true)
     const off = () => setOnline(false)
@@ -101,7 +102,7 @@ export default function MobileLayout() {
       stopSyncManager()
       if (locationInterval) clearInterval(locationInterval)
     }
-  }, [user, navigate])
+  }, [user, authLoading, navigate])
 
   const handleSync = async () => {
     setSyncing(true)
@@ -128,8 +129,20 @@ export default function MobileLayout() {
     { to: '/m/profil',    icon: UserCircle,      label: t('m_nav_profile') },
   ]
 
+  // Show splash while restoring session
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center h-[100dvh] bg-slate-900">
+        <div className="text-center">
+          <BrandMark size={48} />
+          <p className="text-white/50 text-sm mt-4 animate-pulse">Yukleniyor...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="flex flex-col h-[100dvh] bg-slate-50" style={{ maxWidth: 480, margin: '0 auto' }}>
+    <div className="flex flex-col h-[100dvh] bg-slate-50" style={{ maxWidth: 480, margin: '0 auto', overflowX: 'hidden' }}>
       {/* Install PWA banner */}
       {showInstallBanner && (
         <div className="bg-cyan-600 text-white text-xs font-medium py-2.5 px-4 flex items-center gap-2 safe-area-top">

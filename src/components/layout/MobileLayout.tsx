@@ -9,7 +9,7 @@ import { startSyncManager, stopSyncManager, syncNow, isSyncing } from '../../lib
 import { api } from '../../lib/api'
 
 export default function MobileLayout() {
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
   const { user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [online, setOnline] = useState(navigator.onLine)
@@ -122,7 +122,7 @@ export default function MobileLayout() {
 
   const tabs = [
     { to: '/m/gorevler',  icon: ClipboardList,   label: t('m_nav_tasks') },
-    { to: '/m/formlar',   icon: FileSpreadsheet, label: 'Formlar' },
+    { to: '/m/formlar',   icon: FileSpreadsheet, label: lang === 'tr' ? 'Formlar' : 'Forms' },
     { to: '/m/qr-tarama', icon: ScanLine,        label: 'QR',             highlight: false, qr: true },
     { to: '/m/operiq',    icon: Cpu,             label: 'OperIQ',         highlight: true },
     { to: '/m/mesajlar',  icon: MessageSquare,   label: t('m_nav_messages') },
@@ -135,7 +135,7 @@ export default function MobileLayout() {
       <div className="flex items-center justify-center h-[100dvh] bg-slate-900">
         <div className="text-center">
           <BrandMark size={48} />
-          <p className="text-white/50 text-sm mt-4 animate-pulse">Yukleniyor...</p>
+          <p className="text-white/50 text-sm mt-4 animate-pulse">{lang === 'tr' ? 'Yükleniyor...' : 'Loading...'}</p>
         </div>
       </div>
     )
@@ -199,15 +199,20 @@ export default function MobileLayout() {
           <div className="flex items-start gap-2.5 w-full">
             <MapPin size={14} className="text-blue-500 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="text-[11px] font-semibold text-blue-800">Konum Bilgisi</p>
+              <p className="text-[11px] font-semibold text-blue-800">
+                {lang === 'tr' ? 'Konum Bilgisi' : 'Location Information'}
+              </p>
               <p className="text-[10px] text-blue-700 leading-relaxed mt-0.5">
-                {'Mesai ba\u015flang\u0131c\u0131ndan biti\u015fine kadar konum bilginiz a\u00e7\u0131k olacakt\u0131r.'} <strong>{'Kimlik bilgileriniz kesinlikle takip edilmemektedir.'}</strong> {'Bu uygulama emniyeti ve operasyonel verimlili\u011fi art\u0131rmak i\u00e7in kullan\u0131lmaktad\u0131r.'}
+                {lang === 'tr'
+                  ? <>Mesai başlangıcından bitişine kadar konum bilginiz açık olacaktır. <strong>Kimlik bilgileriniz kesinlikle takip edilmemektedir.</strong> Bu uygulama emniyeti ve operasyonel verimliliği artırmak için kullanılmaktadır.</>
+                  : <>Your location will be shared during working hours. <strong>Your personal identity is never tracked.</strong> This is used to improve safety and operational efficiency.</>
+                }
               </p>
             </div>
           </div>
           <button type="button" onClick={() => setLocationDismissed(true)}
             className="px-6 py-1.5 rounded-lg text-[11px] font-semibold text-white bg-blue-600 hover:bg-blue-500">
-            {'Anlad\u0131m'}
+            {lang === 'tr' ? 'Anladım' : 'Got it'}
           </button>
         </div>
       )}

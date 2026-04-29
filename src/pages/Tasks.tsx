@@ -206,7 +206,7 @@ KURALLAR:
 JSON formatinda yanit ver:
 {"ozet": "...", "risk": "dusuk|orta|yuksek", "oneriler": ["...", "..."]}`
 
-      const result = await api.post<any>('/operiq-chat/message', { content: prompt })
+      const result = await api.post<any>('/operiq-chat/message', { message: prompt.slice(0, 2000) })
       const aiText = result?.reply || result?.content || result?.message || ''
       // Try to parse JSON from AI response
       let parsed: any = null

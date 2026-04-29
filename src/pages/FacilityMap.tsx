@@ -241,12 +241,15 @@ export default function FacilityMap() {
 
   const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!editMode || !canvasRef.current) return
-    const rect = canvasRef.current.getBoundingClientRect()
-    // Account for pan/zoom transform
-    const rawX = e.clientX - rect.left
-    const rawY = e.clientY - rect.top
-    const x = ((rawX - transform.x) / (rect.width * transform.scale)) * 100
-    const y = ((rawY - transform.y) / (rect.height * transform.scale)) * 100
+    // Find the actual image element to get its dimensions
+    const img = canvasRef.current.querySelector('img')
+    if (!img) return
+    const imgRect = img.getBoundingClientRect()
+    // Calculate click position relative to the image (accounting for pan/zoom)
+    const x = ((e.clientX - imgRect.left) / imgRect.width) * 100
+    const y = ((e.clientY - imgRect.top) / imgRect.height) * 100
+    // Only accept clicks within the image bounds
+    if (x < 0 || x > 100 || y < 0 || y > 100) return
     setShowCreateZone(true)
     setNewZone(prev => ({ ...prev, x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 }))
   }

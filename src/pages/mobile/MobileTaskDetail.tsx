@@ -49,22 +49,60 @@ export default function MobileTaskDetail() {
     setUploading(true)
     try {
       for (const photo of photos) {
+        // Compress image before upload (max 1200px, 0.7 quality)
+        const compressed = await compressImage(photo, 1200, 0.7)
         const fd = new FormData()
-        fd.append('photo', photo)
+        fd.append('photo', compressed, photo.name || 'photo.jpg')
         const token = tokenStore.get()
-        const res = await fetch(`${API_BASE}/tasks/${id}/attachments`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-          credentials: 'include',
-          body: fd,
-        })
-        if (res.ok) {
-          const body = await res.json()
-          setAttachments(prev => [...prev, body.data])
+        const controller = new AbortController()
+        const timer = setTimeout(() => controller.abort(), 60000)
+        try {
+          const res = await fetch(`${API_BASE}/tasks/${id}/attachments`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+            credentials: 'include',
+            body: fd,
+            signal: controller.signal,
+          })
+          clearTimeout(timer)
+          if (res.ok) {
+            const body = await res.json()
+            setAttachments(prev => [...prev, body.data])
+          } else {
+            alert(lang === 'tr' ? 'Fotograf yuklenemedi' : 'Photo upload failed')
+          }
+        } catch (err: any) {
+          clearTimeout(timer)
+          alert(err.name === 'AbortError'
+            ? (lang === 'tr' ? 'Yukleme zaman asimina ugradi. Daha kucuk bir fotograf deneyin.' : 'Upload timed out. Try a smaller photo.')
+            : (lang === 'tr' ? 'Yukleme basarisiz oldu' : 'Upload failed'))
         }
       }
       setPhotos([])
     } catch {} finally { setUploading(false) }
+  }
+
+  // Compress image to reduce upload size
+  function compressImage(file: File, maxSize: number, quality: number): Promise<Blob> {
+    return new Promise((resolve) => {
+      const img = new Image()
+      img.onload = () => {
+        let { width, height } = img
+        if (width > maxSize || height > maxSize) {
+          const ratio = Math.min(maxSize / width, maxSize / height)
+          width = Math.round(width * ratio)
+          height = Math.round(height * ratio)
+        }
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        canvas.getContext('2d')!.drawImage(img, 0, 0, width, height)
+        canvas.toBlob(blob => resolve(blob || file), 'image/jpeg', quality)
+        URL.revokeObjectURL(img.src)
+      }
+      img.onerror = () => resolve(file)
+      img.src = URL.createObjectURL(file)
+    })
   }
 
   useEffect(() => {

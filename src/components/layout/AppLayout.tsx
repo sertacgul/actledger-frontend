@@ -47,43 +47,10 @@ export default function AppLayout() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem('actledger_sidebar_collapsed') === 'true')
 
-  // Block mobile/tablet/kiosk devices from accessing platform
+  // Mobile devices: redirect to mobile app instead of blocking
   if (isMobileDevice()) {
-    const tr = lang === 'tr'
-    return (
-      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: '#0f172a' }}>
-        <div className="max-w-md w-full text-center space-y-6">
-          <BrandMark size={48} />
-          <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto">
-            <Smartphone size={28} className="text-red-400" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-white mb-2">
-              {tr ? 'Mobil Cihazdan Erisim Engellendi' : 'Mobile Device Access Blocked'}
-            </h1>
-            <p className="text-sm text-slate-400 leading-relaxed">
-              {tr
-                ? 'ActLedger platformuna yalnizca masaustu veya laptop bilgisayarlardan (Windows, macOS, Linux) erisebilirsiniz. Telefon, tablet veya kiosk cihazlarindan platforma giris yapilamaz.'
-                : 'ActLedger platform can only be accessed from desktop or laptop computers (Windows, macOS, Linux). Access from phones, tablets, or kiosk devices is not permitted.'}
-            </p>
-          </div>
-          <div className="flex items-center gap-3 justify-center text-slate-500">
-            <Monitor size={20} />
-            <span className="text-xs font-medium">
-              {tr ? 'Masaustu / Laptop bilgisayar gereklidir' : 'Desktop / Laptop computer required'}
-            </span>
-          </div>
-          <div className="pt-4 border-t border-slate-800">
-            <p className="text-xs text-slate-500 mb-3">
-              {tr ? 'Mobil saha uygulamasini kullanmak icin:' : 'To use the mobile field app:'}
-            </p>
-            <Link to="/m/giris" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-cyan-600 text-white text-sm font-semibold hover:bg-cyan-500 transition-colors">
-              <Smartphone size={14} /> {tr ? 'Mobil Girise Git' : 'Go to Mobile Login'}
-            </Link>
-          </div>
-        </div>
-      </div>
-    )
+    window.location.replace('/m/giris')
+    return null
   }
 
   // Auto-close drawer on route change

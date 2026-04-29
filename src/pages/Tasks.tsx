@@ -168,11 +168,56 @@ function TaskDetailModal({
 
   const handleOperIQAnalyze = async () => {
     setOperiqLoading(true)
+    setOperiqResult(null)
     try {
-      const context = `Gorev: ${task.title}\nAciklama: ${task.description}\nDurum: ${task.status}\nOncelik: ${task.priority}\nYorumlar: ${comments.map(c => c.content).join('; ')}\nFotograf sayisi: ${attachments.length}`
-      const result = await api.post<any>('/gemini', { type: 'GENEL_OZET', prompt: context })
-      setOperiqResult(result)
-    } catch {} finally { setOperiqLoading(false) }
+      const statusMap: Record<string, string> = { beklemede: 'Beklemede', devam_ediyor: 'Devam Ediyor', tamamlandi: 'Tamamlandi', gecikti: 'Gecikti', iptal: 'Iptal' }
+      const priorityMap: Record<string, string> = { dusuk: 'Dusuk', normal: 'Normal', yuksek: 'Yuksek', kritik: 'Kritik' }
+      const checklistInfo = task.checklist?.length > 0
+        ? `Kontrol Listesi: ${task.checklist.filter((c: any) => c.completed).length}/${task.checklist.length} tamamlandi`
+        : 'Kontrol listesi yok'
+      const commentInfo = comments.length > 0
+        ? `Yorumlar (${comments.length}): ${comments.slice(0, 5).map((c: any) => c.content).join(' | ')}`
+        : 'Henuz yorum yok'
+
+      const prompt = `Bu gorevi analiz et ve operasyonel icgoru uret.
+
+GOREV DETAYLARI:
+- Baslik: ${task.title}
+- Aciklama: ${task.description || 'Belirtilmemis'}
+- Durum: ${statusMap[task.status] || task.status}
+- Oncelik: ${priorityMap[task.priority] || task.priority}
+- Tur: ${task.type}
+- Olusturulma: ${new Date(task.createdAt).toLocaleDateString('tr-TR')}
+- Son Tarih: ${task.dueDate ? new Date(task.dueDate).toLocaleDateString('tr-TR') : 'Belirtilmemis'}
+- Atanan: ${task.assignee?.name || 'Belirtilmemis'}
+- ${checklistInfo}
+- Fotograf/Ek: ${attachments.length} adet
+- ${commentInfo}
+
+KURALLAR:
+- SADECE bu gorev hakkinda analiz yap, genel sirket analizi YAPMA
+- Gorev durumuna gore degerlendirme yap
+- Gecikme riski varsa uyar
+- Oncelik ve tur bazli oneriler sun
+- En fazla 4-5 cumle ile ozet ver
+- Veri yetersizse bunu belirt ve eldeki bilgiyle en iyi yorumu yap
+- Em-dash veya en-dash kullanma, sadece kisa tire (-) kullan
+
+JSON formatinda yanit ver:
+{"ozet": "...", "risk": "dusuk|orta|yuksek", "oneriler": ["...", "..."]}`
+
+      const result = await api.post<any>('/operiq-chat/message', { content: prompt })
+      const aiText = result?.reply || result?.content || result?.message || ''
+      // Try to parse JSON from AI response
+      let parsed: any = null
+      try {
+        const jsonMatch = aiText.match(/\{[\s\S]*\}/)
+        if (jsonMatch) parsed = JSON.parse(jsonMatch[0])
+      } catch {}
+      setOperiqResult(parsed || { ozet: aiText })
+    } catch (e: any) {
+      setOperiqResult({ ozet: e.message || 'Analiz yapilamadi. Lutfen tekrar deneyin.' })
+    } finally { setOperiqLoading(false) }
   }
 
   const handleChecklistToggle = async (itemId: string, completed: boolean) => {
@@ -428,9 +473,30 @@ function TaskDetailModal({
         )}
 
         {operiqResult && (
-          <div className="p-3 rounded-lg text-[12px]" style={{ background: 'var(--border-subtle)', border: '1px solid var(--border)' }}>
-            <p className="font-bold mb-1 flex items-center gap-1" style={{ color: '#14b8a6' }}><Zap size={12} /> OperIQ</p>
-            <p style={{ color: 'var(--text-2)' }}>{typeof operiqResult?.content === 'object' ? operiqResult.content.ozet ?? JSON.stringify(operiqResult.content) : operiqResult?.content ?? '-'}</p>
+          <div className="p-3 rounded-lg text-[12px] space-y-2" style={{ background: 'var(--border-subtle)', border: '1px solid var(--border)' }}>
+            <p className="font-bold flex items-center gap-1" style={{ color: '#14b8a6' }}><Zap size={12} /> OperIQ Gorev Analizi</p>
+            <p style={{ color: 'var(--text-2)' }}>{operiqResult.ozet || operiqResult.content?.ozet || (typeof operiqResult.content === 'string' ? operiqResult.content : '-')}</p>
+            {operiqResult.risk && (
+              <p className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded" style={{
+                  background: operiqResult.risk === 'yuksek' ? '#fef2f2' : operiqResult.risk === 'orta' ? '#fffbeb' : '#f0fdf4',
+                  color: operiqResult.risk === 'yuksek' ? '#dc2626' : operiqResult.risk === 'orta' ? '#d97706' : '#16a34a',
+                  border: `1px solid ${operiqResult.risk === 'yuksek' ? '#fecaca' : operiqResult.risk === 'orta' ? '#fde68a' : '#bbf7d0'}`,
+                }}>Risk: {operiqResult.risk}</span>
+              </p>
+            )}
+            {operiqResult.oneriler?.length > 0 && (
+              <div>
+                <p className="text-[10px] font-bold uppercase mb-1" style={{ color: 'var(--text-3)' }}>Oneriler</p>
+                <ul className="space-y-0.5">
+                  {operiqResult.oneriler.map((o: string, i: number) => (
+                    <li key={i} className="flex items-start gap-1.5" style={{ color: 'var(--text-2)' }}>
+                      <span className="text-teal-500 mt-0.5">-</span> {o}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
       </div>

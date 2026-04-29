@@ -407,22 +407,35 @@ export default function FacilityMap() {
   const [newZone, setNewZone] = useState({ name: '', type: 'MARKER' as string, x: 50, y: 50, z: 0, width: 10, height: 10, color: '#6366f1', layer: 'general', linkedEntityType: '', linkedEntityId: '' })
   const [creatingZone, setCreatingZone] = useState(false)
 
+  const [zoneError, setZoneError] = useState<string | null>(null)
+  const [zoneSuccess, setZoneSuccess] = useState(false)
+
   const handleCreateZone = async () => {
     if (!selectedPlanId || !newZone.name.trim()) return
     setCreatingZone(true)
+    setZoneError(null)
     try {
-      await api.post(`/facility-map/floor-plans/${selectedPlanId}/zones`, {
-        ...newZone,
-        z: newZone.z || undefined,
-        width: ['ZONE', 'STOCK_AREA', 'DEPARTMENT', 'HAZARD'].includes(newZone.type) ? newZone.width : undefined,
-        height: ['ZONE', 'STOCK_AREA', 'DEPARTMENT', 'HAZARD'].includes(newZone.type) ? newZone.height : undefined,
-        linkedEntityType: newZone.linkedEntityType || undefined,
-        linkedEntityId: newZone.linkedEntityId || undefined,
-      })
+      const isArea = ['ZONE', 'STOCK_AREA', 'DEPARTMENT', 'HAZARD'].includes(newZone.type)
+      const body: Record<string, unknown> = {
+        type: newZone.type,
+        name: newZone.name.trim(),
+        x: newZone.x,
+        y: newZone.y,
+        color: newZone.color,
+        layer: newZone.layer,
+      }
+      if (isArea) { body.width = newZone.width; body.height = newZone.height }
+      if (newZone.linkedEntityType) { body.linkedEntityType = newZone.linkedEntityType; body.linkedEntityId = newZone.linkedEntityId }
+
+      await api.post(`/facility-map/floor-plans/${selectedPlanId}/zones`, body)
       setShowCreateZone(false)
       setNewZone({ name: '', type: 'MARKER', x: 50, y: 50, z: 0, width: 10, height: 10, color: '#6366f1', layer: 'general', linkedEntityType: '', linkedEntityId: '' })
+      setZoneSuccess(true)
+      setTimeout(() => setZoneSuccess(false), 3000)
       loadLiveData()
-    } catch {} finally { setCreatingZone(false) }
+    } catch (e: any) {
+      setZoneError(e.message ?? 'Alan olusturulamadi')
+    } finally { setCreatingZone(false) }
   }
 
   // ── Upload form ────────────────────────────────────────────────────────
@@ -553,6 +566,11 @@ export default function FacilityMap() {
                 style={{ color: editMode ? '#06b6d4' : 'var(--text-1)' }}>
                 <Plus size={14} /> {lang === 'tr' ? (editMode ? 'Düzenleme Aktif' : 'Düzenle') : (editMode ? 'Editing' : 'Edit')}
               </button>
+              {zoneSuccess && (
+                <div className="card px-3 py-2 flex items-center gap-1.5 text-[12px] font-semibold bg-emerald-50 text-emerald-700 border-emerald-200 animate-pulse">
+                  <CheckCircle2 size={14} /> {lang === 'tr' ? 'Alan oluşturuldu!' : 'Zone created!'}
+                </div>
+              )}
               <button type="button" onClick={() => setEmergencyMode(!emergencyMode)}
                 className={clsx('card px-3 py-2 flex items-center gap-1.5 text-[12px] font-bold transition-all', emergencyMode ? 'bg-red-600 text-white border-red-600' : 'hover:shadow-md')}
                 style={!emergencyMode ? { color: 'var(--text-1)' } : undefined}>
@@ -1136,6 +1154,9 @@ export default function FacilityMap() {
                 </div>
               )}
             </div>
+            {zoneError && (
+              <div className="px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-red-700 text-[11px] font-medium">{zoneError}</div>
+            )}
             <div className="flex justify-end gap-2 pt-2">
               <button type="button" onClick={() => setShowCreateZone(false)} className="btn-secondary">{lang === 'tr' ? 'Iptal' : 'Cancel'}</button>
               <button type="button" onClick={handleCreateZone} disabled={creatingZone || !newZone.name.trim()} className="btn-primary disabled:opacity-40">

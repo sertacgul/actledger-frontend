@@ -4,17 +4,6 @@ import { registerSW } from 'virtual:pwa-register'
 import App from './App.tsx'
 import './index.css'
 
-// Force clear old caches on load
-if ('caches' in window) {
-  caches.keys().then(names => {
-    for (const name of names) {
-      if (name.includes('workbox') || name.includes('precache')) {
-        caches.delete(name)
-      }
-    }
-  })
-}
-
 // PWA service worker registration with auto-update
 const updateSW = registerSW({
   immediate: true,

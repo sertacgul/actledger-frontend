@@ -49,6 +49,7 @@ export default defineConfig({
           },
         ],
         navigateFallback: '/index.html',
+        navigateFallbackAllowlist: [/^\/(?!api|uploads|sw|workbox)/],
       },
     }),
   ],

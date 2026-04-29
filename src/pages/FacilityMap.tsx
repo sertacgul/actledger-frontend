@@ -736,7 +736,8 @@ export default function FacilityMap() {
                     transformStyle: view3D ? 'preserve-3d' : 'flat',
                   }}
                 >
-                  {/* Floor plan image */}
+                  {/* Floor plan image + zone overlays (same wrapper so % coordinates match image) */}
+                  <div className="relative w-full" style={{ display: 'inline-block' }}>
                   {imageUrl && (
                     <img
                       src={imageUrl}
@@ -748,7 +749,7 @@ export default function FacilityMap() {
                     />
                   )}
 
-                  {/* Zone overlays */}
+                  {/* Zone overlays - positioned relative to image */}
                   {visibleZones.map(zone => {
                     const isArea = ['ZONE', 'STOCK_AREA', 'DEPARTMENT', 'HAZARD', 'EMERGENCY_EXIT'].includes(zone.type) && zone.width && zone.height
                     const isSelected = selectedZone?.id === zone.id
@@ -895,6 +896,7 @@ export default function FacilityMap() {
                       </div>
                     </div>
                   ))}
+                  </div>{/* end image+zones wrapper */}
                 </div>
 
                 {/* Edit mode indicator */}

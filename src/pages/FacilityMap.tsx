@@ -416,16 +416,23 @@ export default function FacilityMap() {
     setZoneError(null)
     try {
       const isArea = ['ZONE', 'STOCK_AREA', 'DEPARTMENT', 'HAZARD'].includes(newZone.type)
+      const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v))
       const body: Record<string, unknown> = {
         type: newZone.type,
         name: newZone.name.trim(),
-        x: newZone.x,
-        y: newZone.y,
-        color: newZone.color,
-        layer: newZone.layer,
+        x: clamp(Number(newZone.x) || 50, 0, 100),
+        y: clamp(Number(newZone.y) || 50, 0, 100),
+        color: newZone.color || '#6366f1',
+        layer: newZone.layer || 'general',
       }
-      if (isArea) { body.width = newZone.width; body.height = newZone.height }
-      if (newZone.linkedEntityType) { body.linkedEntityType = newZone.linkedEntityType; body.linkedEntityId = newZone.linkedEntityId }
+      if (isArea) {
+        body.width = clamp(Number(newZone.width) || 10, 0, 100)
+        body.height = clamp(Number(newZone.height) || 10, 0, 100)
+      }
+      if (newZone.linkedEntityType && newZone.linkedEntityId) {
+        body.linkedEntityType = newZone.linkedEntityType
+        body.linkedEntityId = newZone.linkedEntityId
+      }
 
       await api.post(`/facility-map/floor-plans/${selectedPlanId}/zones`, body)
       setShowCreateZone(false)

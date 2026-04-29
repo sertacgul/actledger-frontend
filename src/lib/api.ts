@@ -77,7 +77,7 @@ async function request<T>(
 
   if (!res.ok) {
     const statusMessages: Record<number, string> = {
-      400: 'Gecersiz istek - lutfen alanlari kontrol edin',
+      400: body.message || 'Gecersiz istek - lutfen alanlari kontrol edin',
       403: 'Bu islem icin yetkiniz bulunmuyor veya limit asildi',
       404: 'Aranan kayit bulunamadi',
       409: 'Bu kayit zaten mevcut',
@@ -86,7 +86,13 @@ async function request<T>(
       500: 'Beklenmeyen bir hata olustu - lutfen tekrar deneyin',
     }
     const fallback = statusMessages[res.status] ?? 'Islem gerceklestirilemedi'
-    throw new ApiError(res.status, body.message ?? fallback, body.code)
+    // Include field-level errors from Zod validation
+    let detail = body.message ?? fallback
+    if (body.fields) {
+      const fieldErrors = Object.entries(body.fields).map(([k, v]) => `${k}: ${(v as string[]).join(', ')}`).join('; ')
+      if (fieldErrors) detail += ` (${fieldErrors})`
+    }
+    throw new ApiError(res.status, detail, body.code)
   }
 
   // Paginated response → return { data, meta }

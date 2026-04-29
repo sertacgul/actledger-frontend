@@ -82,26 +82,39 @@ export default function MobileTaskDetail() {
     } catch {} finally { setUploading(false) }
   }
 
-  // Compress image to reduce upload size
+  // Compress image to reduce upload size (with fallback to original)
   function compressImage(file: File, maxSize: number, quality: number): Promise<Blob> {
+    // Skip compression for small files (<500KB) or non-image files
+    if (file.size < 500 * 1024 || !file.type.startsWith('image/')) return Promise.resolve(file)
     return new Promise((resolve) => {
-      const img = new Image()
-      img.onload = () => {
-        let { width, height } = img
-        if (width > maxSize || height > maxSize) {
-          const ratio = Math.min(maxSize / width, maxSize / height)
-          width = Math.round(width * ratio)
-          height = Math.round(height * ratio)
+      const timeout = setTimeout(() => resolve(file), 10000) // 10s fallback
+      try {
+        const img = new window.Image()
+        img.onload = () => {
+          try {
+            let { width, height } = img
+            if (width > maxSize || height > maxSize) {
+              const ratio = Math.min(maxSize / width, maxSize / height)
+              width = Math.round(width * ratio)
+              height = Math.round(height * ratio)
+            }
+            const canvas = document.createElement('canvas')
+            canvas.width = width
+            canvas.height = height
+            const ctx = canvas.getContext('2d')
+            if (!ctx) { clearTimeout(timeout); resolve(file); return }
+            ctx.drawImage(img, 0, 0, width, height)
+            canvas.toBlob(
+              blob => { clearTimeout(timeout); resolve(blob || file) },
+              'image/jpeg',
+              quality
+            )
+          } catch { clearTimeout(timeout); resolve(file) }
+          finally { try { URL.revokeObjectURL(img.src) } catch {} }
         }
-        const canvas = document.createElement('canvas')
-        canvas.width = width
-        canvas.height = height
-        canvas.getContext('2d')!.drawImage(img, 0, 0, width, height)
-        canvas.toBlob(blob => resolve(blob || file), 'image/jpeg', quality)
-        URL.revokeObjectURL(img.src)
-      }
-      img.onerror = () => resolve(file)
-      img.src = URL.createObjectURL(file)
+        img.onerror = () => { clearTimeout(timeout); resolve(file) }
+        img.src = URL.createObjectURL(file)
+      } catch { clearTimeout(timeout); resolve(file) }
     })
   }
 

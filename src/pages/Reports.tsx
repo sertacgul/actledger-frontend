@@ -233,7 +233,12 @@ function ReportDetailModal({
               <Users size={14} /> {tr ? 'Ilet' : 'Broadcast'}
             </button>
           </>
-        ) : undefined
+        ) : (
+          <button type="button" onClick={() => setShowBroadcast(true)}
+            className="btn-default">
+            <Users size={14} /> {tr ? 'Ilet' : 'Broadcast'}
+          </button>
+        )
       }
     >
       <div className="p-6 space-y-5">

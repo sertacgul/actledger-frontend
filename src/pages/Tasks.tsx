@@ -206,15 +206,18 @@ KURALLAR:
 JSON formatinda yanit ver:
 {"ozet": "...", "risk": "dusuk|orta|yuksek", "oneriler": ["...", "..."]}`
 
-      const result = await api.post<any>('/operiq-chat/message', { message: prompt.slice(0, 2000) })
-      const aiText = result?.reply || result?.content || result?.message || ''
-      // Try to parse JSON from AI response
-      let parsed: any = null
-      try {
-        const jsonMatch = aiText.match(/\{[\s\S]*\}/)
-        if (jsonMatch) parsed = JSON.parse(jsonMatch[0])
-      } catch {}
-      setOperiqResult(parsed || { ozet: aiText })
+      const result = await api.post<any>('/operiq-chat/message', { message: prompt.slice(0, 2000), lang: lang ?? 'tr' })
+      const aiText = result?.aiMessage?.content || result?.reply || result?.content || ''
+      // Try structured response first, then parse from text
+      const structured = result?.aiMessage?.structured
+      let parsed: any = structured || null
+      if (!parsed) {
+        try {
+          const jsonMatch = aiText.match(/\{[\s\S]*\}/)
+          if (jsonMatch) parsed = JSON.parse(jsonMatch[0])
+        } catch {}
+      }
+      setOperiqResult(parsed || { ozet: aiText || 'Analiz tamamlandi' })
     } catch (e: any) {
       setOperiqResult({ ozet: e.message || 'Analiz yapilamadi. Lutfen tekrar deneyin.' })
     } finally { setOperiqLoading(false) }

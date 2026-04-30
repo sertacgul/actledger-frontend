@@ -214,7 +214,7 @@ export function mapReport(r: any): FieldReport {
     issues:         [],
     photos:         (r.photos ?? []).map((p: any) => ({
       id:      p.id,
-      url:     p.url,
+      url:     p.url?.startsWith('http') ? p.url : `${SERVER_BASE}${p.url}`,
       caption: p.caption ?? '',
     })),
     createdAt:      r.createdAt,

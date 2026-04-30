@@ -240,7 +240,8 @@ export default function MobileOperIQ() {
     try {
       const data = await api.post<any>('/operiq-chat/message', {
         message: msg,
-        conversationId,
+        lang,
+        ...(conversationId ? { conversationId } : {}),
       })
 
       if (data.conversationId) setConversationId(data.conversationId)
@@ -309,6 +310,7 @@ export default function MobileOperIQ() {
     try {
       const formData = new FormData()
       formData.append('photo', file)
+      formData.append('lang', lang)
       if (input.trim()) formData.append('message', input.trim())
       if (conversationId) formData.append('conversationId', conversationId)
 

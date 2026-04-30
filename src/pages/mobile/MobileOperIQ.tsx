@@ -112,7 +112,7 @@ export default function MobileOperIQ() {
 
   useEffect(() => {
     // Load suggestions
-    api.get<string[]>('/operiq-chat/suggestions')
+    api.get<string[]>(`/operiq-chat/suggestions?lang=${lang}`)
       .then(data => { if (Array.isArray(data)) setSuggestions(data) })
       .catch(() => {})
 
@@ -186,7 +186,7 @@ export default function MobileOperIQ() {
     setConversationId(null)
     setActiveChecklist(null)
     setView('chat')
-    api.get<string[]>('/operiq-chat/suggestions')
+    api.get<string[]>(`/operiq-chat/suggestions?lang=${lang}`)
       .then(data => { if (Array.isArray(data)) setSuggestions(data) })
       .catch(() => {})
   }
@@ -640,7 +640,7 @@ export default function MobileOperIQ() {
           </div>
           <div>
             <h1 className="text-base font-bold text-slate-900">OperIQ</h1>
-            <p className="text-[10px] text-slate-500">Yapay Zeka Asistanı</p>
+            <p className="text-[10px] text-slate-500">{lang === 'tr' ? 'Yapay Zeka Asistanı' : 'AI Assistant'}</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5">
@@ -837,7 +837,7 @@ export default function MobileOperIQ() {
           <div className="flex-1">
             <textarea value={input} onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
-              placeholder="OperIQ'ya sorun..." rows={1}
+              placeholder={lang === 'tr' ? 'OperIQ\'ya sorun...' : 'Ask OperIQ...'} rows={1}
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm resize-none focus:outline-none focus:border-cyan-500"
               style={{ maxHeight: 80 }} />
           </div>

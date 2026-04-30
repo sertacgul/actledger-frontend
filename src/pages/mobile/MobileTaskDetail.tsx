@@ -67,17 +67,13 @@ export default function MobileTaskDetail() {
             signal: controller.signal,
           })
           clearTimeout(timer)
-          if (res.ok) {
-            // Upload successful - will refetch below
-          } else {
-            const errBody = await res.json().catch(() => ({}))
-            alert(errBody.message || (lang === 'tr' ? 'Fotograf yuklenemedi' : 'Photo upload failed'))
+          // Silent success or log error - no alert to user
+          if (!res.ok) {
+            console.warn('Photo upload response:', res.status)
           }
         } catch (err: any) {
           clearTimeout(timer)
-          alert(err.name === 'AbortError'
-            ? (lang === 'tr' ? 'Yukleme zaman asimina ugradi. Daha kucuk bir fotograf deneyin.' : 'Upload timed out. Try a smaller photo.')
-            : (lang === 'tr' ? 'Yukleme basarisiz oldu' : 'Upload failed'))
+          console.warn('Photo upload error:', err.message)
         }
       }
       setPhotos([])

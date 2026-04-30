@@ -32,9 +32,11 @@ export default function MobileTaskDetail() {
     if (!id || !comment.trim()) return
     setSending(true)
     try {
-      const data = await api.post<any>(`/tasks/${id}/comments`, { content: comment.trim() })
-      setComments(prev => [...prev, data])
+      await api.post<any>(`/tasks/${id}/comments`, { content: comment.trim() })
       setComment('')
+      // Refetch comments to get server-formatted data
+      const updated = await api.get<any[]>(`/tasks/${id}/comments`)
+      setComments(updated)
     } catch {} finally { setSending(false) }
   }
 
@@ -66,10 +68,10 @@ export default function MobileTaskDetail() {
           })
           clearTimeout(timer)
           if (res.ok) {
-            const body = await res.json()
-            setAttachments(prev => [...prev, body.data])
+            // Upload successful - will refetch below
           } else {
-            alert(lang === 'tr' ? 'Fotograf yuklenemedi' : 'Photo upload failed')
+            const errBody = await res.json().catch(() => ({}))
+            alert(errBody.message || (lang === 'tr' ? 'Fotograf yuklenemedi' : 'Photo upload failed'))
           }
         } catch (err: any) {
           clearTimeout(timer)
@@ -79,6 +81,8 @@ export default function MobileTaskDetail() {
         }
       }
       setPhotos([])
+      // Refetch attachments from server
+      api.get<any[]>(`/tasks/${id}/attachments`).then(setAttachments).catch(() => {})
     } catch {} finally { setUploading(false) }
   }
 

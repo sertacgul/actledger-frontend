@@ -89,7 +89,14 @@ export default function Header({ title, subtitle, onMenuClick, onToggleCollapse,
       showBrowserNotif(senderLabel, msg?.content || 'Yeni bir mesajiniz var')
     })
 
-    socket.on('task:updated', () => refetch())
+    socket.on('task:updated', () => {
+      refetch()
+      // Broadcast to Tasks page for real-time updates
+      window.dispatchEvent(new Event('task:updated'))
+    })
+    socket.on('task:checklist:updated', () => {
+      window.dispatchEvent(new Event('task:checklist:updated'))
+    })
 
     socketRef.current = socket
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Plus, Search, CheckSquare, Calendar, Tag, AlertCircle, Layers, Sparkles, FileSpreadsheet, Camera, MessageSquare, Zap, Loader2, X, Cpu } from 'lucide-react'
 import { api, API_BASE } from '../lib/api'
 import clsx from 'clsx'
@@ -708,6 +708,19 @@ export default function Tasks() {
   const { user } = useAuth()
   const { departments } = useDepartments()
   const { users }       = useUsers({ active: 'aktif' })
+
+  // Auto-refresh when tasks are updated via socket (mobile status changes, comments, photos)
+  useEffect(() => {
+    const handler = () => refetch()
+    const events = ['task:updated', 'task:checklist:updated']
+    const timer = setInterval(refetch, 30000) // Also poll every 30s
+    // Listen for custom events from Header socket
+    events.forEach(e => window.addEventListener(e, handler))
+    return () => {
+      clearInterval(timer)
+      events.forEach(e => window.removeEventListener(e, handler))
+    }
+  }, [refetch])
 
   const statusCounts = tasks.reduce((acc, t) => {
     acc[t.status] = (acc[t.status] || 0) + 1; return acc

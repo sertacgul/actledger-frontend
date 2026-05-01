@@ -373,6 +373,8 @@ export default function MobileOperIQ() {
       const body = await res.json()
       if (!res.ok) throw new Error(body.message ?? 'PDF yüklenemedi')
       setManuals(prev => [body.data, ...prev])
+      // Trigger re-extraction to ensure text is available for OperIQ
+      api.post('/operiq-chat/manuals/reextract', {}).catch(() => {})
     } catch (err: any) {
       alert(err.message ?? 'PDF yüklenemedi')
     } finally {

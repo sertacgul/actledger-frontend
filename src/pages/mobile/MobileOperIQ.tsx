@@ -611,12 +611,9 @@ export default function MobileOperIQ() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 mb-0.5">
-                            <p className="text-sm font-semibold text-slate-800 truncate flex-1">
+                            <p className="text-sm font-semibold text-slate-800 truncate flex-1 pr-16">
                               {conv.title ?? 'Sohbet'}
                             </p>
-                            <span className="text-[10px] text-slate-400 flex-shrink-0">
-                              {formatDate(conv.updatedAt)}
-                            </span>
                           </div>
                           <p className="text-xs text-slate-500 truncate">{preview || '...'}</p>
                           <p className="text-[10px] text-slate-400 mt-0.5">{conv._count.messages} mesaj</p>

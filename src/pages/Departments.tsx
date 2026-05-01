@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react'
-import { Building2, Users, CheckSquare, TrendingUp, ChevronRight, Search, Target, Plus, Trash2, Pencil, Save, X } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Building2, Users, CheckSquare, TrendingUp, ChevronRight, Search, Target, Plus, Trash2, Pencil, Save, X, FileText, Loader2 } from 'lucide-react'
 import clsx from 'clsx'
 import {
   useDepartments, useUsers, useTasks, useKpis,
@@ -7,6 +7,7 @@ import {
   createDepartment as createDeptApi, updateDepartment as updateDeptApi, deleteDepartment as deleteDeptApi,
   type Kpi, type KpiLayer,
 } from '../lib/hooks'
+import { api } from '../lib/api'
 import type { Department } from '../types'
 import { ROLE_HIERARCHY } from '../types'
 import DraggableModal from '../components/ui/DraggableModal'
@@ -73,6 +74,114 @@ function DepartmentCard({ dept, onSelect }: { dept: Department; onSelect: (d: De
           />
         </div>
       </div>
+    </div>
+  )
+}
+
+// ── Department Documents (OperIQ) ──────────────────────────────────────────────
+function DepartmentDocuments({ departmentId, canManage }: { departmentId: string; canManage: boolean }) {
+  const [docs, setDocs] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    api.get<any>(`/operiq-chat/department-manuals/${departmentId}`)
+      .then(data => setDocs(Array.isArray(data) ? data : data?.data ?? []))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [departmentId])
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    setUploading(true)
+    try {
+      // Extract text in browser
+      let extractedText = ''
+      try {
+        const pdfjsLib = await import('pdfjs-dist')
+        pdfjsLib.GlobalWorkerOptions.workerSrc = ''
+        const buf = await file.arrayBuffer()
+        const pdf = await pdfjsLib.getDocument({ data: buf }).promise
+        const pages: string[] = []
+        for (let i = 1; i <= Math.min(pdf.numPages, 100); i++) {
+          const page = await pdf.getPage(i)
+          const content = await page.getTextContent()
+          pages.push(content.items.map((item: any) => item.str).join(' '))
+        }
+        extractedText = pages.join('\n\n').slice(0, 50000)
+      } catch {}
+
+      const fd = new FormData()
+      fd.append('manual', file)
+      if (extractedText) fd.append('textContent', extractedText)
+      const { tokenStore: ts, API_BASE: base } = await import('../lib/api')
+      const token = ts.get()
+      const res = await fetch(`${base}/operiq-chat/department-manuals/${departmentId}`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        credentials: 'include',
+        body: fd,
+      })
+      const body = await res.json()
+      if (res.ok) setDocs(prev => [body.data, ...prev])
+      else alert(body.message || 'Dokuman yuklenemedi')
+    } catch (err: any) {
+      alert(err.message || 'Dokuman yuklenemedi')
+    } finally { setUploading(false) }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Bu dokumani silmek istediginize emin misiniz?')) return
+    try {
+      await api.delete(`/operiq-chat/manuals/${id}`)
+      setDocs(prev => prev.filter(d => d.id !== id))
+    } catch {}
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-semibold flex items-center gap-1.5" style={{ color: 'var(--text-1)' }}>
+          <FileText size={14} /> Teknik Dokumanlar (OperIQ)
+        </h3>
+        {canManage && (
+          <>
+            <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
+              className="btn-default btn-sm text-xs">
+              {uploading ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
+              PDF Yukle
+            </button>
+            <input ref={fileRef} type="file" accept="application/pdf" onChange={handleUpload} className="hidden" />
+          </>
+        )}
+      </div>
+      {loading ? (
+        <div className="h-12 skeleton rounded-lg" />
+      ) : docs.length === 0 ? (
+        <p className="text-xs text-center py-4 rounded-lg" style={{ color: 'var(--text-3)', background: 'var(--border-subtle)', border: '1px solid var(--border)' }}>
+          {canManage ? 'Henuz dokuman yuklenmedi. PDF yukleyerek departman calisanlarinin OperIQ uzerinden dokumana erisimini saglayin.' : 'Bu departmana ait teknik dokuman bulunmuyor.'}
+        </p>
+      ) : (
+        <ul className="space-y-1.5">
+          {docs.map(d => (
+            <li key={d.id} className="flex items-center gap-3 p-3 rounded-lg" style={{ background: 'var(--border-subtle)', border: '1px solid var(--border)' }}>
+              <FileText size={14} className="text-cyan-500 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate" style={{ color: 'var(--text-1)' }}>{d.name}</p>
+                <p className="text-[10px]" style={{ color: 'var(--text-3)' }}>{(d.size / 1024).toFixed(0)} KB {d.textContent ? '- Metin cikarildi' : '- Metin bekleniyor'}</p>
+              </div>
+              {canManage && (
+                <button type="button" onClick={() => handleDelete(d.id)} className="text-red-400 hover:text-red-600 transition-colors">
+                  <Trash2 size={13} />
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
@@ -536,6 +645,9 @@ function DepartmentDetailModal({ dept, onClose, onChanged, canEditDept = false, 
             )
           }
         </div>
+
+        {/* Technical Documents (OperIQ) */}
+        <DepartmentDocuments departmentId={dept.id} canManage={canEditDept || canManageKpi} />
 
         {/* Tasks */}
         <div>

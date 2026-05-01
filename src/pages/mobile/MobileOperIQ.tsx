@@ -365,9 +365,9 @@ export default function MobileOperIQ() {
       let extractedText = ''
       try {
         const pdfjsLib = await import('pdfjs-dist')
-        pdfjsLib.GlobalWorkerOptions.workerSrc = ''
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`
         const arrayBuffer = await file.arrayBuffer()
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+        const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise
         const pages: string[] = []
         for (let i = 1; i <= Math.min(pdf.numPages, 100); i++) {
           const page = await pdf.getPage(i)

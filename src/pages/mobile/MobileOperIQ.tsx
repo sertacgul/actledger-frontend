@@ -686,31 +686,24 @@ export default function MobileOperIQ() {
       {/* Manuals panel */}
       {showManuals && (
         <div className="mx-4 mb-2 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between px-3 py-2 border-b border-slate-100">
-            <p className="text-xs font-semibold text-slate-700">Teknik Dokümanlar</p>
-            <button type="button" onClick={() => manualInputRef.current?.click()} disabled={uploadingManual}
-              className="flex items-center gap-1 text-[10px] font-semibold text-cyan-600 active:text-cyan-800">
-              {uploadingManual ? <Loader2 size={11} className="animate-spin" /> : <Upload size={11} />} PDF Yükle
-            </button>
+          <div className="px-3 py-2 border-b border-slate-100">
+            <p className="text-xs font-semibold text-slate-700">{lang === 'tr' ? 'Departman Teknik Dokumanlari' : 'Department Technical Documents'}</p>
+            <p className="text-[10px] text-slate-400">{lang === 'tr' ? 'Departman yoneticiniz tarafindan yuklenmistir' : 'Uploaded by your department manager'}</p>
           </div>
-          <input ref={manualInputRef} type="file" accept="application/pdf" onChange={handleManualUpload} className="hidden" />
           {manuals.length === 0 ? (
             <div className="py-6 text-center">
               <FileText size={24} className="text-slate-300 mx-auto mb-2" />
-              <p className="text-xs text-slate-400">Henüz doküman yüklenmemiş</p>
+              <p className="text-xs text-slate-400">{lang === 'tr' ? 'Henuz dokuman yuklenmemis' : 'No documents uploaded yet'}</p>
             </div>
           ) : (
             <div className="divide-y divide-slate-100 max-h-48 overflow-y-auto">
               {manuals.map(m => (
                 <div key={m.id} className="flex items-center gap-2.5 px-3 py-2">
-                  <FileText size={16} className="text-red-400 flex-shrink-0" />
+                  <FileText size={16} className="text-cyan-500 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-slate-700 truncate">{m.name}</p>
                     <p className="text-[10px] text-slate-400">{formatSize(m.size)}</p>
                   </div>
-                  <button type="button" onClick={() => handleDeleteManual(m.id)} className="p-1 text-slate-400 hover:text-red-500">
-                    <Trash2 size={13} />
-                  </button>
                 </div>
               ))}
             </div>

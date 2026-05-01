@@ -100,24 +100,16 @@ function DepartmentDocuments({ departmentId, canManage }: { departmentId: string
     setUploading(true)
     setUploadErr(null)
     try {
-      // Extract text in browser using pdf.js
+      // Extract PDF text: send as base64 for server-side AI extraction
       let extractedText = ''
       try {
-        const pdfjsLib = await import('pdfjs-dist')
-        // Use fake worker to avoid CORS/worker issues
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`
-        const buf = await file.arrayBuffer()
-        const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise
-        const pages: string[] = []
-        for (let i = 1; i <= Math.min(pdf.numPages, 100); i++) {
-          const page = await pdf.getPage(i)
-          const content = await page.getTextContent()
-          pages.push(content.items.map((item: any) => item.str).join(' '))
-        }
-        extractedText = pages.join('\n\n').slice(0, 50000)
-      } catch (pdfErr: any) {
-        console.warn('PDF text extraction failed:', pdfErr.message)
-      }
+        const reader = new FileReader()
+        const b64 = await new Promise<string>((resolve) => {
+          reader.onload = () => resolve((reader.result as string).split(',')[1] || '')
+          reader.readAsDataURL(file)
+        })
+        if (b64) extractedText = `[BASE64_PDF]${b64.slice(0, 200000)}`
+      } catch {}
 
       const fd = new FormData()
       fd.append('manual', file)

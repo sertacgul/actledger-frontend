@@ -83,6 +83,7 @@ function DepartmentDocuments({ departmentId, canManage }: { departmentId: string
   const [docs, setDocs] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
+  const [uploadErr, setUploadErr] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -97,6 +98,7 @@ function DepartmentDocuments({ departmentId, canManage }: { departmentId: string
     if (!file) return
     e.target.value = ''
     setUploading(true)
+    setUploadErr(null)
     try {
       // Extract text in browser
       let extractedText = ''
@@ -116,20 +118,25 @@ function DepartmentDocuments({ departmentId, canManage }: { departmentId: string
 
       const fd = new FormData()
       fd.append('manual', file)
+      fd.append('name', file.name.replace(/\.pdf$/i, ''))
       if (extractedText) fd.append('textContent', extractedText)
-      const { tokenStore: ts, API_BASE: base } = await import('../lib/api')
-      const token = ts.get()
-      const res = await fetch(`${base}/operiq-chat/department-manuals/${departmentId}`, {
+      const token = (await import('../lib/api')).tokenStore.get()
+      const apiBase = (await import('../lib/api')).API_BASE
+      const res = await fetch(`${apiBase}/operiq-chat/department-manuals/${departmentId}`, {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         credentials: 'include',
         body: fd,
       })
-      const body = await res.json()
-      if (res.ok) setDocs(prev => [body.data, ...prev])
-      else alert(body.message || 'Dokuman yuklenemedi')
+      if (res.ok) {
+        const body = await res.json()
+        setDocs(prev => [body.data, ...prev])
+      } else {
+        const errBody = await res.json().catch(() => ({}))
+        setUploadErr(errBody.message || `Yuklenemedi (${res.status})`)
+      }
     } catch (err: any) {
-      alert(err.message || 'Dokuman yuklenemedi')
+      setUploadErr(err.message || 'Yuklenemedi')
     } finally { setUploading(false) }
   }
 
@@ -158,6 +165,9 @@ function DepartmentDocuments({ departmentId, canManage }: { departmentId: string
           </>
         )}
       </div>
+      {uploadErr && (
+        <div className="mb-2 px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-red-700 text-[11px]">{uploadErr}</div>
+      )}
       {loading ? (
         <div className="h-12 skeleton rounded-lg" />
       ) : docs.length === 0 ? (

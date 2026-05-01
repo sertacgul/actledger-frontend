@@ -110,13 +110,14 @@ export default function MobileLayout() {
     setSyncing(false)
   }
 
-  // Detect if running in standalone PWA mode
+  // Detect if running in standalone PWA mode or native app (Capacitor)
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true
+  const isNativeApp = !!(window as any).Capacitor?.isNativePlatform?.()
   const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
   const [showInstallBanner, setShowInstallBanner] = useState(() => {
-    if (isStandalone) return false
+    if (isStandalone || isNativeApp) return false
     const dismissed = localStorage.getItem('actledger_install_dismissed')
-    if (dismissed && Date.now() - Number(dismissed) < 86400000) return false // 24h cooldown
+    if (dismissed && Date.now() - Number(dismissed) < 86400000) return false
     return true
   })
 

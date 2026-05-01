@@ -524,11 +524,10 @@ export default function MobileOperIQ() {
         )}
 
         {s.ilgiliManuel && (
-          <button type="button" className="flex items-center gap-2 text-xs text-cyan-700 bg-cyan-50 rounded-lg px-3 py-2 w-full active:bg-cyan-100">
+          <div className="flex items-center gap-2 text-xs text-cyan-700 bg-cyan-50 rounded-lg px-3 py-2">
             <FileText size={14} />
-            <span>Teknik Doküman: <strong>{s.ilgiliManuel}</strong></span>
-            <ExternalLink size={11} className="ml-auto" />
-          </button>
+            <span>{lang === 'tr' ? 'Kaynak Dokuman' : 'Source Document'}: <strong>{s.ilgiliManuel}</strong></span>
+          </div>
         )}
 
         {s.ilgiliGorevId && (

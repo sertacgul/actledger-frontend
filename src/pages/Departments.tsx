@@ -176,7 +176,7 @@ function DepartmentDocuments({ departmentId, canManage }: { departmentId: string
               <FileText size={14} className="text-cyan-500 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate" style={{ color: 'var(--text-1)' }}>{d.name}</p>
-                <p className="text-[10px]" style={{ color: 'var(--text-3)' }}>{(d.size / 1024).toFixed(0)} KB {d.textContent ? '- Metin cikarildi' : '- Metin bekleniyor'}</p>
+                <p className="text-[10px]" style={{ color: 'var(--text-3)' }}>{(d.size / 1024).toFixed(0)} KB {d.textContent ? '- Dokuman devreye alindi' : '- Isleniyor...'}</p>
               </div>
               {canManage && (
                 <button type="button" onClick={() => handleDelete(d.id)} className="text-red-400 hover:text-red-600 transition-colors">

@@ -361,8 +361,25 @@ export default function MobileOperIQ() {
     e.target.value = ''
     setUploadingManual(true)
     try {
+      // Extract PDF text in browser before upload
+      let extractedText = ''
+      try {
+        const pdfjsLib = await import('pdfjs-dist')
+        pdfjsLib.GlobalWorkerOptions.workerSrc = ''
+        const arrayBuffer = await file.arrayBuffer()
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+        const pages: string[] = []
+        for (let i = 1; i <= Math.min(pdf.numPages, 100); i++) {
+          const page = await pdf.getPage(i)
+          const content = await page.getTextContent()
+          pages.push(content.items.map((item: any) => item.str).join(' '))
+        }
+        extractedText = pages.join('\n\n').slice(0, 50000)
+      } catch { /* PDF text extraction failed in browser */ }
+
       const formData = new FormData()
       formData.append('manual', file)
+      if (extractedText) formData.append('textContent', extractedText)
       const token = tokenStore.get()
       const res = await fetch(`${API_BASE}/operiq-chat/manuals`, {
         method: 'POST',
@@ -371,12 +388,10 @@ export default function MobileOperIQ() {
         body: formData,
       })
       const body = await res.json()
-      if (!res.ok) throw new Error(body.message ?? 'PDF yüklenemedi')
+      if (!res.ok) throw new Error(body.message ?? 'PDF yuklenemedi')
       setManuals(prev => [body.data, ...prev])
-      // Trigger re-extraction to ensure text is available for OperIQ
-      api.post('/operiq-chat/manuals/reextract', {}).catch(() => {})
     } catch (err: any) {
-      alert(err.message ?? 'PDF yüklenemedi')
+      alert(err.message ?? 'PDF yuklenemedi')
     } finally {
       setUploadingManual(false)
     }

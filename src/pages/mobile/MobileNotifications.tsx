@@ -9,13 +9,35 @@ export default function MobileNotifications() {
   const navigate = useNavigate()
   const { notifications, unreadCount, loading, refetch } = useNotifications()
 
+  /** Convert desktop notification links to mobile routes */
+  const toMobileLink = (link: string): string | null => {
+    // Already a mobile path
+    if (link.startsWith('/m/')) return link
+    // /gorevler/xxx -> /m/gorev/xxx
+    const taskMatch = link.match(/^\/gorevler\/(.+)/)
+    if (taskMatch) return `/m/gorev/${taskMatch[1]}`
+    // /gorevler -> /m/gorevler
+    if (link === '/gorevler') return '/m/gorevler'
+    // /mesajlar -> /m/mesajlar
+    if (link === '/mesajlar') return '/m/mesajlar'
+    // /raporlar/xxx -> /m/rapor/xxx
+    const reportMatch = link.match(/^\/raporlar\/(.+)/)
+    if (reportMatch) return `/m/rapor/${reportMatch[1]}`
+    // /formlar -> /m/formlar
+    if (link.startsWith('/formlar')) return '/m/formlar'
+    return null
+  }
+
   const handleTap = async (id: string, link?: string) => {
     try {
       await markNotificationRead(id)
       window.dispatchEvent(new CustomEvent('notif:read'))
       refetch()
     } catch {}
-    if (link) navigate(link)
+    if (link) {
+      const mobilePath = toMobileLink(link)
+      if (mobilePath) navigate(mobilePath)
+    }
   }
 
   const handleMarkAllRead = async () => {

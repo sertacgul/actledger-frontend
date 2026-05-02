@@ -16,10 +16,12 @@
         body { background: #0f172a !important; margin: 0 !important; overflow: hidden !important; }
         #root {
           transform: translateY(50px);
-          height: calc(100dvh - 50px) !important;
+          height: calc(100dvh - 50px - 34px) !important;
           overflow: hidden !important;
         }
-        #root > * { max-height: 100% !important; }
+        /* Force Tailwind full-height containers to fit within safe area */
+        .h-\[100dvh\]     { height: calc(100dvh - 50px - 34px) !important; }
+        .min-h-\[100dvh\] { min-height: calc(100dvh - 50px - 34px) !important; }
       }
     </style>
     <meta name="apple-mobile-web-app-title" content="ActLedger Mobil" />

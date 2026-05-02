@@ -121,6 +121,14 @@ function GlobalShortcuts() {
   return null
 }
 
+/** In standalone PWA / native app mode, redirect landing page to mobile login */
+function StandaloneRedirect({ children }: { children: React.ReactNode }) {
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true
+  const isNativeApp = !!(window as any).Capacitor?.isNativePlatform?.()
+  if (isStandalone || isNativeApp) return <Navigate to="/m/giris" replace />
+  return <>{children}</>
+}
+
 function AppRoutes() {
   return (
     <>
@@ -128,7 +136,7 @@ function AppRoutes() {
       <ShortcutsHelpModal />
       <HelpTooltips />
       <Routes>
-        <Route path="/"          element={<Landing />} />
+        <Route path="/"          element={<StandaloneRedirect><Landing /></StandaloneRedirect>} />
         <Route path="/giris"     element={<Navigate to="/" replace />} />
         <Route path="/privacy"   element={<PrivacyPolicy />} />
         <Route path="/terms"     element={<TermsOfUse />} />
@@ -178,7 +186,7 @@ function AppRoutes() {
           <Route path="qr-tarama"       element={<MobileQRScanner />} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<StandaloneRedirect><Navigate to="/" replace /></StandaloneRedirect>} />
       </Routes>
     </>
   )

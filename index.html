@@ -3,9 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <style>
+      /*
+        PWA standalone: shift entire app below iOS status bar.
+        transform on #root makes fixed children position relative to #root,
+        so fixed overlays (messages, modals) also shift down automatically.
+      */
+      @media (display-mode: standalone) {
+        body { background: #0f172a !important; margin: 0 !important; overflow: hidden !important; }
+        #root {
+          transform: translateY(50px);
+          height: calc(100dvh - 50px) !important;
+          overflow: hidden !important;
+        }
+        #root > * { max-height: 100% !important; }
+      }
+    </style>
     <meta name="apple-mobile-web-app-title" content="ActLedger Mobil" />
     <meta name="theme-color" content="#0f172a" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />

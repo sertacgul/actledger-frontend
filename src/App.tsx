@@ -121,11 +121,13 @@ function GlobalShortcuts() {
   return null
 }
 
-/** In standalone PWA / native app mode, redirect landing page to mobile login */
+/** In standalone PWA / native app mode on mobile devices, redirect landing page to mobile login */
 function StandaloneRedirect({ children }: { children: React.ReactNode }) {
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true
   const isNativeApp = !!(window as any).Capacitor?.isNativePlatform?.()
-  if (isStandalone || isNativeApp) return <Navigate to="/m/giris" replace />
+  const ua = navigator.userAgent || ''
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet|Kindle|Silk/i.test(ua)
+  if ((isStandalone || isNativeApp) && isMobile) return <Navigate to="/m/giris" replace />
   return <>{children}</>
 }
 

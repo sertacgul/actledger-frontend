@@ -50,6 +50,10 @@ export interface User {
   lastSyncAt?: string | null
   isMobileUser?: boolean
   mobileAppVersion?: string | null
+  title?: string
+  subUnit?: string
+  jobTitle?: string
+  departments?: { id: string; name: string; code: string; color: string }[]
 }
 
 export interface Department {

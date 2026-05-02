@@ -136,6 +136,10 @@ export function mapUser(u: any): User {
     lastSyncAt:   u.lastSyncAt ?? null,
     isMobileUser: u.isMobileUser ?? false,
     mobileAppVersion: u.mobileAppVersion ?? null,
+    title:        u.title ?? undefined,
+    subUnit:      u.subUnit ?? undefined,
+    jobTitle:     u.jobTitle ?? undefined,
+    departments:  u.departments ?? undefined,
   }
 }
 

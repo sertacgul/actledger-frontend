@@ -21,12 +21,12 @@ export default function MobileProfile() {
   const displayEmail = rawEmail.endsWith('@mobile.actledger.local') ? '' : rawEmail
 
   const info = [
-    { label: t('m_profile_department'), value: (user as any)?.departments?.[0]?.name ?? '-' },
-    { label: lang === 'tr' ? 'Alt Birim' : 'Sub-unit', value: (user as any)?.subUnit ?? '-' },
-    { label: t('m_profile_position'), value: (user as any)?.title ?? '-' },
-    { label: lang === 'tr' ? 'Gorev Tanimi' : 'Job Title', value: (user as any)?.jobTitle ?? '-' },
+    { label: t('m_profile_department'), value: user?.departments?.[0]?.name ?? '-' },
+    { label: lang === 'tr' ? 'Alt Birim' : 'Sub-unit', value: user?.subUnit ?? '-' },
+    { label: t('m_profile_position'), value: user?.title ?? '-' },
+    { label: lang === 'tr' ? 'Gorev Tanimi' : 'Job Title', value: user?.jobTitle ?? '-' },
     { label: 'E-posta', value: displayEmail || '-' },
-    { label: t('admin_mobile_phone'), value: (user as any)?.phone ?? '-' },
+    { label: t('admin_mobile_phone'), value: user?.phone ?? '-' },
   ]
 
   return (

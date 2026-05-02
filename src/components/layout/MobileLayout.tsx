@@ -15,6 +15,8 @@ export default function MobileLayout() {
   const [online, setOnline] = useState(navigator.onLine)
 
   const [syncing, setSyncing] = useState(false)
+  const [unreadMsgCount, setUnreadMsgCount] = useState(0)
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0)
   // Show location notice on every login (session-based, not persisted)
   const [locationDismissed, setLocationDismissed] = useState(false)
 
@@ -74,6 +76,18 @@ export default function MobileLayout() {
       } catch (err) { console.error('[Push] Error:', err) }
     })()
 
+    // Unread message + notification count: fetch on mount + poll every 15s
+    const fetchUnread = () => {
+      api.get<any>('/messages/unread-count').then((r: any) => {
+        setUnreadMsgCount(r?.total ?? r?.data?.total ?? 0)
+      }).catch(() => {})
+      api.get<any>('/notifications?page=1&pageSize=1').then((r: any) => {
+        setUnreadNotifCount(r?.meta?.unreadCount ?? 0)
+      }).catch(() => {})
+    }
+    fetchUnread()
+    const unreadInterval = setInterval(fetchUnread, 15000)
+
     // Location: send every 60s - mobile users always share location
     let locationInterval: ReturnType<typeof setInterval> | null = null
     const sendLocation = () => {
@@ -100,6 +114,7 @@ export default function MobileLayout() {
       window.removeEventListener('online', on)
       window.removeEventListener('offline', off)
       stopSyncManager()
+      clearInterval(unreadInterval)
       if (locationInterval) clearInterval(locationInterval)
     }
   }, [user, authLoading, navigate])
@@ -107,6 +122,13 @@ export default function MobileLayout() {
   const handleSync = async () => {
     setSyncing(true)
     await syncNow()
+    // Refresh unread counts after sync
+    api.get<any>('/messages/unread-count').then((r: any) => {
+      setUnreadMsgCount(r?.total ?? r?.data?.total ?? 0)
+    }).catch(() => {})
+    api.get<any>('/notifications?page=1&pageSize=1').then((r: any) => {
+      setUnreadNotifCount(r?.meta?.unreadCount ?? 0)
+    }).catch(() => {})
     setSyncing(false)
   }
 
@@ -190,6 +212,11 @@ export default function MobileLayout() {
             className="relative p-1.5"
           >
             <Bell size={18} className="text-white/80" />
+            {unreadNotifCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-3.5 px-0.5 rounded-full bg-red-500 text-white text-[8px] font-bold flex items-center justify-center">
+                {unreadNotifCount > 99 ? '99+' : unreadNotifCount}
+              </span>
+            )}
           </button>
         </div>
       </header>
@@ -262,7 +289,14 @@ export default function MobileLayout() {
                 </>
               ) : (
                 <>
-                  <tab.icon size={22} />
+                  <div className="relative">
+                    <tab.icon size={22} />
+                    {tab.to === '/m/mesajlar' && unreadMsgCount > 0 && (
+                      <span className="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+                        {unreadMsgCount > 99 ? '99+' : unreadMsgCount}
+                      </span>
+                    )}
+                  </div>
                   <span className="text-[10px] font-semibold">{tab.label}</span>
                 </>
               )}

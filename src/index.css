@@ -839,6 +839,14 @@
 .dossier-root .border-indigo-200 { border-color: color-mix(in srgb, var(--df-accent) 30%, white) !important; }
 .dossier-root .bg-indigo-50 { background-color: color-mix(in srgb, var(--df-accent) 8%, white) !important; }
 
+/* ─── iOS Safe Area ─────────────────────────────────────── */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 /* ─── Utilities ──────────────────────────────────────────── */
 @layer utilities {
   .text-balance { overflow-wrap: break-word; }

@@ -93,6 +93,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch { /* ignore */ }
     tokenStore.set(null)
     setUser(null)
+    // Clear saved mobile credentials so auto-login won't trigger
+    localStorage.removeItem('actledger_mobile_code')
+    localStorage.removeItem('actledger_mobile_pass')
+    localStorage.removeItem('actledger_token')
+    localStorage.removeItem('actledger_user_id')
   }
 
   return (

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Smartphone, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
@@ -9,8 +9,9 @@ import SplashScreen from '../../components/ui/SplashScreen'
 
 export default function MobileLogin() {
   const { lang, setLang, t } = useLanguage()
-  const { mobileLogin } = useAuth()
+  const { user, loading: authLoading, mobileLogin } = useAuth()
   const navigate = useNavigate()
+  const autoLoginAttempted = useRef(false)
 
   const [showSplash, setShowSplash] = useState(() => {
     const seen = sessionStorage.getItem('actledger_mobile_splash_seen')
@@ -21,7 +22,45 @@ export default function MobileLogin() {
   const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem('actledger_mobile_code'))
   const [showPass, setShowPass] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [autoLogging, setAutoLogging] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // ── Session already active (refresh token cookie worked) -> redirect ──
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate('/m/gorevler', { replace: true })
+    }
+  }, [authLoading, user, navigate])
+
+  // ── Auto-login with saved credentials if refresh token failed ─────────
+  useEffect(() => {
+    if (authLoading || user || autoLoginAttempted.current) return
+    const savedCode = localStorage.getItem('actledger_mobile_code')
+    const savedPass = localStorage.getItem('actledger_mobile_pass')
+    if (!savedCode || !savedPass) return
+
+    autoLoginAttempted.current = true
+    setAutoLogging(true)
+    ;(async () => {
+      try {
+        const result = await mobileLogin(savedCode, savedPass)
+        if (result.mustChangePassword) {
+          navigate('/m/sifre-degistir', { replace: true })
+        } else {
+          navigate('/m/gorevler', { replace: true })
+        }
+      } catch {
+        // Auto-login failed (password changed, account disabled, etc.)
+        // Clear stale credentials and show login form
+        localStorage.removeItem('actledger_mobile_code')
+        localStorage.removeItem('actledger_mobile_pass')
+        setCode('')
+        setPassword('')
+        setRememberMe(false)
+        setAutoLogging(false)
+      }
+    })()
+  }, [authLoading, user, mobileLogin, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,8 +89,18 @@ export default function MobileLogin() {
     }
   }
 
+  // Show splash, auth loading, or auto-login spinner
   if (showSplash) {
     return <SplashScreen onComplete={() => { sessionStorage.setItem('actledger_mobile_splash_seen', '1'); setShowSplash(false) }} />
+  }
+
+  if (authLoading || autoLogging) {
+    return (
+      <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-slate-900">
+        <BrandMark size={36} />
+        <Loader2 size={24} className="animate-spin text-cyan-400 mt-4" />
+      </div>
+    )
   }
 
   return (

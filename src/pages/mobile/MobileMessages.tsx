@@ -253,8 +253,8 @@ export default function MobileMessages() {
   if (screen === 'story' && activeStory) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: activeStory.bgColor || '#0f172a', maxWidth: 480, margin: '0 auto' }}>
-        <button className="absolute right-4 p-2 text-white/70" style={{ top: 'calc(env(safe-area-inset-top, 0px) + 16px)' }} onClick={() => { setActiveStory(null); setScreen('chats') }}><X size={24} /></button>
-        <div className="absolute left-4 flex items-center gap-3" style={{ top: 'calc(env(safe-area-inset-top, 0px) + 16px)' }}>
+        <button className="absolute top-14 right-4 p-2 text-white/70" onClick={() => { setActiveStory(null); setScreen('chats') }}><X size={24} /></button>
+        <div className="absolute top-14 left-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white text-sm font-bold">
             {activeStory.createdBy.name.charAt(0)}
           </div>
@@ -280,8 +280,10 @@ export default function MobileMessages() {
   if (screen === 'conversation' && chatTarget) {
     return (
       <div className="fixed inset-0 z-50 flex flex-col bg-slate-50" style={{ maxWidth: 480, margin: '0 auto' }}>
+        {/* iOS safe area spacer */}
+        <div className="ios-safe-spacer-top bg-slate-800" />
         {/* Header */}
-        <div className="bg-slate-800 text-white px-3 flex items-center gap-3 flex-shrink-0" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 10px)', paddingBottom: 10 }}>
+        <div className="bg-slate-800 text-white px-3 py-2.5 flex items-center gap-3 flex-shrink-0">
           <button onClick={() => { setScreen('chats'); setChatTarget(null); loadAllMessages() }} className="p-1"><ArrowLeft size={20} /></button>
           <div className={clsx('w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0',
             chatTarget.type === 'broadcast' ? 'bg-emerald-500' : chatTarget.type === 'department' ? 'bg-blue-500' : 'bg-cyan-600'
@@ -366,7 +368,7 @@ export default function MobileMessages() {
   return (
     <div className="flex flex-col h-full bg-white">
       {/* Header */}
-      <div className="bg-slate-800 text-white px-4 flex items-center justify-between flex-shrink-0" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)', paddingBottom: 12 }}>
+      <div className="bg-slate-800 text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
         <h1 className="text-lg font-bold">{tr ? 'Mesajlar' : 'Messages'}</h1>
         <button onClick={() => { setShowContacts(true); api.get<any>('/messages/contacts').then((r: any) => { const d = r?.data ?? r; setContacts(Array.isArray(d) ? d.map((c: any) => ({ id: c.id, name: c.name, jobTitle: c.jobTitle ?? '', isMobile: c.isMobile ?? false, department: c.department?.name ?? c.department ?? '', departmentId: c.departmentId ?? '' })) : []) }).catch(() => {}) }}
           className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center"><Plus size={18} /></button>
@@ -437,7 +439,8 @@ export default function MobileMessages() {
       {/* New chat contacts modal */}
       {showContacts && (
         <div className="fixed inset-0 z-50 bg-white flex flex-col" style={{ maxWidth: 480, margin: '0 auto' }}>
-          <div className="bg-slate-800 text-white px-4 flex items-center gap-3 flex-shrink-0" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)', paddingBottom: 12 }}>
+          <div className="ios-safe-spacer-top bg-slate-800" />
+          <div className="bg-slate-800 text-white px-4 py-3 flex items-center gap-3 flex-shrink-0">
             <button onClick={() => setShowContacts(false)} className="p-1"><ArrowLeft size={20} /></button>
             <h2 className="text-sm font-bold">{tr ? 'Yeni Sohbet' : 'New Chat'}</h2>
           </div>

@@ -840,11 +840,17 @@
 .dossier-root .bg-indigo-50 { background-color: color-mix(in srgb, var(--df-accent) 8%, white) !important; }
 
 /* ─── iOS Safe Area ─────────────────────────────────────── */
-.safe-area-top {
-  padding-top: env(safe-area-inset-top, 0px);
+.ios-safe-spacer-top {
+  width: 100%;
+  flex-shrink: 0;
+  height: constant(safe-area-inset-top); /* iOS 11.0-11.2 */
+  height: env(safe-area-inset-top, 0px); /* iOS 11.2+ */
 }
-.safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+.ios-safe-spacer-bottom {
+  width: 100%;
+  flex-shrink: 0;
+  height: constant(safe-area-inset-bottom);
+  height: env(safe-area-inset-bottom, 0px);
 }
 
 /* ─── Utilities ──────────────────────────────────────────── */

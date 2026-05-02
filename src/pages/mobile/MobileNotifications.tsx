@@ -1,28 +1,46 @@
-import { ArrowLeft, Bell, Loader2, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Bell, Loader2, AlertTriangle, CheckCheck } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useLanguage } from '../../context/LanguageContext'
-import { useNotifications, markNotificationRead } from '../../lib/hooks'
+import { useNotifications, markNotificationRead, markAllNotificationsRead } from '../../lib/hooks'
 import clsx from 'clsx'
 
 export default function MobileNotifications() {
   const { t, lang } = useLanguage()
   const navigate = useNavigate()
-  const { notifications, loading, refetch } = useNotifications()
+  const { notifications, unreadCount, loading, refetch } = useNotifications()
 
-  const handleTap = async (id: string) => {
+  const handleTap = async (id: string, link?: string) => {
     try {
       await markNotificationRead(id)
+      window.dispatchEvent(new CustomEvent('notif:read'))
+      refetch()
+    } catch {}
+    if (link) navigate(link)
+  }
+
+  const handleMarkAllRead = async () => {
+    try {
+      await markAllNotificationsRead()
+      window.dispatchEvent(new CustomEvent('notif:read'))
       refetch()
     } catch {}
   }
 
   return (
     <div className="pb-4">
-      <div className="sticky top-0 bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 z-10">
-        <button type="button" onClick={() => navigate(-1)} className="p-1 -ml-1">
-          <ArrowLeft size={20} className="text-slate-600" />
-        </button>
-        <p className="text-sm font-bold text-slate-900">{t('m_notif_title')}</p>
+      <div className="sticky top-0 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between z-10">
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={() => navigate(-1)} className="p-1 -ml-1">
+            <ArrowLeft size={20} className="text-slate-600" />
+          </button>
+          <p className="text-sm font-bold text-slate-900">{t('m_notif_title')}</p>
+        </div>
+        {unreadCount > 0 && (
+          <button type="button" onClick={handleMarkAllRead} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-cyan-50 border border-cyan-200 active:bg-cyan-100">
+            <CheckCheck size={14} className="text-cyan-600" />
+            <span className="text-[11px] font-semibold text-cyan-700">{lang === 'tr' ? 'Tumunu oku' : 'Read all'}</span>
+          </button>
+        )}
       </div>
 
       <div className="p-4">
@@ -43,7 +61,7 @@ export default function MobileNotifications() {
               <button
                 key={n.id}
                 type="button"
-                onClick={() => { handleTap(n.id) }}
+                onClick={() => { handleTap(n.id, n.link) }}
                 className={clsx(
                   'w-full text-left rounded-xl border p-4 transition-colors active:scale-[0.98]',
                   isUrgent && !n.read

@@ -88,6 +88,14 @@ export default function MobileLayout() {
     fetchUnread()
     const unreadInterval = setInterval(fetchUnread, 15000)
 
+    // Immediately refresh badge when notifications are marked as read
+    const onNotifRead = () => {
+      api.get<any>('/notifications?page=1&pageSize=1').then((r: any) => {
+        setUnreadNotifCount(r?.meta?.unreadCount ?? 0)
+      }).catch(() => {})
+    }
+    window.addEventListener('notif:read', onNotifRead)
+
     // Location: send every 60s - mobile users always share location
     let locationInterval: ReturnType<typeof setInterval> | null = null
     const sendLocation = () => {
@@ -113,6 +121,7 @@ export default function MobileLayout() {
     return () => {
       window.removeEventListener('online', on)
       window.removeEventListener('offline', off)
+      window.removeEventListener('notif:read', onNotifRead)
       stopSyncManager()
       clearInterval(unreadInterval)
       if (locationInterval) clearInterval(locationInterval)

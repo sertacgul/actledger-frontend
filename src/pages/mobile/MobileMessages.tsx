@@ -46,9 +46,6 @@ const timeFormat = (d: string, lang: string) => {
 
 type Screen = 'chats' | 'conversation' | 'story'
 
-const isPWA = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true || !!(window as any).Capacitor?.isNativePlatform?.()
-const pwaInset = isPWA ? { top: '5%', bottom: '2.5%' } : { top: 0, bottom: 0 }
-
 export default function MobileMessages() {
   const { t, lang } = useLanguage()
   const { user } = useAuth()
@@ -255,7 +252,7 @@ export default function MobileMessages() {
   // ── Story Viewer ──────────────────────────────────────────────
   if (screen === 'story' && activeStory) {
     return (
-      <div className="fixed left-0 right-0 z-50 flex items-center justify-center" style={{ background: activeStory.bgColor || '#0f172a', maxWidth: 480, margin: '0 auto', top: pwaInset.top, bottom: pwaInset.bottom }}>
+      <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: activeStory.bgColor || '#0f172a', maxWidth: 480, margin: '0 auto' }}>
         <button className="absolute top-6 right-4 p-2 text-white/70" onClick={() => { setActiveStory(null); setScreen('chats') }}><X size={24} /></button>
         <div className="absolute top-6 left-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white text-sm font-bold">
@@ -282,7 +279,7 @@ export default function MobileMessages() {
   // ── Conversation Screen ───────────────────────────────────────
   if (screen === 'conversation' && chatTarget) {
     return (
-      <div className="fixed left-0 right-0 z-50 flex flex-col bg-slate-50" style={{ maxWidth: 480, margin: '0 auto', top: pwaInset.top, bottom: pwaInset.bottom }}>
+      <div className="fixed inset-0 z-50 flex flex-col bg-slate-50" style={{ maxWidth: 480, margin: '0 auto' }}>
         {/* Header */}
         <div className="bg-slate-800 text-white px-3 py-2.5 flex items-center gap-3 flex-shrink-0">
           <button onClick={() => { setScreen('chats'); setChatTarget(null); loadAllMessages() }} className="p-1"><ArrowLeft size={20} /></button>
@@ -439,7 +436,7 @@ export default function MobileMessages() {
 
       {/* New chat contacts modal */}
       {showContacts && (
-        <div className="fixed left-0 right-0 z-50 bg-white flex flex-col" style={{ maxWidth: 480, margin: '0 auto', top: pwaInset.top, bottom: pwaInset.bottom }}>
+        <div className="fixed inset-0 z-50 bg-white flex flex-col" style={{ maxWidth: 480, margin: '0 auto' }}>
           <div className="bg-slate-800 text-white px-4 py-3 flex items-center gap-3 flex-shrink-0">
             <button onClick={() => setShowContacts(false)} className="p-1"><ArrowLeft size={20} /></button>
             <h2 className="text-sm font-bold">{tr ? 'Yeni Sohbet' : 'New Chat'}</h2>

@@ -135,6 +135,7 @@ export default function MobileLayout() {
   // Detect if running in standalone PWA mode or native app (Capacitor)
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true
   const isNativeApp = !!(window as any).Capacitor?.isNativePlatform?.()
+  const needsSafeArea = isStandalone || isNativeApp
   const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
   const [showInstallBanner, setShowInstallBanner] = useState(() => {
     if (isStandalone || isNativeApp) return false
@@ -165,10 +166,10 @@ export default function MobileLayout() {
   }
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-slate-50" style={{ maxWidth: 480, margin: '0 auto', overflowX: 'hidden' }}>
-      {/* iOS safe area spacer */}
-      <div className="ios-safe-spacer-top bg-slate-900" />
-
+    <div
+      className={clsx('flex flex-col h-[100dvh]', needsSafeArea ? 'bg-slate-900' : 'bg-slate-50')}
+      style={{ maxWidth: 480, margin: '0 auto', overflowX: 'hidden', ...(needsSafeArea && { paddingTop: '5%', paddingBottom: '2.5%' }) }}
+    >
       {/* Install PWA banner */}
       {showInstallBanner && (
         <div className="bg-cyan-600 text-white text-xs font-medium py-2.5 px-4 flex items-center gap-2">
@@ -249,7 +250,7 @@ export default function MobileLayout() {
       )}
 
       {/* Content */}
-      <main className="flex-1 overflow-y-auto overscroll-contain">
+      <main className="flex-1 overflow-y-auto overscroll-contain bg-slate-50">
         <Outlet />
       </main>
 
@@ -307,7 +308,6 @@ export default function MobileLayout() {
           )
         })}
       </nav>
-      <div className="ios-safe-spacer-bottom bg-white" />
     </div>
   )
 }

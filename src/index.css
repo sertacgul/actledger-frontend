@@ -839,20 +839,6 @@
 .dossier-root .border-indigo-200 { border-color: color-mix(in srgb, var(--df-accent) 30%, white) !important; }
 .dossier-root .bg-indigo-50 { background-color: color-mix(in srgb, var(--df-accent) 8%, white) !important; }
 
-/* ─── iOS Safe Area ─────────────────────────────────────── */
-.ios-safe-spacer-top {
-  width: 100%;
-  flex-shrink: 0;
-  height: constant(safe-area-inset-top); /* iOS 11.0-11.2 */
-  height: env(safe-area-inset-top, 0px); /* iOS 11.2+ */
-}
-.ios-safe-spacer-bottom {
-  width: 100%;
-  flex-shrink: 0;
-  height: constant(safe-area-inset-bottom);
-  height: env(safe-area-inset-bottom, 0px);
-}
-
 /* ─── Utilities ──────────────────────────────────────────── */
 @layer utilities {
   .text-balance { overflow-wrap: break-word; }

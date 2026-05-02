@@ -135,7 +135,15 @@ export default function MobileLayout() {
   // Detect if running in standalone PWA mode or native app (Capacitor)
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true
   const isNativeApp = !!(window as any).Capacitor?.isNativePlatform?.()
+  const isPWA = isStandalone || isNativeApp
   const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent)
+
+  // JS fallback: apply dark status bar overlay for standalone PWA
+  useEffect(() => {
+    if (!isPWA) return
+    // Ensure body::before dark overlay exists even if CSS cache is stale
+    document.body.classList.add('pwa-standalone')
+  }, [isPWA])
   const [showInstallBanner, setShowInstallBanner] = useState(() => {
     if (isStandalone || isNativeApp) return false
     const dismissed = localStorage.getItem('actledger_install_dismissed')
@@ -165,7 +173,7 @@ export default function MobileLayout() {
   }
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-slate-50" style={{ maxWidth: 480, margin: '0 auto', overflowX: 'hidden' }}>
+    <div className="flex flex-col h-[100dvh] bg-slate-50" style={{ maxWidth: 480, margin: '0 auto', overflowX: 'hidden', ...(isPWA && { paddingTop: 50, boxSizing: 'border-box' }) }}>
       {/* Install PWA banner */}
       {showInstallBanner && (
         <div className="bg-cyan-600 text-white text-xs font-medium py-2.5 px-4 flex items-center gap-2">

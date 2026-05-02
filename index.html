@@ -13,15 +13,15 @@
         so fixed overlays (messages, modals) also shift down automatically.
       */
       @media (display-mode: standalone) {
-        body { background: #0f172a !important; margin: 0 !important; overflow: hidden !important; }
-        #root {
-          transform: translateY(50px);
-          height: calc(100dvh - 50px - 34px) !important;
-          overflow: hidden !important;
+        body::before {
+          content: '';
+          position: fixed;
+          top: 0; left: 0; right: 0;
+          height: 50px;
+          background: #0f172a;
+          z-index: 99999;
+          pointer-events: none;
         }
-        /* Force Tailwind full-height containers to fit within safe area */
-        .h-\[100dvh\]     { height: calc(100dvh - 50px - 34px) !important; }
-        .min-h-\[100dvh\] { min-height: calc(100dvh - 50px - 34px) !important; }
       }
     </style>
     <meta name="apple-mobile-web-app-title" content="ActLedger Mobil" />

@@ -43,7 +43,7 @@ export default function MobileNotifications() {
               <button
                 key={n.id}
                 type="button"
-                onClick={() => { handleTap(n.id); if (n.link) navigate(n.link) }}
+                onClick={() => { handleTap(n.id) }}
                 className={clsx(
                   'w-full text-left rounded-xl border p-4 transition-colors active:scale-[0.98]',
                   isUrgent && !n.read

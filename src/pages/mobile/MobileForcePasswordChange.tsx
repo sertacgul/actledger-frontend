@@ -52,7 +52,8 @@ export default function MobileForcePasswordChange() {
       <button
         type="button"
         onClick={() => navigate(-1)}
-        className="absolute top-4 left-4 safe-area-top flex items-center gap-1.5 text-slate-400 active:text-white py-2 px-3 rounded-lg"
+        className="absolute left-4 flex items-center gap-1.5 text-slate-400 active:text-white py-2 px-3 rounded-lg"
+        style={{ top: 'calc(env(safe-area-inset-top, 0px) + 16px)' }}
       >
         <ArrowLeft size={18} />
         <span className="text-sm font-medium">Geri</span>

@@ -168,7 +168,7 @@ export default function MobileLayout() {
     <div className="flex flex-col h-[100dvh] bg-slate-50" style={{ maxWidth: 480, margin: '0 auto', overflowX: 'hidden' }}>
       {/* Install PWA banner */}
       {showInstallBanner && (
-        <div className="bg-cyan-600 text-white text-xs font-medium py-2.5 px-4 flex items-center gap-2 safe-area-top">
+        <div className="bg-cyan-600 text-white text-xs font-medium px-4 flex items-center gap-2" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 10px)', paddingBottom: 10 }}>
           <div className="flex-1">
             {isIOS
               ? 'Bildirim almak icin uygulamayi ana ekrana ekleyin: Paylas > Ana Ekrana Ekle'
@@ -188,7 +188,7 @@ export default function MobileLayout() {
       )}
 
       {/* Top bar */}
-      <header className="flex items-center justify-between px-4 py-3 bg-slate-900 text-white safe-area-top">
+      <header className="flex items-center justify-between px-4 bg-slate-900 text-white" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)', paddingBottom: 12 }}>
         <div className="flex items-center gap-2">
           <BrandMark size={24} iconOnly />
           <span className="text-sm font-bold tracking-tight">{t('m_brand')}</span>
@@ -251,7 +251,7 @@ export default function MobileLayout() {
       </main>
 
       {/* Bottom nav */}
-      <nav className="flex items-stretch border-t border-slate-200 bg-white safe-area-bottom relative">
+      <nav className="flex items-stretch border-t border-slate-200 bg-white relative" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         {tabs.map(tab => {
           const isHighlight = (tab as any).highlight
           const isQr = (tab as any).qr

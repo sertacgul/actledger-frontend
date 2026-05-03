@@ -759,9 +759,10 @@ export default function MobileOperIQ() {
             ))}
           </div>
           {activeChecklist.checked.every(Boolean) && (
-            <div className="mt-3 text-center">
-              <p className="text-xs font-semibold text-green-600">Tüm adımlar tamamlandı!</p>
-            </div>
+            <button type="button" onClick={() => setActiveChecklist(null)}
+              className="mt-3 w-full py-2.5 rounded-xl bg-green-500 text-white text-xs font-bold active:bg-green-600 transition-colors">
+              {lang === 'tr' ? 'Tum adimlar tamamlandi!' : 'All steps completed!'}
+            </button>
           )}
         </div>
       )}

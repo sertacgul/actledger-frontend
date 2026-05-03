@@ -89,6 +89,7 @@ export default function MobileOperIQ() {
 
   // Photo state
   const [photoStatus, setPhotoStatus] = useState<PhotoStatus>({ used: 0, limit: 5, remaining: 5 })
+  const [pendingPhoto, setPendingPhoto] = useState<{ file: File; previewUrl: string } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Manual state
@@ -223,6 +224,7 @@ export default function MobileOperIQ() {
   // ── Send text message ─────────────────────────────────────────────────────
 
   const handleSend = async () => {
+    if (pendingPhoto) { sendPhotoWithCaption(); return }
     const msg = input.trim()
     if (!msg || sending) return
 
@@ -284,7 +286,7 @@ export default function MobileOperIQ() {
 
   // ── Send photo message ────────────────────────────────────────────────────
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     e.target.value = ''
@@ -299,19 +301,33 @@ export default function MobileOperIQ() {
       return
     }
 
+    setPendingPhoto({ file, previewUrl: URL.createObjectURL(file) })
+  }
+
+  const cancelPendingPhoto = () => {
+    if (pendingPhoto) URL.revokeObjectURL(pendingPhoto.previewUrl)
+    setPendingPhoto(null)
+  }
+
+  const sendPhotoWithCaption = async () => {
+    if (!pendingPhoto) return
+    const { file, previewUrl } = pendingPhoto
+
     setSending(true)
-    const localUrl = URL.createObjectURL(file)
     const tempId = `temp-photo-${Date.now()}`
+    const caption = input.trim()
     setMessages(prev => [...prev, {
-      id: tempId, role: 'USER', content: 'Foto yuklendi',
-      photoUrl: localUrl, createdAt: new Date().toISOString(),
+      id: tempId, role: 'USER', content: caption || (lang === 'tr' ? 'Fotograf yuklendi' : 'Photo uploaded'),
+      photoUrl: previewUrl, createdAt: new Date().toISOString(),
     }])
+    setPendingPhoto(null)
+    setInput('')
 
     try {
       const formData = new FormData()
       formData.append('photo', file)
       formData.append('lang', lang)
-      if (input.trim()) formData.append('message', input.trim())
+      if (caption) formData.append('message', caption)
       if (conversationId) formData.append('conversationId', conversationId)
 
       const token = tokenStore.get()
@@ -339,7 +355,6 @@ export default function MobileOperIQ() {
           { id: data.aiMessage.id, role: 'ASSISTANT' as const, content: data.aiMessage.content, structured: data.aiMessage.structured, photoAnalysis: data.aiMessage.photoAnalysis, createdAt: data.aiMessage.createdAt },
         ]
       })
-      setInput('')
     } catch (err: any) {
       setMessages(prev => prev.filter(m => m.id !== tempId))
       setMessages(prev => [...prev, {
@@ -349,7 +364,7 @@ export default function MobileOperIQ() {
       }])
     } finally {
       setSending(false)
-      URL.revokeObjectURL(localUrl)
+      URL.revokeObjectURL(previewUrl)
     }
   }
 
@@ -829,26 +844,41 @@ export default function MobileOperIQ() {
       </div>
 
       {/* Input area */}
-      <div className="p-3 border-t border-slate-200 bg-white">
-        <div className="flex items-end gap-2">
+      <div className="border-t border-slate-200 bg-white">
+        {/* Photo preview */}
+        {pendingPhoto && (
+          <div className="px-3 pt-3 flex items-start gap-2">
+            <div className="relative">
+              <img src={pendingPhoto.previewUrl} alt="" className="w-16 h-16 rounded-lg object-cover border border-slate-200" />
+              <button type="button" onClick={cancelPendingPhoto}
+                className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center shadow">
+                <X size={12} />
+              </button>
+            </div>
+            <p className="text-[11px] text-slate-400 pt-1">{lang === 'tr' ? 'Aciklama ekleyebilirsiniz' : 'Add a description'}</p>
+          </div>
+        )}
+        <div className="p-3 flex items-end gap-2">
           <button type="button" onClick={() => fileInputRef.current?.click()}
-            disabled={sending || photoStatus.remaining <= 0}
+            disabled={sending || photoStatus.remaining <= 0 || !!pendingPhoto}
             className={clsx('p-2.5 rounded-xl transition-colors',
-              photoStatus.remaining > 0 ? 'bg-slate-100 text-slate-600 active:bg-slate-200' : 'bg-slate-50 text-slate-300')}>
+              photoStatus.remaining > 0 && !pendingPhoto ? 'bg-slate-100 text-slate-600 active:bg-slate-200' : 'bg-slate-50 text-slate-300')}>
             <Camera size={18} />
           </button>
           <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment"
-            onChange={handlePhotoUpload} className="hidden" />
+            onChange={handlePhotoSelect} className="hidden" />
 
           <div className="flex-1">
             <textarea value={input} onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
-              placeholder={lang === 'tr' ? 'OperIQ\'ya sorun...' : 'Ask OperIQ...'} rows={1}
+              placeholder={pendingPhoto
+                ? (lang === 'tr' ? 'Fotograf hakkinda aciklama yazin...' : 'Describe the photo...')
+                : (lang === 'tr' ? 'OperIQ\'ya sorun...' : 'Ask OperIQ...')} rows={1}
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm resize-none focus:outline-none focus:border-cyan-500"
               style={{ maxHeight: 80 }} />
           </div>
 
-          <button type="button" onClick={handleSend} disabled={!input.trim() || sending}
+          <button type="button" onClick={handleSend} disabled={(!input.trim() && !pendingPhoto) || sending}
             className="p-2.5 rounded-xl bg-cyan-600 text-white disabled:opacity-30 active:scale-95 transition-all">
             {sending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
           </button>

@@ -202,11 +202,14 @@ export default function MobileMessages() {
       const items = (Array.isArray(data) ? data : []).map(mapMsg)
       setChatMessages(items.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()))
       // Mark as read
+      let hasUnread = false
       for (const m of items) {
         if (m.senderId !== user?.id && !m.readAt) {
+          hasUnread = true
           api.patch(`/messages/${m.id}/read`).catch(() => {})
         }
       }
+      if (hasUnread) window.dispatchEvent(new CustomEvent('notif:read'))
     } catch {}
     setChatLoading(false)
   }
@@ -289,7 +292,7 @@ export default function MobileMessages() {
             {chatTarget.type === 'broadcast' ? <Users size={18} /> : chatTarget.type === 'department' ? <Building2 size={18} /> : chatTarget.name.charAt(0)}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold truncate">{chatTarget.name}</p>
+            <p className="text-sm font-bold text-white truncate">{chatTarget.name}</p>
             <p className="text-[10px] text-white/50">
               {chatTarget.type === 'broadcast' ? (tr ? 'Genel kanal' : 'General channel') :
                chatTarget.type === 'department' ? (tr ? 'Departman grubu' : 'Department group') :

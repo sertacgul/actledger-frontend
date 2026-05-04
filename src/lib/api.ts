@@ -63,8 +63,9 @@ async function request<T>(
     throw new ApiError(0, 'Istek gonderilemedi. Lutfen tekrar deneyin.')
   }
 
-  // Auto-refresh on 401
-  if (res.status === 401 && retry && path !== '/auth/login') {
+  // Auto-refresh on 401 (skip login endpoints - they return specific error messages)
+  const isLoginPath = path === '/auth/login' || path === '/mobile-auth/login'
+  if (res.status === 401 && retry && !isLoginPath) {
     const ok = await tryRefresh()
     if (ok) return request<T>(path, options, false)
     tokenStore.set(null)

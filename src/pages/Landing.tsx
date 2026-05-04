@@ -179,6 +179,8 @@ const T = {
     nf12Body: 'Her IoT cihaz\u0131na sorumlu personel atay\u0131n. Alarm, kritik durum ve \u00e7evrimd\u0131\u015f\u0131 bildirimleri otomatik g\u00f6nderilir. G\u00fcnde 2 kere rutin durum raporu ile proaktif takip.',
     nf12Benefit: 'Cihaz ar\u0131za tepki s\u00fcresini %60 k\u0131salt\u0131n',
     tryFree: 'ActLedger Platformu ve ActLedger Mobil\'i \u00dccretsiz Deneyin',
+    appStoreDownload: 'App Store\'dan \u0130ndirin',
+    appStoreAvailable: 'Art\u0131k App Store\'da',
     platformVideoTitle: 'Platformu Ke\u015ffedin',
     platformVideoSubtitle: 'ActLedger\'in g\u00fcc\u00fcn\u00fc tek bir ekranda deneyimleyin.',
     benchmarkSupra: 'ERP\'den Fazlas\u0131: Operasyonun Ger\u00e7ek Zamanl\u0131 Y\u00f6netimi',
@@ -367,6 +369,8 @@ const T = {
     nf12Body: 'Assign responsible personnel to each IoT device. Alert, critical, and offline notifications sent automatically. Twice-daily routine status reports for proactive monitoring.',
     nf12Benefit: 'Cut device failure response time by 60%',
     tryFree: 'Try ActLedger Platform & ActLedger Mobile for Free',
+    appStoreDownload: 'Download on the App Store',
+    appStoreAvailable: 'Now on the App Store',
     platformVideoTitle: 'Explore the Platform',
     platformVideoSubtitle: 'Experience the power of ActLedger on a single screen.',
     benchmarkSupra: 'Beyond ERP: Real-Time Operations Management',
@@ -392,6 +396,39 @@ const T = {
     insightsTitle: 'OperIQ Insights',
     insightsSubtitle: 'Make sense of your operational data, make the right decisions on time.',
   },
+}
+
+/* --------------------------------------------------------------------------
+   APP STORE BADGE
+   -------------------------------------------------------------------------- */
+const APP_STORE_URL = 'https://apps.apple.com/tr/app/actledger/id6763721339?l=tr'
+
+function AppStoreBadge({ className = '', dark = false }: { className?: string; dark?: boolean }) {
+  return (
+    <a
+      href={APP_STORE_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`inline-flex items-center gap-2.5 rounded-xl transition-all duration-300 hover:scale-105 ${className}`}
+      style={{
+        background: dark ? '#ffffff' : '#000000',
+        padding: '10px 20px',
+        textDecoration: 'none',
+      }}
+    >
+      <svg viewBox="0 0 24 24" width="28" height="28" fill={dark ? '#000000' : '#ffffff'}>
+        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+      </svg>
+      <div style={{ lineHeight: 1.1 }}>
+        <div style={{ fontSize: '10px', fontWeight: 500, color: dark ? '#000000' : '#ffffff', opacity: 0.85 }}>
+          Download on the
+        </div>
+        <div style={{ fontSize: '18px', fontWeight: 700, color: dark ? '#000000' : '#ffffff', letterSpacing: '-0.02em' }}>
+          App Store
+        </div>
+      </div>
+    </a>
+  )
 }
 
 /* --------------------------------------------------------------------------
@@ -440,7 +477,10 @@ function ScrollGrowVideo({ src }: { src: string }) {
           border: progress > 0.9 ? 'none' : '1px solid rgba(6,182,212,0.15)',
         }}
       >
-        <video autoPlay muted loop playsInline src={src} className="w-full block" />
+        <video autoPlay muted loop playsInline className="w-full block">
+          <source src={src.replace('.mov', '.mp4')} type="video/mp4" />
+          <source src={src} type="video/quicktime" />
+        </video>
         <div className="absolute inset-0 pointer-events-none"
           style={{
             background: `linear-gradient(to top, rgba(15,23,42,${0.15 * (1 - progress)}) 0%, transparent 20%, transparent 80%, rgba(15,23,42,${0.08 * (1 - progress)}) 100%)`,
@@ -660,10 +700,12 @@ function ScrollGrowIphone({ src }: { src: string }) {
               muted
               loop
               playsInline
-              src={src}
               className="group-hover:scale-[1.02] transition-transform duration-700 ease-out"
               style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-            />
+            >
+              <source src={src.replace('.mov', '.mp4')} type="video/mp4" />
+              <source src={src} type="video/quicktime" />
+            </video>
             {/* Bottom gradient fade */}
             <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
               style={{ background: 'linear-gradient(transparent, rgba(10,22,40,0.6))' }} />
@@ -1621,12 +1663,12 @@ export default function Landing() {
         <div className="w-full px-4 sm:px-6 lg:px-12 py-4 flex items-center justify-between overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
           <div className="flex items-center gap-4 flex-shrink-0">
             <div className="[&>div]:gap-1 lg:[&>div]:gap-2.5"><BrandMark size={36} variant="dark" /></div>
-            <span className="hidden xl:block text-[13px] font-bold whitespace-nowrap" style={{ color: '#ffffff' }}>
+            <span className="hidden 2xl:block text-[13px] font-bold whitespace-nowrap" style={{ color: '#ffffff' }}>
               ATAOL AI Techs taraf{'\u0131'}ndan geli{'\u015f'}tirildi.
             </span>
           </div>
 
-          <div className="hidden md:flex items-center gap-4 lg:gap-6 xl:gap-8 text-base lg:text-lg font-bold flex-nowrap whitespace-nowrap" style={{ color: '#ffffff' }}>
+          <div className="hidden md:flex items-center gap-3 lg:gap-5 xl:gap-6 2xl:gap-8 text-sm lg:text-base xl:text-lg font-bold flex-nowrap whitespace-nowrap" style={{ color: '#ffffff' }}>
             <a href="#platform" className="hover:text-cyan-300 transition-colors duration-300">{t.navPlatform}</a>
             <a href="#sectors" className="hover:text-cyan-300 transition-colors duration-300">{t.navSectors}</a>
             <a href="#features" className="hover:text-cyan-300 transition-colors duration-300">{t.navFeatures}</a>
@@ -1744,6 +1786,7 @@ export default function Landing() {
                   >
                     {t.heroDemo} <ArrowRight size={16} />
                   </button>
+                  <AppStoreBadge />
                 </div>
               </Reveal>
             </div>
@@ -2971,6 +3014,13 @@ export default function Landing() {
                   {lang === 'tr' ? '1 Ayl\u0131k \u00dccretsiz Deneme \u0130\u00e7in \u0130leti\u015fime Ge\u00e7in' : '1-Month Free Trial - Get in Touch'}
                 </p>
               </button>
+              {/* App Store Badge */}
+              <div className="mt-6">
+                <p className="text-xs font-medium mb-3 tracking-wider uppercase" style={{ color: 'rgba(148,163,184,0.6)' }}>
+                  {t.appStoreAvailable}
+                </p>
+                <AppStoreBadge dark />
+              </div>
             </div>
           </Reveal>
 
@@ -3016,6 +3066,7 @@ export default function Landing() {
                 >
                   {t.ctaDemo} <ArrowRight size={16} />
                 </button>
+                <AppStoreBadge />
               </div>
             </div>
           </Reveal>
@@ -3356,16 +3407,21 @@ export default function Landing() {
 
             <div>
               <h4 className="text-lg font-bold mb-4" style={{ color: '#ffffff' }}>Social</h4>
-              <a
-                href="https://www.linkedin.com/company/ataol-ai-techs"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-lg font-semibold transition-all duration-300 hover:scale-105"
-                style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)', color: '#ffffff' }}
-              >
-                <Linkedin size={16} />
-                LinkedIn
-              </a>
+              <div className="space-y-3">
+                <a
+                  href="https://www.linkedin.com/company/ataol-ai-techs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-lg font-semibold transition-all duration-300 hover:scale-105"
+                  style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)', color: '#ffffff' }}
+                >
+                  <Linkedin size={16} />
+                  LinkedIn
+                </a>
+                <div>
+                  <AppStoreBadge className="!rounded-lg" />
+                </div>
+              </div>
             </div>
           </div>
 

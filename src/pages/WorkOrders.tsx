@@ -364,6 +364,18 @@ function WorkOrderDetailModal({
   const [localComments, setLocalComments] = useState<WorkOrderComment[]>(wo.comments || [])
   const [rejectionNote, setRejectionNote] = useState('')
   const [showRejectInput, setShowRejectInput] = useState(false)
+  const [showAssignInput, setShowAssignInput] = useState(false)
+  const [assignUserId, setAssignUserId] = useState('')
+  const [deptUsers, setDeptUsers] = useState<{ id: string; name: string; role: string }[]>([])
+
+  // Fetch target dept users when assign panel opens
+  useEffect(() => {
+    if (!showAssignInput) return
+    api.get<any>(`/users?departmentId=${wo.targetDeptId}&pageSize=100`).then((r: any) => {
+      const users = (r?.data ?? r ?? []).map((u: any) => ({ id: u.id, name: u.name, role: u.role }))
+      setDeptUsers(users)
+    }).catch(() => {})
+  }, [showAssignInput, wo.targetDeptId])
 
   // Determine what actions this user can take
   const isRequesterDeptManager = userDeptId === wo.requesterDeptId && ROLE_HIERARCHY[userRole] >= ROLE_HIERARCHY['mudur']
@@ -452,6 +464,14 @@ function WorkOrderDetailModal({
       )
     }
 
+    if (status === 'devam_ediyor' && (isTargetDeptManager || isTargetDeptSupervisor)) {
+      btns.push(
+        <button key="assign" onClick={() => setShowAssignInput(true)} disabled={actionLoading}
+          className="px-4 py-2 text-sm font-medium text-white rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-50 flex items-center gap-2">
+          <ArrowRight size={14} /> {tr ? 'Ata / Ilet' : 'Assign / Forward'}
+        </button>
+      )
+    }
     if (status === 'devam_ediyor' && isTargetDeptManager) {
       btns.push(
         <button key="complete" onClick={() => performAction('complete')} disabled={actionLoading}
@@ -595,6 +615,46 @@ function WorkOrderDetailModal({
                 className="px-3 py-1.5 text-xs text-slate-600 hover:text-slate-800"
               >
                 {tr ? 'Vazgec' : 'Cancel'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Assign input */}
+        {showAssignInput && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-2">
+            <p className="text-xs font-semibold text-amber-700">{tr ? 'Kime atamak istiyorsunuz?' : 'Assign to whom?'}</p>
+            <select
+              value={assignUserId}
+              onChange={e => setAssignUserId(e.target.value)}
+              className="w-full border border-amber-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-amber-300"
+            >
+              <option value="">{tr ? 'Kisi secin...' : 'Select person...'}</option>
+              {deptUsers.filter(u => u.id !== userId).map(u => (
+                <option key={u.id} value={u.id}>{u.name} ({u.role})</option>
+              ))}
+            </select>
+            <div className="flex gap-2">
+              <button
+                onClick={async () => {
+                  if (!assignUserId) return
+                  try {
+                    await api.post(`/work-orders/${wo.id}/assign`, { assigneeUserId: assignUserId })
+                    setShowAssignInput(false)
+                    setAssignUserId('')
+                    onRefetch()
+                  } catch (e: any) { alert(e.message || 'Atama basarisiz') }
+                }}
+                disabled={!assignUserId}
+                className="px-3 py-1.5 text-xs font-medium text-white bg-amber-500 rounded-lg hover:bg-amber-600 disabled:opacity-50"
+              >
+                {tr ? 'Ata' : 'Assign'}
+              </button>
+              <button
+                onClick={() => { setShowAssignInput(false); setAssignUserId('') }}
+                className="px-3 py-1.5 text-xs text-slate-600 hover:text-slate-800"
+              >
+                {tr ? 'Vazge\u00e7' : 'Cancel'}
               </button>
             </div>
           </div>

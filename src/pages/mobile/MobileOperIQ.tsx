@@ -490,13 +490,13 @@ export default function MobileOperIQ() {
             'bg-red-100 text-red-700': s.riskSeviyesi === 'kritik',
           })}>
             <AlertTriangle size={11} />
-            Risk: {s.riskSeviyesi.charAt(0).toUpperCase() + s.riskSeviyesi.slice(1)}
+            {lang === 'tr' ? 'Risk' : 'Risk'}: {lang === 'tr' ? (s.riskSeviyesi.charAt(0).toUpperCase() + s.riskSeviyesi.slice(1)) : ({ dusuk: 'Low', orta: 'Medium', yuksek: 'High', kritik: 'Critical' }[s.riskSeviyesi] || s.riskSeviyesi)}
           </div>
         )}
 
         {s.muhtemelNedenler && s.muhtemelNedenler.length > 0 && (
           <div className="bg-amber-50 rounded-lg p-2.5">
-            <p className="text-xs font-semibold text-amber-700 mb-1.5">Muhtemel Nedenler:</p>
+            <p className="text-xs font-semibold text-amber-700 mb-1.5">{lang === 'tr' ? 'Muhtemel Nedenler:' : 'Possible Causes:'}</p>
             <ul className="space-y-1">
               {s.muhtemelNedenler.map((n, i) => (
                 <li key={i} className="text-xs text-amber-800 flex items-start gap-1.5">
@@ -509,7 +509,7 @@ export default function MobileOperIQ() {
 
         {s.yapilmasiGerekenler && s.yapilmasiGerekenler.length > 0 && (
           <div className="bg-slate-50 rounded-lg p-2.5">
-            <p className="text-xs font-semibold text-slate-700 mb-1.5">Yapılması Gerekenler:</p>
+            <p className="text-xs font-semibold text-slate-700 mb-1.5">{lang === 'tr' ? 'Yapilmasi Gerekenler:' : 'Required Actions:'}</p>
             <ol className="space-y-1.5">
               {s.yapilmasiGerekenler.map((step, i) => (
                 <li key={i} className={clsx('text-xs flex items-start gap-1.5', step.kritik ? 'text-red-700 font-semibold' : 'text-slate-700')}>
@@ -523,7 +523,7 @@ export default function MobileOperIQ() {
             </ol>
             <button type="button" onClick={() => startChecklist(s.yapilmasiGerekenler!)}
               className="mt-2.5 w-full flex items-center justify-center gap-1.5 py-2 bg-cyan-600 text-white rounded-lg text-xs font-semibold active:scale-[0.98]">
-              <CheckSquare size={13} /> Adımları Checklist Olarak Başlat
+              <CheckSquare size={13} /> {lang === 'tr' ? 'Adimlari Checklist Olarak Baslat' : 'Start Steps as Checklist'}
             </button>
           </div>
         )}

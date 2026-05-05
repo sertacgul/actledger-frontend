@@ -1,6 +1,6 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { ClipboardList, FileSpreadsheet, MessageSquare, UserCircle, Bell, RefreshCw, Wifi, WifiOff, Cpu, MapPin, X, ScanLine } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { ClipboardList, FileSpreadsheet, MessageSquare, UserCircle, Bell, RefreshCw, Wifi, WifiOff, Cpu, MapPin, X, ScanLine, Briefcase, ChevronUp } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
 import clsx from 'clsx'
 import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
@@ -12,6 +12,7 @@ export default function MobileLayout() {
   const { t, lang } = useLanguage()
   const { user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [online, setOnline] = useState(navigator.onLine)
 
   const [syncing, setSyncing] = useState(false)
@@ -164,9 +165,28 @@ export default function MobileLayout() {
     return true
   })
 
+  // "Isler" group sub-items
+  const workSubItems = [
+    { to: '/m/gorevler',        icon: ClipboardList,   label: lang === 'tr' ? 'Gorevler' : 'Tasks' },
+    { to: '/m/formlar',         icon: FileSpreadsheet, label: lang === 'tr' ? 'Formlar' : 'Forms' },
+    { to: '/m/is-siparisleri',  icon: Briefcase,       label: lang === 'tr' ? 'Is Siparisleri' : 'Work Orders' },
+  ]
+  const workPaths = workSubItems.map(i => i.to)
+  const [workMenuOpen, setWorkMenuOpen] = useState(false)
+  const workMenuRef = useRef<HTMLDivElement>(null)
+
+  // Close work menu on outside tap
+  useEffect(() => {
+    if (!workMenuOpen) return
+    const handler = (e: MouseEvent) => {
+      if (workMenuRef.current && !workMenuRef.current.contains(e.target as Node)) setWorkMenuOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [workMenuOpen])
+
   const tabs = [
-    { to: '/m/gorevler',  icon: ClipboardList,   label: t('m_nav_tasks') },
-    { to: '/m/formlar',   icon: FileSpreadsheet, label: lang === 'tr' ? 'Formlar' : 'Forms' },
+    { to: '/m/gorevler',  icon: Briefcase,       label: lang === 'tr' ? 'Isler' : 'Work',  group: true },
     { to: '/m/qr-tarama', icon: ScanLine,        label: 'QR',             highlight: false, qr: true },
     { to: '/m/operiq',    icon: Cpu,             label: 'OperIQ',         highlight: true },
     { to: '/m/mesajlar',  icon: MessageSquare,   label: t('m_nav_messages') },
@@ -273,13 +293,59 @@ export default function MobileLayout() {
 
       {/* Bottom nav */}
       <nav className="flex items-stretch border-t border-slate-200 bg-white relative">
+        {/* Work menu popup */}
+        {workMenuOpen && (
+          <div ref={workMenuRef} className="absolute bottom-full left-0 mb-2 ml-1 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 min-w-[160px]">
+            {workSubItems.map(item => {
+              const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + '/')
+              return (
+                <button
+                  key={item.to}
+                  type="button"
+                  onClick={() => { navigate(item.to); setWorkMenuOpen(false) }}
+                  className={clsx(
+                    'w-full flex items-center gap-3 px-4 py-3 text-left transition-colors',
+                    isActive ? 'bg-cyan-50 text-cyan-700' : 'text-slate-600 active:bg-slate-50'
+                  )}
+                >
+                  <item.icon size={18} />
+                  <span className="text-sm font-medium">{item.label}</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
         {tabs.map(tab => {
           const isHighlight = (tab as any).highlight
           const isQr = (tab as any).qr
+          const isGroup = (tab as any).group
+          const isGroupActive = isGroup && workPaths.some(p => location.pathname === p || location.pathname.startsWith(p + '/'))
+
+          if (isGroup) {
+            return (
+              <button
+                key={tab.to}
+                type="button"
+                onClick={() => setWorkMenuOpen(!workMenuOpen)}
+                className={clsx(
+                  'flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors min-h-[56px] py-2.5',
+                  isGroupActive || workMenuOpen ? 'text-cyan-600 bg-cyan-50/50' : 'text-slate-400 active:bg-slate-50'
+                )}
+              >
+                <div className="relative">
+                  <tab.icon size={22} />
+                  <ChevronUp size={10} className={clsx('absolute -top-1 -right-2 transition-transform', workMenuOpen ? '' : 'rotate-180')} />
+                </div>
+                <span className="text-[10px] font-semibold">{tab.label}</span>
+              </button>
+            )
+          }
+
           return (
             <NavLink
               key={tab.to}
               to={tab.to}
+              onClick={() => setWorkMenuOpen(false)}
               className={({ isActive }) => clsx(
                 'flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors min-h-[56px]',
                 isHighlight

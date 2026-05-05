@@ -4,8 +4,7 @@ import {
   RotateCcw, Send, AlertCircle, Loader2, ChevronDown, Trash2, MessageSquare,
   Paperclip, Package, History, ListChecks,
 } from 'lucide-react'
-import { api } from '../lib/api'
-import { mapWorkOrder } from '../lib/api'
+import { api, mapWorkOrder, API_BASE, tokenStore } from '../lib/api'
 import clsx from 'clsx'
 import DraggableModal from '../components/ui/DraggableModal'
 import { useLanguage } from '../context/LanguageContext'
@@ -674,7 +673,34 @@ function WorkOrderDetailModal({
           )}
 
           {activeTab === 'attachments' && (
-            <div className="space-y-2">
+            <div className="space-y-3">
+              {/* Upload button - requester can upload in request phase, target dept can upload in completion phase */}
+              {(wo.requesterUserId === userId ||
+                (userDeptId === wo.targetDeptId && ['devam_ediyor', 'tamamlandi_onay_bekliyor'].includes(wo.status))
+              ) && (
+                <label className="flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-dashed border-slate-300 hover:border-cyan-400 cursor-pointer transition-colors bg-slate-50 hover:bg-cyan-50">
+                  <Paperclip size={16} className="text-slate-400" />
+                  <span className="text-sm text-slate-500">{tr ? 'Dosya yukle...' : 'Upload file...'}</span>
+                  <input type="file" className="hidden" onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    const formData = new FormData()
+                    formData.append('file', file)
+                    const phase = wo.requesterUserId === userId ? 'request' : 'completion'
+                    formData.append('phase', phase)
+                    try {
+                      await fetch(`${API_BASE}/work-orders/${wo.id}/attachments`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${tokenStore.get()}` },
+                        body: formData,
+                        credentials: 'include',
+                      })
+                      onRefetch()
+                    } catch {}
+                    e.target.value = ''
+                  }} />
+                </label>
+              )}
               {(!wo.attachments || wo.attachments.length === 0) ? (
                 <p className="text-sm text-slate-400 italic">{tr ? 'Ek dosya yok' : 'No attachments'}</p>
               ) : (
@@ -684,7 +710,7 @@ function WorkOrderDetailModal({
                     <div className="min-w-0 flex-1">
                       <p className="text-sm text-slate-700 truncate">{att.fileName}</p>
                       <p className="text-[10px] text-slate-400">
-                        {(att.fileSize / 1024).toFixed(1)} KB - {formatDate(att.createdAt)}
+                        {att.phase === 'request' ? (tr ? 'Talep' : 'Request') : (tr ? 'Tamamlama' : 'Completion')} - {(att.fileSize / 1024).toFixed(1)} KB - {formatDate(att.createdAt)}
                       </p>
                     </div>
                   </div>

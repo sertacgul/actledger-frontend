@@ -736,7 +736,7 @@ function CreateScreen({
         targetDeptId: form.targetDeptId,
         requesterDeptId: form.requesterDeptId || undefined,
         priority: form.priority.toUpperCase(),
-        dueDate: form.dueDate || undefined,
+        dueDate: form.dueDate ? new Date(form.dueDate).toISOString() : undefined,
         estimatedHours: form.estimatedHours ? Number(form.estimatedHours) : undefined,
         estimatedCost: form.estimatedCost ? Number(form.estimatedCost) : undefined,
       }

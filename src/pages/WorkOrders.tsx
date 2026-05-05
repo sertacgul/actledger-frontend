@@ -127,7 +127,7 @@ function CreateWorkOrderModal({
         targetDeptId: form.targetDeptId,
         requesterDeptId: form.requesterDeptId || undefined,
         priority: form.priority.toUpperCase(),
-        dueDate: form.dueDate || undefined,
+        dueDate: form.dueDate ? new Date(form.dueDate).toISOString() : undefined,
         estimatedHours: form.estimatedHours ? Number(form.estimatedHours) : undefined,
         estimatedCost: form.estimatedCost ? Number(form.estimatedCost) : undefined,
         items: items.filter(i => i.title.trim()).map((i, idx) => ({ title: i.title.trim(), sortOrder: idx })),

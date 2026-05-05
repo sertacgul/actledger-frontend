@@ -167,9 +167,9 @@ export default function MobileLayout() {
 
   // "Isler" group sub-items
   const workSubItems = [
-    { to: '/m/gorevler',        icon: ClipboardList,   label: lang === 'tr' ? 'Gorevler' : 'Tasks' },
+    { to: '/m/gorevler',        icon: ClipboardList,   label: lang === 'tr' ? 'G\u00f6revler' : 'Tasks' },
     { to: '/m/formlar',         icon: FileSpreadsheet, label: lang === 'tr' ? 'Formlar' : 'Forms' },
-    { to: '/m/is-siparisleri',  icon: Briefcase,       label: lang === 'tr' ? 'Is Siparisleri' : 'Work Orders' },
+    { to: '/m/is-siparisleri',  icon: Briefcase,       label: lang === 'tr' ? '\u0130\u015f Sipari\u015fleri' : 'Work Orders' },
   ]
   const workPaths = workSubItems.map(i => i.to)
   const [workMenuOpen, setWorkMenuOpen] = useState(false)
@@ -293,28 +293,6 @@ export default function MobileLayout() {
 
       {/* Bottom nav */}
       <nav className="flex items-stretch border-t border-slate-200 bg-white relative">
-        {/* Work menu popup */}
-        {workMenuOpen && (
-          <div ref={workMenuRef} className="absolute bottom-full left-0 mb-2 ml-1 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 min-w-[160px]">
-            {workSubItems.map(item => {
-              const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + '/')
-              return (
-                <button
-                  key={item.to}
-                  type="button"
-                  onClick={() => { navigate(item.to); setWorkMenuOpen(false) }}
-                  className={clsx(
-                    'w-full flex items-center gap-3 px-4 py-3 text-left transition-colors',
-                    isActive ? 'bg-cyan-50 text-cyan-700' : 'text-slate-600 active:bg-slate-50'
-                  )}
-                >
-                  <item.icon size={18} />
-                  <span className="text-sm font-medium">{item.label}</span>
-                </button>
-              )
-            })}
-          </div>
-        )}
         {tabs.map(tab => {
           const isHighlight = (tab as any).highlight
           const isQr = (tab as any).qr
@@ -323,21 +301,44 @@ export default function MobileLayout() {
 
           if (isGroup) {
             return (
-              <button
-                key={tab.to}
-                type="button"
-                onClick={() => setWorkMenuOpen(!workMenuOpen)}
-                className={clsx(
-                  'flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors min-h-[56px] py-2.5',
-                  isGroupActive || workMenuOpen ? 'text-cyan-600 bg-cyan-50/50' : 'text-slate-400 active:bg-slate-50'
+              <div key={tab.to} ref={workMenuRef} className="flex-1 relative">
+                {/* Work menu popup */}
+                {workMenuOpen && (
+                  <div className="absolute bottom-full left-0 mb-2 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 min-w-[160px]">
+                    {workSubItems.map(item => {
+                      const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + '/')
+                      return (
+                        <button
+                          key={item.to}
+                          type="button"
+                          onClick={() => { navigate(item.to); setWorkMenuOpen(false) }}
+                          className={clsx(
+                            'w-full flex items-center gap-3 px-4 py-3 text-left transition-colors',
+                            isActive ? 'bg-cyan-50 text-cyan-700' : 'text-slate-600 active:bg-slate-50'
+                          )}
+                        >
+                          <item.icon size={18} />
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
                 )}
-              >
-                <div className="relative">
-                  <tab.icon size={22} />
-                  <ChevronUp size={10} className={clsx('absolute -top-1 -right-2 transition-transform', workMenuOpen ? '' : 'rotate-180')} />
-                </div>
-                <span className="text-[10px] font-semibold">{tab.label}</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setWorkMenuOpen(!workMenuOpen)}
+                  className={clsx(
+                    'w-full flex flex-col items-center justify-center gap-0.5 transition-colors min-h-[56px] py-2.5',
+                    isGroupActive || workMenuOpen ? 'text-cyan-600 bg-cyan-50/50' : 'text-slate-400 active:bg-slate-50'
+                  )}
+                >
+                  <div className="relative">
+                    <tab.icon size={22} />
+                    <ChevronUp size={10} className={clsx('absolute -top-1 -right-2 transition-transform', workMenuOpen ? '' : 'rotate-180')} />
+                  </div>
+                  <span className="text-[10px] font-semibold">{tab.label}</span>
+                </button>
+              </div>
             )
           }
 

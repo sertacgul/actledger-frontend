@@ -316,7 +316,18 @@ function DetailScreen({
   const performAction = async (action: string, extraBody?: any) => {
     setActionLoading(true)
     try {
-      await api.post(`/work-orders/${wo.id}/transition`, { action, ...extraBody })
+      const endpointMap: Record<string, string> = {
+        submit: 'submit',
+        approve: 'approve',
+        reject: 'reject',
+        request_revision: 'request-revision',
+        accept: 'accept',
+        complete: 'complete',
+        verify_completion: 'approve-completion',
+        close: 'close',
+      }
+      const endpoint = endpointMap[action] || action
+      await api.post(`/work-orders/${wo.id}/${endpoint}`, extraBody || {})
       onRefetch()
     } catch (e: any) {
       alert(e.message || (tr ? 'Islem basarisiz' : 'Action failed'))
@@ -745,7 +756,7 @@ function CreateScreen({
       // If not draft, submit immediately
       if (!asDraft && wo?.id) {
         try {
-          await api.post(`/work-orders/${wo.id}/transition`, { action: 'submit' })
+          await api.post(`/work-orders/${wo.id}/submit`, {})
         } catch {}
       }
 

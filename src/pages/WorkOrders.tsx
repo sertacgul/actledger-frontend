@@ -374,9 +374,19 @@ function WorkOrderDetailModal({
   const performAction = async (action: string, extraBody?: any) => {
     setActionLoading(true)
     try {
-      await api.post(`/work-orders/${wo.id}/transition`, { action, ...extraBody })
+      const endpointMap: Record<string, string> = {
+        submit: 'submit',
+        approve: 'approve',
+        reject: 'reject',
+        request_revision: 'request-revision',
+        accept: 'accept',
+        complete: 'complete',
+        verify_completion: 'approve-completion',
+        close: 'close',
+      }
+      const endpoint = endpointMap[action] || action
+      await api.post(`/work-orders/${wo.id}/${endpoint}`, extraBody || {})
       onRefetch()
-      // Close if terminal action
       if (action === 'close' || action === 'reject') {
         onClose()
       }

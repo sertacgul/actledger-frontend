@@ -11,6 +11,8 @@ import { useCompany } from '../../context/CompanyContext'
 import { useLanguage } from '../../context/LanguageContext'
 import { useTheme } from '../../context/ThemeContext'
 import BrandMark from '../ui/BrandMark'
+import { ROLE_HIERARCHY } from '../../types'
+import type { UserRole } from '../../types'
 import type { TranslationKey } from '../../i18n/translations'
 
 interface SidebarProps {
@@ -33,38 +35,42 @@ export default function Sidebar({ open = false, collapsed = false, onClose }: Si
     shortcut?: string
     badge?:    string
     operiq?:   boolean
+    minLevel?: number  // Minimum role level to see this menu item
   }
+
+  const userLevel = user ? ROLE_HIERARCHY[user.role as UserRole] ?? 1 : 1
+
   const NAV: { label: string; items: NavItem[] }[] = [
     {
       label: t('sidebar_section_ops'),
       items: [
         { to: '/panel',    icon: LayoutDashboard, label: t('nav_dashboard'), desc: t('tooltip_dashboard' as TranslationKey), shortcut: 'g d' },
         { to: '/gorevler',  icon: CheckSquare,     label: t('nav_tasks'),     desc: t('tooltip_tasks' as TranslationKey),     shortcut: 'g t' },
-        { to: '/is-siparisleri', icon: ClipboardList, label: lang === 'tr' ? 'İş Siparişleri' : 'Work Orders', desc: lang === 'tr' ? 'Departmanlar arası iş siparişleri' : 'Cross-department work orders' },
+        { to: '/is-siparisleri', icon: ClipboardList, label: lang === 'tr' ? '\u0130\u015f Sipari\u015fleri' : 'Work Orders', desc: lang === 'tr' ? 'Departmanlar aras\u0131 i\u015f sipari\u015fleri' : 'Cross-department work orders', minLevel: 4 },
         { to: '/raporlar',  icon: FileText,        label: t('nav_reports'),   desc: t('tooltip_reports' as TranslationKey),   shortcut: 'g r' },
-        { to: '/harita',    icon: MapPin,          label: lang === 'tr' ? 'Operasyon & Tesis' : 'Operations & Facility', desc: lang === 'tr' ? 'Canl\u0131 harita ve tesis kat planlar\u0131' : 'Live map and facility floor plans',    shortcut: 'g h' },
+        { to: '/harita',    icon: MapPin,          label: lang === 'tr' ? 'Operasyon & Tesis' : 'Operations & Facility', desc: lang === 'tr' ? 'Canl\u0131 harita ve tesis kat planlar\u0131' : 'Live map and facility floor plans',    shortcut: 'g h', minLevel: 4 },
       ],
     },
     {
       label: t('sidebar_section_org'),
       items: [
-        { to: '/departmanlar', icon: Building2,  label: t('nav_departments'), desc: t('tooltip_departments' as TranslationKey), shortcut: 'g p' },
-        { to: '/kullanicilar', icon: Users,      label: t('nav_users'),       desc: t('tooltip_users' as TranslationKey),       shortcut: 'g u' },
+        { to: '/departmanlar', icon: Building2,  label: t('nav_departments'), desc: t('tooltip_departments' as TranslationKey), shortcut: 'g p', minLevel: 5 },
+        { to: '/kullanicilar', icon: Users,      label: t('nav_users'),       desc: t('tooltip_users' as TranslationKey),       shortcut: 'g u', minLevel: 5 },
         { to: '/dosyalar',     icon: FolderOpen, label: t('nav_files'),       desc: t('tooltip_files' as TranslationKey),       shortcut: 'g f' },
-        { to: '/envanter',     icon: Package,    label: t('nav_inventory'),   desc: t('tooltip_inventory' as TranslationKey),   shortcut: 'g e' },
-        { to: '/stok',         icon: Boxes,      label: t('nav_stock' as TranslationKey), desc: t('tooltip_stock' as TranslationKey), shortcut: 'g q' },
-        { to: '/iot',          icon: Radio,      label: 'IoT',                desc: 'IoT cihaz ve sensör yönetimi',              shortcut: 'g o' },
-        { to: '/envanter-zeka', icon: ScanLine,  label: 'AssetIQ', desc: 'AssetIQ', shortcut: 'g z' },
+        { to: '/envanter',     icon: Package,    label: t('nav_inventory'),   desc: t('tooltip_inventory' as TranslationKey),   shortcut: 'g e', minLevel: 4 },
+        { to: '/stok',         icon: Boxes,      label: t('nav_stock' as TranslationKey), desc: t('tooltip_stock' as TranslationKey), shortcut: 'g q', minLevel: 4 },
+        { to: '/iot',          icon: Radio,      label: 'IoT',                desc: 'IoT cihaz ve sens\u00f6r y\u00f6netimi',              shortcut: 'g o', minLevel: 5 },
+        { to: '/envanter-zeka', icon: ScanLine,  label: 'AssetIQ', desc: 'AssetIQ', shortcut: 'g z', minLevel: 4 },
       ],
     },
     {
       label: t('sidebar_section_plat'),
       items: [
-        { to: '/mobil',     icon: Smartphone, label: t('nav_mobile'),   desc: t('tooltip_mobile' as TranslationKey),   shortcut: 'g m' },
-        { to: '/kpi-panel', icon: Target,     label: 'KPI',             desc: 'KPI Ajandası ve Analizi',                shortcut: 'g k' },
-        { to: '/otomasyon',   icon: Zap,       label: t('nav_automation' as TranslationKey), desc: t('tooltip_automation' as TranslationKey), shortcut: 'g a' },
-        { to: '/is-akislari', icon: GitBranch, label: t('nav_workflows' as TranslationKey),  desc: t('tooltip_workflows' as TranslationKey),  shortcut: 'g w' },
-        { to: '/analizler', icon: Cpu,        label: 'OperIQ',          desc: t('tooltip_insights' as TranslationKey), shortcut: 'g i', operiq: true },
+        { to: '/mobil',     icon: Smartphone, label: t('nav_mobile'),   desc: t('tooltip_mobile' as TranslationKey),   shortcut: 'g m', minLevel: 5 },
+        { to: '/kpi-panel', icon: Target,     label: 'KPI',             desc: 'KPI Ajandas\u0131 ve Analizi',                shortcut: 'g k' },
+        { to: '/otomasyon',   icon: Zap,       label: t('nav_automation' as TranslationKey), desc: t('tooltip_automation' as TranslationKey), shortcut: 'g a', minLevel: 6 },
+        { to: '/is-akislari', icon: GitBranch, label: t('nav_workflows' as TranslationKey),  desc: t('tooltip_workflows' as TranslationKey),  shortcut: 'g w', minLevel: 6 },
+        { to: '/analizler', icon: Cpu,        label: 'OperIQ',          desc: t('tooltip_insights' as TranslationKey), shortcut: 'g i', operiq: true, minLevel: 5 },
         { to: '/ayarlar',   icon: Settings,   label: t('nav_settings'), desc: t('tooltip_settings' as TranslationKey), shortcut: 'g s' },
       ],
     },
@@ -99,10 +105,13 @@ export default function Sidebar({ open = false, collapsed = false, onClose }: Si
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-1 scrollbar-hide">
-        {NAV.map(section => (
+        {NAV.map(section => {
+          const visibleItems = section.items.filter(item => !item.minLevel || userLevel >= item.minLevel)
+          if (visibleItems.length === 0) return null
+          return (
           <div key={section.label} className="sidebar-section">
             <p className="sidebar-section-label">{section.label}</p>
-            {section.items.map(item => (
+            {visibleItems.map(item => (
               <div key={item.to} className="nav-item-wrap">
                 <NavLink
                   to={item.to}
@@ -139,7 +148,7 @@ export default function Sidebar({ open = false, collapsed = false, onClose }: Si
               </div>
             ))}
           </div>
-        ))}
+        )})}
       </nav>
 
       {/* Sidebar font zoom */}

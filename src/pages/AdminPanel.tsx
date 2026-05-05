@@ -466,8 +466,8 @@ function AdminUserManagement({ lang, sectorId }: { lang: 'tr' | 'en'; sectorId: 
       // Update cached detail data
       setDetailData(prev => ({ ...prev, [userId]: { ...prev[userId], lastPassword: newPassword } }))
       setTimeout(() => setResetState(null), 2000)
-    } catch {
-      setResetState({ userId, newPassword, status: 'err', msg: lang === 'tr' ? 'Hata olustu' : 'Error occurred' })
+    } catch (e: any) {
+      setResetState({ userId, newPassword, status: 'err', msg: e.message || (lang === 'tr' ? 'Hata olustu' : 'Error occurred') })
     }
   }
 
@@ -1048,8 +1048,11 @@ function AdminMobileUsers({ lang }: { lang: string }) {
   const handleResetPassword = async (id: string) => {
     try {
       const data = await api.post<any>(`/users/mobile/${id}/reset-password`)
-      alert(`${lang === 'tr' ? 'Gecici sifre' : 'Temp password'}: ${data.tempPassword}`)
-    } catch {}
+      const tempPw = data?.tempPassword ?? data
+      alert(`${lang === 'tr' ? 'Gecici sifre' : 'Temp password'}: ${tempPw}`)
+    } catch (e: any) {
+      alert(`${lang === 'tr' ? 'Sifre sifirlama hatasi' : 'Password reset error'}: ${e.message || 'Bilinmeyen hata'}`)
+    }
   }
 
   const handleDeleteMobileUser = async (id: string, name: string) => {

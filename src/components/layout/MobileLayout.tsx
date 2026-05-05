@@ -165,7 +165,7 @@ export default function MobileLayout() {
     return true
   })
 
-  // "Isler" group sub-items
+  // "İşler" group sub-items
   const workSubItems = [
     { to: '/m/gorevler',        icon: ClipboardList,   label: lang === 'tr' ? 'G\u00f6revler' : 'Tasks' },
     { to: '/m/formlar',         icon: FileSpreadsheet, label: lang === 'tr' ? 'Formlar' : 'Forms' },
@@ -186,7 +186,7 @@ export default function MobileLayout() {
   }, [workMenuOpen])
 
   const tabs = [
-    { to: '/m/gorevler',  icon: Briefcase,       label: lang === 'tr' ? 'Isler' : 'Work',  group: true },
+    { to: '/m/gorevler',  icon: Briefcase,       label: lang === 'tr' ? 'İşler' : 'Work',  group: true },
     { to: '/m/qr-tarama', icon: ScanLine,        label: 'QR',             highlight: false, qr: true },
     { to: '/m/operiq',    icon: Cpu,             label: 'OperIQ',         highlight: true },
     { to: '/m/mesajlar',  icon: MessageSquare,   label: t('m_nav_messages') },

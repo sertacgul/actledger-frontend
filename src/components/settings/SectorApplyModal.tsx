@@ -97,7 +97,7 @@ export default function SectorApplyModal({ sectorId, onClose, onApplied }: Props
       onApplied?.()
     } catch (e: any) {
       const msg = (e.status === 429 || (e.message && e.message.includes('fazla istek')))
-        ? 'Yeni bir sablon uygulamak istiyorsaniz ActLedger destek ile gorusunuz.'
+        ? 'Yeni bir şablon uygulamak istiyorsanız ActLedger destek ile görüşünüz.'
         : (e.message ?? t('apply_modal_failure'))
       setResult({ ok: false, msg })
     } finally {

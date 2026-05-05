@@ -229,7 +229,7 @@ export default function Header({ title, subtitle, onMenuClick, onToggleCollapse,
             <button type="button" onClick={() => setLang('tr')}
               className={clsx('flex items-center gap-1 px-1.5 py-1 rounded text-[10px] font-bold transition-all',
                 lang === 'tr' ? 'bg-white shadow-sm text-slate-900 dark:bg-slate-700 dark:text-white' : 'text-slate-400 hover:text-slate-600'
-              )} aria-label="Turkce">
+              )} aria-label="Türkçe">
               <FlagTR size={16} /><span>TR</span>
             </button>
             <button type="button" onClick={() => setLang('en')}

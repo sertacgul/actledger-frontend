@@ -24,7 +24,7 @@ export default function MobileProfile() {
     { label: t('m_profile_department'), value: user?.departments?.[0]?.name ?? '-' },
     { label: lang === 'tr' ? 'Alt Birim' : 'Sub-unit', value: user?.subUnit ?? '-' },
     { label: t('m_profile_position'), value: user?.title ?? '-' },
-    { label: lang === 'tr' ? 'Gorev Tanimi' : 'Job Title', value: user?.jobTitle ?? '-' },
+    { label: lang === 'tr' ? 'Görev Tanımı' : 'Job Title', value: user?.jobTitle ?? '-' },
     { label: 'E-posta', value: displayEmail || '-' },
     { label: t('admin_mobile_phone'), value: user?.phone ?? '-' },
   ]
@@ -69,7 +69,7 @@ export default function MobileProfile() {
             }`}
           >
             <FlagTR size={20} />
-            <span className="text-sm font-bold">Turkce</span>
+            <span className="text-sm font-bold">Türkçe</span>
           </button>
           <button
             type="button"
@@ -127,36 +127,36 @@ export default function MobileProfile() {
               <button type="button" onClick={() => setShowGuide(false)} className="p-1 rounded-full bg-slate-100"><ChevronRight size={16} className="rotate-90 text-slate-500" /></button>
             </div>
             <div className="p-4 space-y-4 text-[13px] text-slate-700">
-              <GuideSection title={lang === 'tr' ? 'Giris' : 'Login'} items={[
-                lang === 'tr' ? 'Admin tarafindan verilen giris kodu (ACT-XXXXXX) ve gecici sifre ile giris yapin.' : 'Login with the code (ACT-XXXXXX) and temporary password from your admin.',
-                lang === 'tr' ? 'Ilk giriste sifrenizi degistirmeniz istenir.' : 'You will be asked to change your password on first login.',
+              <GuideSection title={lang === 'tr' ? 'Giriş' : 'Login'} items={[
+                lang === 'tr' ? 'Admin tarafından verilen giriş kodu (ACT-XXXXXX) ve geçici şifre ile giriş yapın.' : 'Login with the code (ACT-XXXXXX) and temporary password from your admin.',
+                lang === 'tr' ? 'İlk girişte şifrenizi değiştirmeniz istenir.' : 'You will be asked to change your password on first login.',
               ]} />
-              <GuideSection title={lang === 'tr' ? 'Gorevler' : 'Tasks'} items={[
-                lang === 'tr' ? 'Alt menudeki "Gorevler" sekmesinde size atanan tum gorevleri gorun.' : 'See all tasks assigned to you in the "Tasks" tab.',
-                lang === 'tr' ? 'Gorev detayina girerek checklist maddelerini isaretleyin ve durumu güncelleyin.' : 'Enter task detail to check items and update status.',
-                lang === 'tr' ? 'Geciken gorevler kirmizi ile isaretlenir.' : 'Overdue tasks are marked in red.',
+              <GuideSection title={lang === 'tr' ? 'Görevler' : 'Tasks'} items={[
+                lang === 'tr' ? 'Alt menüdeki "Görevler" sekmesinde size atanan tüm görevleri görün.' : 'See all tasks assigned to you in the "Tasks" tab.',
+                lang === 'tr' ? 'Görev detayına girerek checklist maddelerini işaretleyin ve durumu güncelleyin.' : 'Enter task detail to check items and update status.',
+                lang === 'tr' ? 'Geciken görevler kırmızı ile işaretlenir.' : 'Overdue tasks are marked in red.',
               ]} />
               <GuideSection title={lang === 'tr' ? 'Formlar' : 'Forms'} items={[
-                lang === 'tr' ? '"Formlar" sekmesinden atanan form sablonunu secin ve doldurun.' : 'Select and fill assigned form templates from "Forms" tab.',
-                lang === 'tr' ? 'Gerekirse fotograf ekleyebilirsiniz.' : 'Add photos if needed.',
+                lang === 'tr' ? '"Formlar" sekmesinden atanan form şablonunu seçin ve doldurun.' : 'Select and fill assigned form templates from "Forms" tab.',
+                lang === 'tr' ? 'Gerekirse fotoğraf ekleyebilirsiniz.' : 'Add photos if needed.',
               ]} />
               <GuideSection title={lang === 'tr' ? 'OperIQ Asistan' : 'OperIQ Assistant'} items={[
-                lang === 'tr' ? 'Alt menudeki OperIQ ikonuna tıklayin ve gorev/departman ile ilgili sorular sorun.' : 'Tap OperIQ icon and ask questions about tasks/department.',
-                lang === 'tr' ? 'Fotoğraf analizi için kamera ikonunu kullanin (gunluk 5 limit).' : 'Use camera icon for photo analysis (5/day limit).',
-                lang === 'tr' ? 'AI size gorev bazli rehberlik, checklist ve teknik dokuman referansi sunar.' : 'AI provides task guidance, checklists and technical references.',
+                lang === 'tr' ? 'Alt menüdeki OperIQ ikonuna tıklayın ve görev/departman ile ilgili sorular sorun.' : 'Tap OperIQ icon and ask questions about tasks/department.',
+                lang === 'tr' ? 'Fotoğraf analizi için kamera ikonunu kullanın (günlük 5 limit).' : 'Use camera icon for photo analysis (5/day limit).',
+                lang === 'tr' ? 'AI size görev bazlı rehberlik, checklist ve teknik doküman referansı sunar.' : 'AI provides task guidance, checklists and technical references.',
               ]} />
-              <GuideSection title={lang === 'tr' ? 'Konum Paylasimi' : 'Location Sharing'} items={[
-                lang === 'tr' ? 'Konum izni verdikten sonra konumunuz her 60 saniyede platforma gonderilir.' : 'After granting permission, your location is sent every 60 seconds.',
-                lang === 'tr' ? 'Profil sayfanizda mevcut konumunuzu gorebilirsiniz.' : 'You can see your current location on the profile page.',
-                lang === 'tr' ? 'Yoneticiler canli harita üzerinden konumunuzu gorebilir.' : 'Managers can see your location on the live map.',
+              <GuideSection title={lang === 'tr' ? 'Konum Paylaşımı' : 'Location Sharing'} items={[
+                lang === 'tr' ? 'Konum izni verdikten sonra konumunuz her 60 saniyede platforma gönderilir.' : 'After granting permission, your location is sent every 60 seconds.',
+                lang === 'tr' ? 'Profil sayfanızda mevcut konumunuzu görebilirsiniz.' : 'You can see your current location on the profile page.',
+                lang === 'tr' ? 'Yöneticiler canlı harita üzerinden konumunuzu görebilir.' : 'Managers can see your location on the live map.',
               ]} />
-              <GuideSection title={lang === 'tr' ? 'Mesajlasma' : 'Messaging'} items={[
-                lang === 'tr' ? 'Bildirimler sekmesinden gelen mesajlari gorun.' : 'See incoming messages in the notifications tab.',
-                lang === 'tr' ? 'Platform ve mobil kullanicilar arasi mesajlasma desteklenir.' : 'Messaging between platform and mobile users is supported.',
+              <GuideSection title={lang === 'tr' ? 'Mesajlaşma' : 'Messaging'} items={[
+                lang === 'tr' ? 'Bildirimler sekmesinden gelen mesajları görün.' : 'See incoming messages in the notifications tab.',
+                lang === 'tr' ? 'Platform ve mobil kullanıcılar arası mesajlaşma desteklenir.' : 'Messaging between platform and mobile users is supported.',
               ]} />
-              <GuideSection title={lang === 'tr' ? 'Cevrimdisi Calisma' : 'Offline Mode'} items={[
-                lang === 'tr' ? 'Internet baglantisi kesildiginde veriler cihazda saklanir.' : 'Data is stored locally when offline.',
-                lang === 'tr' ? 'Baglanti geri geldiginde otomatik senkronize edilir.' : 'Auto-syncs when connection is restored.',
+              <GuideSection title={lang === 'tr' ? 'Çevrimdışı Çalışma' : 'Offline Mode'} items={[
+                lang === 'tr' ? 'İnternet bağlantısı kesildiğinde veriler cihazda saklanır.' : 'Data is stored locally when offline.',
+                lang === 'tr' ? 'Bağlantı geri geldiğinde otomatik senkronize edilir.' : 'Auto-syncs when connection is restored.',
               ]} />
             </div>
           </div>

@@ -62,28 +62,28 @@ const INITIAL_WIZARD: WizardState = {
 // ── Trigger config ───────────────────────────────────────────────────────────
 
 const TRIGGERS: Record<TriggerType, { icon: typeof CheckSquare; label: string; color: string; bg: string; desc: string }> = {
-  TASK_CREATED:    { icon: CheckSquare,    label: 'Gorev Oluşturuldu',  color: 'text-blue-600',    bg: 'bg-blue-50',    desc: 'Yeni gorev oluşturuldugunda tetiklenir' },
-  TASK_COMPLETED:  { icon: CheckCircle,    label: 'Gorev Tamamlandi',   color: 'text-emerald-600', bg: 'bg-emerald-50', desc: 'Gorev tamamlandiginda tetiklenir' },
-  TASK_DELAYED:    { icon: Clock,          label: 'Gorev Gecikti',      color: 'text-amber-600',   bg: 'bg-amber-50',   desc: 'Gorev son teslim tarihini gectiginde tetiklenir' },
-  TASK_STALE:      { icon: AlertTriangle,  label: 'Gorev Guncel Degil', color: 'text-orange-600',  bg: 'bg-orange-50',  desc: 'Gorev belirli suredir güncellenmediginde tetiklenir' },
-  KPI_DEVIATION:   { icon: TrendingDown,   label: 'KPI Sapmasi',        color: 'text-red-600',     bg: 'bg-red-50',     desc: 'KPI degeri hedeften saptiginda tetiklenir' },
-  IOT_ALERT:       { icon: Radio,          label: 'IoT Alarmi',         color: 'text-purple-600',  bg: 'bg-purple-50',  desc: 'IoT sensoru alarm urettiginde tetiklenir' },
-  STOCK_BELOW_MIN: { icon: Package,        label: 'Stok Minimum Alti',  color: 'text-amber-600',   bg: 'bg-amber-50',   desc: 'Stok miktari minimum seviyenin altina dustugunde tetiklenir' },
-  STOCK_CRITICAL:  { icon: AlertOctagon,   label: 'Kritik Stok',        color: 'text-red-600',     bg: 'bg-red-50',     desc: 'Stok kritik seviyeye dustugunde tetiklenir' },
-  SCHEDULE:        { icon: Calendar,       label: 'Zamanlanmis',        color: 'text-indigo-600',  bg: 'bg-indigo-50',  desc: 'Belirlenen zaman diliminde periyodik olarak calisir' },
+  TASK_CREATED:    { icon: CheckSquare,    label: 'Görev Oluşturuldu',  color: 'text-blue-600',    bg: 'bg-blue-50',    desc: 'Yeni görev oluşturulduğunda tetiklenir' },
+  TASK_COMPLETED:  { icon: CheckCircle,    label: 'Görev Tamamlandı',   color: 'text-emerald-600', bg: 'bg-emerald-50', desc: 'Görev tamamlandığında tetiklenir' },
+  TASK_DELAYED:    { icon: Clock,          label: 'Görev Gecikti',      color: 'text-amber-600',   bg: 'bg-amber-50',   desc: 'Görev son teslim tarihini geçtiğinde tetiklenir' },
+  TASK_STALE:      { icon: AlertTriangle,  label: 'Görev Güncel Değil', color: 'text-orange-600',  bg: 'bg-orange-50',  desc: 'Görev belirli süredir güncellenmediğinde tetiklenir' },
+  KPI_DEVIATION:   { icon: TrendingDown,   label: 'KPI Sapması',        color: 'text-red-600',     bg: 'bg-red-50',     desc: 'KPI değeri hedeften saptığında tetiklenir' },
+  IOT_ALERT:       { icon: Radio,          label: 'IoT Alarmı',         color: 'text-purple-600',  bg: 'bg-purple-50',  desc: 'IoT sensörü alarm ürettiğinde tetiklenir' },
+  STOCK_BELOW_MIN: { icon: Package,        label: 'Stok Minimum Altı',  color: 'text-amber-600',   bg: 'bg-amber-50',   desc: 'Stok miktarı minimum seviyenin altına düştüğünde tetiklenir' },
+  STOCK_CRITICAL:  { icon: AlertOctagon,   label: 'Kritik Stok',        color: 'text-red-600',     bg: 'bg-red-50',     desc: 'Stok kritik seviyeye düştüğünde tetiklenir' },
+  SCHEDULE:        { icon: Calendar,       label: 'Zamanlanmış',        color: 'text-indigo-600',  bg: 'bg-indigo-50',  desc: 'Belirlenen zaman diliminde periyodik olarak çalışır' },
 }
 
 // ── Action config ────────────────────────────────────────────────────────────
 
 const ACTIONS: Record<ActionType, { icon: typeof Plus; label: string; color: string; bg: string; desc: string }> = {
-  CREATE_TASK:           { icon: Plus,          label: 'Gorev Oluştur',            color: 'text-blue-600',    bg: 'bg-blue-50',    desc: 'Otomatik olarak yeni gorev oluşturur' },
-  ESCALATE_TASK:         { icon: ArrowUpRight,  label: 'Gorevi Eskale Et',         color: 'text-orange-600',  bg: 'bg-orange-50',  desc: 'Gorevi ust yönetim kademesine iletir' },
-  SEND_NOTIFICATION:     { icon: Bell,          label: 'Bildirim Gonder',          color: 'text-purple-600',  bg: 'bg-purple-50',  desc: 'Belirtilen kullanicilara bildirim gonderir' },
-  SEND_MESSAGE:          { icon: MessageSquare, label: 'Mesaj Gonder',             color: 'text-emerald-600', bg: 'bg-emerald-50', desc: 'Dahili mesajlasma üzerinden mesaj gonderir' },
-  TRIGGER_OPERIQ:        { icon: Cpu,           label: 'OperIQ Tetikle',           color: 'text-indigo-600',  bg: 'bg-indigo-50',  desc: 'OperIQ AI asistanini tetikleyerek analiz başlatir' },
-  UPDATE_TASK_STATUS:    { icon: RefreshCw,     label: 'Gorev Durumu Güncelle',    color: 'text-cyan-600',    bg: 'bg-cyan-50',    desc: 'Gorev durumunu otomatik olarak günceller' },
-  UPDATE_TASK_PRIORITY:  { icon: Flag,          label: 'Gorev Onceligi Güncelle',  color: 'text-red-600',     bg: 'bg-red-50',     desc: 'Gorev onceligini otomatik olarak degistirir' },
-  SEND_EMAIL:            { icon: Mail,          label: 'E-posta Gonder',           color: 'text-orange-600',  bg: 'bg-orange-50',  desc: 'Otomatik e-posta bildirimi gonder' },
+  CREATE_TASK:           { icon: Plus,          label: 'Görev Oluştur',            color: 'text-blue-600',    bg: 'bg-blue-50',    desc: 'Otomatik olarak yeni görev oluşturur' },
+  ESCALATE_TASK:         { icon: ArrowUpRight,  label: 'Görevi Eskale Et',         color: 'text-orange-600',  bg: 'bg-orange-50',  desc: 'Görevi üst yönetim kademesine iletir' },
+  SEND_NOTIFICATION:     { icon: Bell,          label: 'Bildirim Gönder',          color: 'text-purple-600',  bg: 'bg-purple-50',  desc: 'Belirtilen kullanıcılara bildirim gönderir' },
+  SEND_MESSAGE:          { icon: MessageSquare, label: 'Mesaj Gönder',             color: 'text-emerald-600', bg: 'bg-emerald-50', desc: 'Dahili mesajlaşma üzerinden mesaj gönderir' },
+  TRIGGER_OPERIQ:        { icon: Cpu,           label: 'OperIQ Tetikle',           color: 'text-indigo-600',  bg: 'bg-indigo-50',  desc: 'OperIQ AI asistanını tetikleyerek analiz başlatır' },
+  UPDATE_TASK_STATUS:    { icon: RefreshCw,     label: 'Görev Durumu Güncelle',    color: 'text-cyan-600',    bg: 'bg-cyan-50',    desc: 'Görev durumunu otomatik olarak günceller' },
+  UPDATE_TASK_PRIORITY:  { icon: Flag,          label: 'Görev Önceliği Güncelle',  color: 'text-red-600',     bg: 'bg-red-50',     desc: 'Görev önceliğini otomatik olarak değiştirir' },
+  SEND_EMAIL:            { icon: Mail,          label: 'E-posta Gönder',           color: 'text-orange-600',  bg: 'bg-orange-50',  desc: 'Otomatik e-posta bildirimi gönder' },
 }
 
 // ── Priority config ──────────────────────────────────────────────────────────
@@ -96,7 +96,7 @@ const PRIORITY_STYLES: Record<string, string> = {
 }
 
 const PRIORITY_LABELS: Record<string, string> = {
-  LOW: 'Dusuk', MEDIUM: 'Orta', HIGH: 'Yuksek', CRITICAL: 'Kritik',
+  LOW: 'Düşük', MEDIUM: 'Orta', HIGH: 'Yüksek', CRITICAL: 'Kritik',
 }
 
 // ── Log status config ────────────────────────────────────────────────────────
@@ -109,7 +109,7 @@ const LOG_STATUS_STYLES: Record<string, string> = {
 }
 
 const LOG_STATUS_LABELS: Record<string, string> = {
-  SUCCESS: 'Basarili', FAILURE: 'Hata', RUNNING: 'Calisiyor', SKIPPED: 'Atlandi',
+  SUCCESS: 'Başarılı', FAILURE: 'Hata', RUNNING: 'Çalışıyor', SKIPPED: 'Atlandı',
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -128,12 +128,12 @@ function timeAgo(d: string | Date | undefined) {
   const then = new Date(d).getTime()
   const diff = now - then
   const mins = Math.floor(diff / 60000)
-  if (mins < 1) return 'az once'
-  if (mins < 60) return `${mins} dk once`
+  if (mins < 1) return 'az önce'
+  if (mins < 60) return `${mins} dk önce`
   const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `${hrs} saat once`
+  if (hrs < 24) return `${hrs} saat önce`
   const days = Math.floor(hrs / 24)
-  return `${days} gun once`
+  return `${days} gün önce`
 }
 
 // ── Main Component ───────────────────────────────────────────────────────────
@@ -189,7 +189,7 @@ export default function Automation() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Bu otomasyon kuralini silmek istediginize emin misiniz? Bu işlem geri alinamaz.')) return
+    if (!confirm('Bu otomasyon kuralını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.')) return
     try {
       await deleteAutomationRule(id)
       refetchRules()
@@ -233,7 +233,7 @@ export default function Automation() {
     } catch (err: any) {
       const msg = err?.message ?? ''
       alert(lang === 'tr'
-        ? `Kural oluşturulamadi: ${msg || 'Bilinmeyen hata. Lutfen tum alanlari kontrol edin.'}`
+        ? `Kural oluşturulamadı: ${msg || 'Bilinmeyen hata. Lütfen tüm alanları kontrol edin.'}`
         : `Failed to create rule: ${msg || 'Unknown error. Please check all fields.'}`)
     }
     setSaving(false)
@@ -270,7 +270,7 @@ export default function Automation() {
           color="text-emerald-600" bg="bg-emerald-50"
         />
         <StatCard
-          icon={Hash} label="Toplam Calisma"
+          icon={Hash} label="Toplam Çalışma"
           value={s?.totalExecutions ?? 0}
           color="text-indigo-600" bg="bg-indigo-50"
         />
@@ -333,12 +333,12 @@ export default function Automation() {
       ) : rules.length === 0 ? (
         <div className="text-center py-16">
           <Zap size={40} className="mx-auto text-zinc-300 mb-3" />
-          <p className="text-sm text-zinc-400">Henuz otomasyon kurali oluşturulmamis</p>
+          <p className="text-sm text-zinc-400">Henüz otomasyon kuralı oluşturulmamış</p>
           <button
             onClick={openWizard}
             className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
           >
-            <Plus size={16} /> Ilk Kurali Oluştur
+            <Plus size={16} /> İlk Kuralı Oluştur
           </button>
         </div>
       ) : (
@@ -489,7 +489,7 @@ export default function Automation() {
       ) : logs.length === 0 ? (
         <div className="text-center py-16">
           <Activity size={40} className="mx-auto text-zinc-300 mb-3" />
-          <p className="text-sm text-zinc-400">Henuz çalışma kaydi bulunmuyor</p>
+          <p className="text-sm text-zinc-400">Henüz çalışma kaydı bulunmuyor</p>
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
@@ -562,7 +562,7 @@ export default function Automation() {
   const renderStep1 = () => (
     <div className="space-y-4 px-5 py-4">
       <div>
-        <h3 className="text-sm font-semibold text-zinc-800 mb-1">Tetikleyici Sec</h3>
+        <h3 className="text-sm font-semibold text-zinc-800 mb-1">Tetikleyici Seç</h3>
         <p className="text-xs text-zinc-500">Kuralın ne zaman çalışacağını belirleyin</p>
       </div>
       <div className="grid grid-cols-3 gap-3">
@@ -621,18 +621,18 @@ export default function Automation() {
               <input
                 value={wizard.triggerConfig.departmentFilter ?? ''}
                 onChange={e => setWizard(w => ({ ...w, triggerConfig: { ...w.triggerConfig, departmentFilter: e.target.value } }))}
-                placeholder="Tum departmanlar"
+                placeholder="Tüm departmanlar"
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-zinc-600 mb-1">Oncelik Filtresi (opsiyonel)</label>
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">Öncelik Filtresi (opsiyonel)</label>
               <select
                 value={wizard.triggerConfig.priorityFilter ?? ''}
                 onChange={e => setWizard(w => ({ ...w, triggerConfig: { ...w.triggerConfig, priorityFilter: e.target.value } }))}
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               >
-                <option value="">Tum onceklikler</option>
+                <option value="">Tüm öncelikler</option>
                 {Object.entries(PRIORITY_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </select>
             </div>
@@ -642,7 +642,7 @@ export default function Automation() {
         {triggerType === 'TASK_DELAYED' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-zinc-600 mb-1">Gecikme Suresi (dakika)</label>
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">Gecikme Süresi (dakika)</label>
               <input
                 type="number"
                 min="1"
@@ -657,7 +657,7 @@ export default function Automation() {
         {triggerType === 'TASK_STALE' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-zinc-600 mb-1">Guncellik Esigi (saat)</label>
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">Güncellik Eşiği (saat)</label>
               <input
                 type="number"
                 min="1"
@@ -672,7 +672,7 @@ export default function Automation() {
         {triggerType === 'KPI_DEVIATION' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-zinc-600 mb-1">Sapma Yuzde Esigi</label>
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">Sapma Yüzde Eşiği</label>
               <input
                 type="number"
                 min="1"
@@ -681,18 +681,18 @@ export default function Automation() {
                 onChange={e => setWizard(w => ({ ...w, triggerConfig: { ...w.triggerConfig, deviationPercent: Number(e.target.value) } }))}
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               />
-              <p className="text-[10px] text-zinc-400 mt-1">KPI degeri hedeften bu yuzde kadar saptiginda tetiklenir</p>
+              <p className="text-[10px] text-zinc-400 mt-1">KPI değeri hedeften bu yüzde kadar saptığında tetiklenir</p>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-zinc-600 mb-1">Sapma Yonu</label>
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">Sapma Yönü</label>
               <select
                 value={wizard.triggerConfig.deviationDirection ?? 'BOTH'}
                 onChange={e => setWizard(w => ({ ...w, triggerConfig: { ...w.triggerConfig, deviationDirection: e.target.value } }))}
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               >
-                <option value="BOTH">Her iki yon</option>
-                <option value="BELOW">Sadece altina dusme</option>
-                <option value="ABOVE">Sadece ustuune cikma</option>
+                <option value="BOTH">Her iki yön</option>
+                <option value="BELOW">Sadece altına düşme</option>
+                <option value="ABOVE">Sadece üstüne çıkma</option>
               </select>
             </div>
           </div>
@@ -701,11 +701,11 @@ export default function Automation() {
         {triggerType === 'IOT_ALERT' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-zinc-600 mb-1">Sensor Tipi (opsiyonel)</label>
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">Sensör Tipi (opsiyonel)</label>
               <input
                 value={wizard.triggerConfig.sensorType ?? ''}
                 onChange={e => setWizard(w => ({ ...w, triggerConfig: { ...w.triggerConfig, sensorType: e.target.value } }))}
-                placeholder="Tum sensorler"
+                placeholder="Tüm sensörler"
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
@@ -716,10 +716,10 @@ export default function Automation() {
                 onChange={e => setWizard(w => ({ ...w, triggerConfig: { ...w.triggerConfig, alertSeverity: e.target.value } }))}
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               >
-                <option value="">Tum seviyeler</option>
-                <option value="LOW">Dusuk</option>
+                <option value="">Tüm seviyeler</option>
+                <option value="LOW">Düşük</option>
                 <option value="MEDIUM">Orta</option>
-                <option value="HIGH">Yuksek</option>
+                <option value="HIGH">Yüksek</option>
                 <option value="CRITICAL">Kritik</option>
               </select>
             </div>
@@ -735,10 +735,10 @@ export default function Automation() {
                 onChange={e => setWizard(w => ({ ...w, triggerConfig: { ...w.triggerConfig, stockCategory: e.target.value } }))}
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               >
-                <option value="">Tum kategoriler</option>
-                <option value="DEMIRBAS">Demirbas</option>
+                <option value="">Tüm kategoriler</option>
+                <option value="DEMIRBAS">Demirbaş</option>
                 <option value="SARF">Sarf Malzemesi</option>
-                <option value="YEDEK_PARCA">Yedek Parca</option>
+                <option value="YEDEK_PARCA">Yedek Parça</option>
               </select>
             </div>
           </div>
@@ -747,14 +747,14 @@ export default function Automation() {
         {triggerType === 'SCHEDULE' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-zinc-600 mb-1">Calisma Zamani</label>
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">Çalışma Zamanı</label>
               <select
                 value={wizard.triggerConfig.scheduleType ?? 'DAILY'}
                 onChange={e => setWizard(w => ({ ...w, triggerConfig: { ...w.triggerConfig, scheduleType: e.target.value } }))}
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               >
                 <option value="HOURLY">Her saat</option>
-                <option value="DAILY">Her gun</option>
+                <option value="DAILY">Her gün</option>
                 <option value="WEEKLY">Her hafta</option>
                 <option value="MONTHLY">Her ay</option>
               </select>
@@ -786,8 +786,8 @@ export default function Automation() {
   const renderStep3 = () => (
     <div className="space-y-4 px-5 py-4">
       <div>
-        <h3 className="text-sm font-semibold text-zinc-800 mb-1">Aksiyon Sec</h3>
-        <p className="text-xs text-zinc-500">Tetiklendiginde ne yapilacagini belirleyin</p>
+        <h3 className="text-sm font-semibold text-zinc-800 mb-1">Aksiyon Seç</h3>
+        <p className="text-xs text-zinc-500">Tetiklendiğinde ne yapılacağını belirleyin</p>
       </div>
       <div className="grid grid-cols-3 gap-3">
         {(Object.entries(ACTIONS) as [ActionType, typeof ACTIONS[ActionType]][]).map(([key, cfg]) => {
@@ -840,27 +840,27 @@ export default function Automation() {
         {actionType === 'CREATE_TASK' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-zinc-600 mb-1">Gorev Basligi *</label>
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">Görev Başlığı *</label>
               <input
                 value={wizard.actionConfig.taskTitle ?? ''}
                 onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, taskTitle: e.target.value } }))}
-                placeholder="Otomatik oluşturulan gorev basligi"
+                placeholder="Otomatik oluşturulan görev başlığı"
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-zinc-600 mb-1">Gorev Aciklamasi</label>
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">Görev Açıklaması</label>
               <textarea
                 rows={2}
                 value={wizard.actionConfig.taskDescription ?? ''}
                 onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, taskDescription: e.target.value } }))}
-                placeholder="Gorev detaylari..."
+                placeholder="Görev detayları..."
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-zinc-600 mb-1">Oncelik</label>
+                <label className="block text-xs font-semibold text-zinc-600 mb-1">Öncelik</label>
                 <select
                   value={wizard.actionConfig.taskPriority ?? 'MEDIUM'}
                   onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, taskPriority: e.target.value } }))}
@@ -870,7 +870,7 @@ export default function Automation() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-zinc-600 mb-1">Son Teslim (gun)</label>
+                <label className="block text-xs font-semibold text-zinc-600 mb-1">Son Teslim (gün)</label>
                 <input
                   type="number"
                   min="1"
@@ -892,18 +892,18 @@ export default function Automation() {
                 onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, escalationLevel: Number(e.target.value) } }))}
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               >
-                <option value={1}>1 kademe yukariya</option>
-                <option value={2}>2 kademe yukariya</option>
-                <option value={3}>3 kademe yukariya</option>
+                <option value={1}>1 kademe yukarıya</option>
+                <option value={2}>2 kademe yukarıya</option>
+                <option value={3}>3 kademe yukarıya</option>
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-zinc-600 mb-1">Eskalasyon Mesaji</label>
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">Eskalasyon Mesajı</label>
               <textarea
                 rows={2}
                 value={wizard.actionConfig.escalationMessage ?? ''}
                 onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, escalationMessage: e.target.value } }))}
-                placeholder="Ust yöneticiye iletilecek mesaj..."
+                placeholder="Üst yöneticiye iletilecek mesaj..."
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
               />
             </div>
@@ -913,30 +913,30 @@ export default function Automation() {
         {(actionType === 'SEND_NOTIFICATION' || actionType === 'SEND_MESSAGE') && (
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-zinc-600 mb-1">Alici Hedefi</label>
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">Alıcı Hedefi</label>
               <select
                 value={wizard.actionConfig.recipientTarget ?? 'ASSIGNEE'}
                 onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, recipientTarget: e.target.value } }))}
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               >
-                <option value="ASSIGNEE">Gorev atanani</option>
-                <option value="CREATOR">Gorev oluşturucusu</option>
+                <option value="ASSIGNEE">Görev atananı</option>
+                <option value="CREATOR">Görev oluşturucusu</option>
                 <option value="DEPARTMENT_HEAD">Departman yöneticisi</option>
-                <option value="ALL_MANAGERS">Tum yöneticiler</option>
+                <option value="ALL_MANAGERS">Tüm yöneticiler</option>
               </select>
             </div>
             <div>
               <label className="block text-xs font-semibold text-zinc-600 mb-1">
-                {actionType === 'SEND_NOTIFICATION' ? 'Bildirim Metni' : 'Mesaj Icerigi'} *
+                {actionType === 'SEND_NOTIFICATION' ? 'Bildirim Metni' : 'Mesaj İçeriği'} *
               </label>
               <textarea
                 rows={3}
                 value={wizard.actionConfig.messageContent ?? ''}
                 onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, messageContent: e.target.value } }))}
-                placeholder="Mesaj icerigi... (degiskenler: {{taskTitle}}, {{assignee}}, {{department}})"
+                placeholder="Mesaj içeriği... (değişkenler: {{taskTitle}}, {{assignee}}, {{department}})"
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
               />
-              <p className="text-[10px] text-zinc-400 mt-1">Kullanilabilir degiskenler: {'{{taskTitle}}'}, {'{{assignee}}'}, {'{{department}}'}, {'{{dueDate}}'}</p>
+              <p className="text-[10px] text-zinc-400 mt-1">Kullanılabilir değişkenler: {'{{taskTitle}}'}, {'{{assignee}}'}, {'{{department}}'}, {'{{dueDate}}'}</p>
             </div>
           </div>
         )}
@@ -951,7 +951,7 @@ export default function Automation() {
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               >
                 <option value="FULL">Tam analiz</option>
-                <option value="QUICK">Hizli tarama</option>
+                <option value="QUICK">Hızlı tarama</option>
                 <option value="SPECIFIC">Belirli alan</option>
               </select>
             </div>
@@ -961,7 +961,7 @@ export default function Automation() {
                 rows={2}
                 value={wizard.actionConfig.operiqPrompt ?? ''}
                 onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, operiqPrompt: e.target.value } }))}
-                placeholder="OperIQ için ozel yonergeler..."
+                placeholder="OperIQ için özel yönergeler..."
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
               />
             </div>
@@ -979,9 +979,9 @@ export default function Automation() {
               >
                 <option value="PENDING">Beklemede</option>
                 <option value="IN_PROGRESS">Devam Ediyor</option>
-                <option value="REVIEW">Inceleme</option>
-                <option value="COMPLETED">Tamamlandi</option>
-                <option value="CANCELLED">Iptal Edildi</option>
+                <option value="REVIEW">İnceleme</option>
+                <option value="COMPLETED">Tamamlandı</option>
+                <option value="CANCELLED">İptal Edildi</option>
               </select>
             </div>
           </div>
@@ -990,7 +990,7 @@ export default function Automation() {
         {actionType === 'UPDATE_TASK_PRIORITY' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-zinc-600 mb-1">Hedef Oncelik</label>
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">Hedef Öncelik</label>
               <select
                 value={wizard.actionConfig.targetPriority ?? 'HIGH'}
                 onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, targetPriority: e.target.value } }))}
@@ -1005,18 +1005,18 @@ export default function Automation() {
         {actionType === 'SEND_EMAIL' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-zinc-600 mb-1">Alici Kaynagi</label>
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">Alıcı Kaynağı</label>
               <select
                 value={wizard.actionConfig.recipientSource ?? 'assigned_user'}
                 onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, recipientSource: e.target.value } }))}
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               >
-                <option value="assigned_user">Goreve Atanan Kisi</option>
-                <option value="task_creator">Gorevi Oluşturan Kisi</option>
-                <option value="department_manager">Departman Muduru</option>
-                <option value="role_based">Role Gore</option>
+                <option value="assigned_user">Göreve Atanan Kişi</option>
+                <option value="task_creator">Görevi Oluşturan Kişi</option>
+                <option value="department_manager">Departman Müdürü</option>
+                <option value="role_based">Role Göre</option>
                 <option value="specific_email">Belirli E-posta</option>
-                <option value="escalation_chain">Ust Yönetim Zinciri</option>
+                <option value="escalation_chain">Üst Yönetim Zinciri</option>
               </select>
             </div>
 
@@ -1026,7 +1026,7 @@ export default function Automation() {
                 <input
                   value={wizard.actionConfig.specificEmail ?? ''}
                   onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, specificEmail: e.target.value } }))}
-                  placeholder="ornek@sirket.com"
+                  placeholder="örnek@sirket.com"
                   className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                 />
               </div>
@@ -1034,17 +1034,17 @@ export default function Automation() {
 
             {wizard.actionConfig.recipientSource === 'role_based' && (
               <div>
-                <label className="block text-xs font-semibold text-zinc-600 mb-1">Rol Secimi</label>
+                <label className="block text-xs font-semibold text-zinc-600 mb-1">Rol Seçimi</label>
                 <select
                   value={wizard.actionConfig.roleTarget ?? 'MUHENDIS'}
                   onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, roleTarget: e.target.value } }))}
                   className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                 >
-                  <option value="MUHENDIS">Muhendis</option>
-                  <option value="SEF">Sef</option>
-                  <option value="SUPERVIZOR">Supervizor</option>
-                  <option value="MUDUR">Mudur</option>
-                  <option value="DIREKTOR">Direktor</option>
+                  <option value="MUHENDIS">Mühendis</option>
+                  <option value="SEF">Şef</option>
+                  <option value="SUPERVIZOR">Süpervizör</option>
+                  <option value="MUDUR">Müdür</option>
+                  <option value="DIREKTOR">Direktör</option>
                 </select>
               </div>
             )}
@@ -1060,18 +1060,18 @@ export default function Automation() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-zinc-600 mb-1">Email Sablonu</label>
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">Email Şablonu</label>
               <select
                 value={wizard.actionConfig.templateKey ?? 'general_notification'}
                 onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, templateKey: e.target.value } }))}
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               >
-                <option value="kpi_alert">KPI Sapma Uyarisi</option>
-                <option value="task_delayed">Gorev Gecikme Bildirimi</option>
+                <option value="kpi_alert">KPI Sapma Uyarısı</option>
+                <option value="task_delayed">Görev Gecikme Bildirimi</option>
                 <option value="iot_alert">IoT Alarm Bildirimi</option>
-                <option value="stock_alert">Stok Uyarisi</option>
+                <option value="stock_alert">Stok Uyarısı</option>
                 <option value="general_notification">Genel Bildirim</option>
-                <option value="custom">Ozel Sablon</option>
+                <option value="custom">Özel Şablon</option>
               </select>
             </div>
 
@@ -1080,26 +1080,26 @@ export default function Automation() {
               <input
                 value={wizard.actionConfig.subjectTemplate ?? ''}
                 onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, subjectTemplate: e.target.value } }))}
-                placeholder="or. [ActLedger] {{department}} departmaninda kritik durum"
+                placeholder="ör. [ActLedger] {{department}} departmanında kritik durum"
                 className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
 
             {wizard.actionConfig.templateKey === 'custom' && (
               <div>
-                <label className="block text-xs font-semibold text-zinc-600 mb-1">Email Icerigi</label>
+                <label className="block text-xs font-semibold text-zinc-600 mb-1">Email İçeriği</label>
                 <textarea
                   rows={4}
                   value={wizard.actionConfig.bodyTemplate ?? ''}
                   onChange={e => setWizard(w => ({ ...w, actionConfig: { ...w.actionConfig, bodyTemplate: e.target.value } }))}
-                  placeholder="Kullanilabilir degiskenler: {{recipient_name}}, {{department}}, {{task_name}}, {{kpi_name}}, {{kpi_value}}, {{threshold}}, {{date}}"
+                  placeholder="Kullanılabilir değişkenler: {{recipient_name}}, {{department}}, {{task_name}}, {{kpi_name}}, {{kpi_value}}, {{threshold}}, {{date}}"
                   className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
                 />
               </div>
             )}
 
             <div className="px-4 py-3 rounded-lg bg-zinc-50 border border-zinc-200">
-              <p className="text-[10px] font-semibold text-zinc-500 mb-1">Kullanilabilir Sablon Degiskenleri</p>
+              <p className="text-[10px] font-semibold text-zinc-500 mb-1">Kullanılabilir Şablon Değişkenleri</p>
               <p className="text-[10px] text-zinc-400">
                 {'{{recipient_name}}'}, {'{{department}}'}, {'{{task_name}}'}, {'{{kpi_name}}'}, {'{{kpi_value}}'}, {'{{threshold}}'}, {'{{date}}'}, {'{{sensor_name}}'}, {'{{stock_item}}'}
               </p>
@@ -1122,7 +1122,7 @@ export default function Automation() {
       <div className="space-y-4 px-5 py-4">
         <div>
           <h3 className="text-sm font-semibold text-zinc-800 mb-1">Kural Bilgileri</h3>
-          <p className="text-xs text-zinc-500">Kurala ad verin ve son ayarlari yapin</p>
+          <p className="text-xs text-zinc-500">Kurala ad verin ve son ayarları yapın</p>
         </div>
 
         {/* Flow summary */}
@@ -1139,27 +1139,27 @@ export default function Automation() {
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-zinc-600 mb-1">Kural Adi *</label>
+          <label className="block text-xs font-semibold text-zinc-600 mb-1">Kural Adı *</label>
           <input
             value={wizard.name}
             onChange={e => setWizard(w => ({ ...w, name: e.target.value }))}
-            placeholder="Orn: Geciken gorevleri eskale et"
+            placeholder="Örn: Geciken görevleri eskale et"
             className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-zinc-600 mb-1">Aciklama (opsiyonel)</label>
+          <label className="block text-xs font-semibold text-zinc-600 mb-1">Açıklama (opsiyonel)</label>
           <textarea
             rows={2}
             value={wizard.description}
             onChange={e => setWizard(w => ({ ...w, description: e.target.value }))}
-            placeholder="Kuralin ne yaptigini aciklayin..."
+            placeholder="Kuralın ne yaptığını açıklayın..."
             className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-zinc-600 mb-1">Oncelik</label>
+            <label className="block text-xs font-semibold text-zinc-600 mb-1">Öncelik</label>
             <select
               value={wizard.priority}
               onChange={e => setWizard(w => ({ ...w, priority: e.target.value as WizardState['priority'] }))}
@@ -1169,7 +1169,7 @@ export default function Automation() {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-zinc-600 mb-1">Bekleme Suresi (dk)</label>
+            <label className="block text-xs font-semibold text-zinc-600 mb-1">Bekleme Süresi (dk)</label>
             <input
               type="number"
               min="0"
@@ -1177,13 +1177,13 @@ export default function Automation() {
               onChange={e => setWizard(w => ({ ...w, cooldownMinutes: Number(e.target.value) }))}
               className="w-full px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
             />
-            <p className="text-[10px] text-zinc-400 mt-1">Ayni olay için tekrar tetiklenmeden once bekleme suresi</p>
+            <p className="text-[10px] text-zinc-400 mt-1">Aynı olay için tekrar tetiklenmeden önce bekleme süresi</p>
           </div>
         </div>
         <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-zinc-50 border border-zinc-200">
           <div>
-            <p className="text-sm font-semibold text-zinc-700">Aktif Olarak Baslat</p>
-            <p className="text-xs text-zinc-500">Kural hemen çalışmaya baslayacaktir</p>
+            <p className="text-sm font-semibold text-zinc-700">Aktif Olarak Başlat</p>
+            <p className="text-xs text-zinc-500">Kural hemen çalışmaya başlayacaktır</p>
           </div>
           <button
             type="button"
@@ -1204,9 +1204,9 @@ export default function Automation() {
 
   const WIZARD_STEPS = [
     { num: 1, label: 'Tetikleyici', render: renderStep1 },
-    { num: 2, label: 'Tetik Ayarlari', render: renderStep2 },
+    { num: 2, label: 'Tetik Ayarları', render: renderStep2 },
     { num: 3, label: 'Aksiyon', render: renderStep3 },
-    { num: 4, label: 'Aksiyon Ayarlari', render: renderStep4 },
+    { num: 4, label: 'Aksiyon Ayarları', render: renderStep4 },
     { num: 5, label: 'Ad ve Ayarlar', render: renderStep5 },
   ]
 
@@ -1215,7 +1215,7 @@ export default function Automation() {
   const TABS: { key: Tab; label: string; icon: typeof Zap }[] = [
     { key: 'rules', label: 'Kurallar',         icon: ListChecks },
     { key: 'new',   label: 'Yeni Kural',       icon: Plus },
-    { key: 'logs',  label: 'Calisma Gecmisi',  icon: Activity },
+    { key: 'logs',  label: 'Çalışma Geçmişi',  icon: Activity },
   ]
 
   // ── Main Render ────────────────────────────────────────────────────────────
@@ -1229,7 +1229,7 @@ export default function Automation() {
             <Zap size={22} className="text-amber-500" />
             Otomasyon Motoru
           </h1>
-          <p className="text-xs text-zinc-500 mt-1">Otomatik kurallar ile is sureclerinizi hizlandirin</p>
+          <p className="text-xs text-zinc-500 mt-1">Otomatik kurallar ile iş süreçlerinizi hızlandırın</p>
         </div>
       </div>
 
@@ -1320,10 +1320,10 @@ export default function Automation() {
               className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-semibold text-zinc-600 hover:bg-zinc-100 transition-colors"
             >
               <ChevronLeft size={16} />
-              {wizard.step === 1 ? 'Iptal' : 'Geri'}
+              {wizard.step === 1 ? 'İptal' : 'Geri'}
             </button>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-zinc-400">Adim {wizard.step}/5</span>
+              <span className="text-xs text-zinc-400">Adım {wizard.step}/5</span>
               {wizard.step < 5 ? (
                 <button
                   onClick={nextStep}
@@ -1380,7 +1380,7 @@ export default function Automation() {
 
             {/* Flow */}
             <div className="space-y-3">
-              <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Otomasyon Akisi</h4>
+              <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Otomasyon Akışı</h4>
               <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-zinc-50 border border-zinc-200">
                 {(() => {
                   const trigger = TRIGGERS[viewRule.triggerType as TriggerType]
@@ -1439,7 +1439,7 @@ export default function Automation() {
               <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Detaylar</h4>
               <div className="px-4 py-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
                 <div className="flex items-center justify-between py-1">
-                  <span className="text-xs text-zinc-500">Bekleme Suresi</span>
+                  <span className="text-xs text-zinc-500">Bekleme Süresi</span>
                   <span className="text-xs font-semibold text-zinc-700">{viewRule.cooldownMinutes ?? 0} dakika</span>
                 </div>
                 <div className="flex items-center justify-between py-1">
@@ -1448,13 +1448,13 @@ export default function Automation() {
                 </div>
                 {viewRule.lastTriggeredAt && (
                   <div className="flex items-center justify-between py-1">
-                    <span className="text-xs text-zinc-500">Son Calisma</span>
+                    <span className="text-xs text-zinc-500">Son Çalışma</span>
                     <span className="text-xs font-semibold text-zinc-700">{formatDate(viewRule.lastTriggeredAt)}</span>
                   </div>
                 )}
                 {viewRule.executionCount != null && (
                   <div className="flex items-center justify-between py-1">
-                    <span className="text-xs text-zinc-500">Toplam Calisma</span>
+                    <span className="text-xs text-zinc-500">Toplam Çalışma</span>
                     <span className="text-xs font-semibold text-zinc-700">{viewRule.executionCount}</span>
                   </div>
                 )}

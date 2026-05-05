@@ -251,3 +251,94 @@ export interface Notification {
   createdAt: string
   link?: string
 }
+
+export type WorkOrderStatus =
+  | 'taslak' | 'mudur_onay_bekliyor' | 'revize_istendi'
+  | 'karsi_taraf_bekliyor' | 'reddedildi' | 'devam_ediyor'
+  | 'tamamlandi_onay_bekliyor' | 'acan_onay_bekliyor' | 'kapandi'
+
+export interface WorkOrderItem {
+  id: string
+  title: string
+  completed: boolean
+  completedAt: string | null
+  completedById: string | null
+  sortOrder: number
+}
+
+export interface WorkOrderComment {
+  id: string
+  userId: string
+  user: { id: string; name: string }
+  content: string
+  createdAt: string
+}
+
+export interface WorkOrderAttachment {
+  id: string
+  userId: string
+  fileName: string
+  fileUrl: string
+  fileSize: number
+  phase: string
+  createdAt: string
+}
+
+export interface WorkOrderMaterial {
+  id: string
+  stockItemId: string | null
+  name: string
+  quantity: number
+  unit: string
+  unitCost: number | null
+}
+
+export interface WorkOrderHistoryEntry {
+  id: string
+  userId: string
+  user: { id: string; name: string }
+  action: string
+  fromStatus: string | null
+  toStatus: string | null
+  note: string | null
+  createdAt: string
+}
+
+export interface WorkOrder {
+  id: string
+  code: string
+  title: string
+  description: string | null
+  status: WorkOrderStatus
+  priority: TaskPriority
+  companyId: string
+  requesterUserId: string
+  requesterUser: { id: string; name: string; email: string }
+  requesterDeptId: string
+  requesterDept: { id: string; name: string }
+  targetDeptId: string
+  targetDept: { id: string; name: string }
+  assigneeUserId: string | null
+  assigneeUser: { id: string; name: string; email: string } | null
+  dueDate: string | null
+  estimatedHours: number | null
+  actualHours: number | null
+  estimatedCost: number | null
+  actualCost: number | null
+  currency: string | null
+  startedAt: string | null
+  completedAt: string | null
+  closedAt: string | null
+  approvedByManagerId: string | null
+  approvedByManagerAt: string | null
+  acceptedByTargetId: string | null
+  acceptedByTargetAt: string | null
+  rejectionReason: string | null
+  items: WorkOrderItem[]
+  comments: WorkOrderComment[]
+  attachments: WorkOrderAttachment[]
+  materials: WorkOrderMaterial[]
+  history: WorkOrderHistoryEntry[]
+  createdAt: string
+  updatedAt: string
+}

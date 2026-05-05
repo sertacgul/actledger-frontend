@@ -120,7 +120,7 @@ export interface PaginatedResult<T> {
 }
 
 // ── Backend → Frontend mappers ────────────────────────────────────────────────
-import type { User, Department, Task, ChecklistItem, FieldReport, Notification } from '../types'
+import type { User, Department, Task, ChecklistItem, FieldReport, Notification, WorkOrder } from '../types'
 
 export function mapUser(u: any): User {
   return {
@@ -332,5 +332,14 @@ export function mapGeminiInsight(g: any): GeminiInsight {
     departmentId: g.departmentId ?? undefined,
     createdAt:    g.createdAt,
     priority:     INSIGHT_PRIORITY_MAP[g.type] ?? 'dusuk',
+  }
+}
+
+// ── WorkOrder mapper ─────────────────────────────────────────────────────────
+export function mapWorkOrder(w: any): WorkOrder {
+  return {
+    ...w,
+    status: (w.status || '').toLowerCase() as WorkOrder['status'],
+    priority: (w.priority || '').toLowerCase() as WorkOrder['priority'],
   }
 }

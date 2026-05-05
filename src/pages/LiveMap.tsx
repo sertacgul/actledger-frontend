@@ -246,8 +246,8 @@ export default function LiveMap() {
         dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
         checklist: [],
         tags: ['acil', 'harita-atama'],
-        latitude: assignTarget.latitude ?? null,
-        longitude: assignTarget.longitude ?? null,
+        latitude: assignTarget.liveLatitude ?? null,
+        longitude: assignTarget.liveLongitude ?? null,
       })
       setAssignTarget(null)
       setAssignForm({ title: '', description: '', priority: 'YUKSEK' })

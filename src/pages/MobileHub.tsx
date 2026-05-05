@@ -260,7 +260,7 @@ function TaskDetailModal({
                     'text-[12px]',
                     item.completed ? 'text-zinc-400 line-through' : 'text-zinc-700'
                   )}>
-                    {item.title}
+                    {item.text}
                   </span>
                 </div>
               ))}
@@ -1486,9 +1486,9 @@ function Devices({ users, departments }: { users: User[]; departments: Departmen
                 <SyncBadge lastSync={u.lastSync} isOnline={u.isOnline} />
                 <p className="text-[9px] text-zinc-400">v{u.appVersion}</p>
               </div>
-              {u.pendingTasks > 0 && (
+              {(u as any).pendingTasks > 0 && (
                 <div className="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
-                  <span className="text-white text-[9px] font-bold">{u.pendingTasks}</span>
+                  <span className="text-white text-[9px] font-bold">{(u as any).pendingTasks}</span>
                 </div>
               )}
             </div>

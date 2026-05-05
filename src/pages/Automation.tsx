@@ -140,7 +140,7 @@ function timeAgo(d: string | Date | undefined) {
 
 export default function Automation() {
   // hooks available for future i18n / role-based access
-  useLanguage()
+  const { lang } = useLanguage()
   useAuth()
 
   const [tab, setTab] = useState<Tab>('rules')

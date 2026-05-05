@@ -275,9 +275,9 @@ export default function AdminPanel() {
 
           {tab === 'departments' && <AdminDepartmentManager lang={lang} />}
 
-          {tab === 'positions' && sector && <AdminPositionManager lang={lang} sectorId={sector.id} />}
+          {tab === 'positions' && sector && <AdminPositionManager lang={lang as 'tr' | 'en'} sectorId={sector.id} />}
 
-          {tab === 'users' && <AdminUserManagement lang={lang} sectorId={sector?.id ?? 'manufacturing'} />}
+          {tab === 'users' && <AdminUserManagement lang={lang as 'tr' | 'en'} sectorId={sector?.id ?? 'manufacturing'} />}
 
           {tab === 'mobile' && <AdminMobileUsers lang={lang} />}
 
@@ -709,7 +709,7 @@ function AdminUserForm({ lang, departments, sectorId, onCreated, onCancel }: {
         email: form.email,
         password,
         role: form.role,
-        departmentId: form.departmentId || undefined,
+        departmentId: form.departmentId || '',
         phone: form.phone || undefined,
       })
       setSuccess(true)

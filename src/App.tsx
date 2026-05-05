@@ -29,6 +29,7 @@ import StockManagement from './pages/StockManagement'
 import SuperAdmin from './pages/SuperAdmin'
 import Automation from './pages/Automation'
 import Workflows from './pages/Workflows'
+import WorkOrders from './pages/WorkOrders'
 import InventoryIntelligence from './pages/InventoryIntelligence'
 import UserGuide from './pages/UserGuide'
 import PlatformMessages from './pages/PlatformMessages'
@@ -49,6 +50,7 @@ import MobileNotifications from './pages/mobile/MobileNotifications'
 import MobileProfile from './pages/mobile/MobileProfile'
 import MobileOperIQ from './pages/mobile/MobileOperIQ'
 import MobileQRScanner from './pages/mobile/MobileQRScanner'
+import MobileWorkOrders from './pages/mobile/MobileWorkOrders'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -167,6 +169,7 @@ function AppRoutes() {
           <Route path="envanter-zeka" element={<InventoryIntelligence />} />
           <Route path="otomasyon"    element={<Automation />}  />
           <Route path="is-akislari"  element={<Workflows />}   />
+          <Route path="is-siparisleri" element={<WorkOrders />} />
           <Route path="mesajlar"     element={<PlatformMessages />} />
           <Route path="ayarlar"      element={<Settings />}    />
           <Route path="manuel"       element={<UserGuide />}   />
@@ -186,6 +189,7 @@ function AppRoutes() {
           <Route path="profil"           element={<MobileProfile />} />
           <Route path="operiq"           element={<MobileOperIQ />} />
           <Route path="qr-tarama"       element={<MobileQRScanner />} />
+          <Route path="is-siparisleri"  element={<MobileWorkOrders />} />
         </Route>
 
         <Route path="*" element={<StandaloneRedirect><Navigate to="/" replace /></StandaloneRedirect>} />

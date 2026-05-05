@@ -3,6 +3,7 @@ import {
   LayoutDashboard, CheckSquare, FileText, Building2,
   Users, Smartphone, Settings, LogOut, Cpu, FolderOpen, Package, Radio, MapPin,
   ZoomIn, ZoomOut, RotateCcw, Target, Boxes, Zap, GitBranch, ScanLine, MessageSquare,
+  ClipboardList,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useAuth } from '../../context/AuthContext'
@@ -39,6 +40,7 @@ export default function Sidebar({ open = false, collapsed = false, onClose }: Si
       items: [
         { to: '/panel',    icon: LayoutDashboard, label: t('nav_dashboard'), desc: t('tooltip_dashboard' as TranslationKey), shortcut: 'g d' },
         { to: '/gorevler',  icon: CheckSquare,     label: t('nav_tasks'),     desc: t('tooltip_tasks' as TranslationKey),     shortcut: 'g t' },
+        { to: '/is-siparisleri', icon: ClipboardList, label: lang === 'tr' ? 'İş Siparişleri' : 'Work Orders', desc: lang === 'tr' ? 'Departmanlar arası iş siparişleri' : 'Cross-department work orders' },
         { to: '/raporlar',  icon: FileText,        label: t('nav_reports'),   desc: t('tooltip_reports' as TranslationKey),   shortcut: 'g r' },
         { to: '/harita',    icon: MapPin,          label: lang === 'tr' ? 'Operasyon & Tesis' : 'Operations & Facility', desc: lang === 'tr' ? 'Canl\u0131 harita ve tesis kat planlar\u0131' : 'Live map and facility floor plans',    shortcut: 'g h' },
       ],

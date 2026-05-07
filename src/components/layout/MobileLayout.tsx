@@ -216,7 +216,7 @@ export default function MobileLayout() {
   }
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-slate-50" style={{ maxWidth: 480, margin: '0 auto', overflowX: 'hidden', ...(isPWA && { paddingTop: 50, boxSizing: 'border-box' }) }}>
+    <div className="flex flex-col h-[100dvh] bg-slate-50 mx-auto w-full max-w-[100vw] tablet:max-w-[768px]" style={{ overflowX: 'hidden', ...(isPWA && { paddingTop: 'max(50px, env(safe-area-inset-top))', boxSizing: 'border-box' }) }}>
       {/* Install PWA banner */}
       {showInstallBanner && (
         <div className="bg-cyan-600 text-white text-xs font-medium py-2.5 px-4 flex items-center gap-2">

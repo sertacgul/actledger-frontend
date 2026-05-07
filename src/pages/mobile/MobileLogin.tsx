@@ -69,8 +69,10 @@ export default function MobileLogin() {
     setError(null)
     try {
       const result = await mobileLogin(code.trim(), password)
-      // Save credentials if remember me is checked
-      if (rememberMe) {
+      // Native app: always persist credentials for auto-login (cookie unreliable on Android WebView)
+      // PWA/browser: respect rememberMe preference
+      const isNative = !!(window as any).Capacitor?.isNativePlatform?.()
+      if (isNative || rememberMe) {
         localStorage.setItem('actledger_mobile_code', code.trim())
         localStorage.setItem('actledger_mobile_pass', password)
       } else {

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { MessageSquare, Send, Loader2, Check, CheckCheck, X, ArrowLeft, Users, Building2, Circle, ChevronRight, Plus, Image, Camera } from 'lucide-react'
 import clsx from 'clsx'
 import { useLanguage } from '../../context/LanguageContext'
@@ -49,6 +50,7 @@ type Screen = 'chats' | 'conversation' | 'story'
 export default function MobileMessages() {
   const { t, lang } = useLanguage()
   const { user } = useAuth()
+  const [searchParams, setSearchParams] = useSearchParams()
   const tr = lang === 'tr'
 
   const [screen, setScreen] = useState<Screen>('chats')
@@ -109,9 +111,11 @@ export default function MobileMessages() {
           const data = res?.data ?? res
           const sorted = (Array.isArray(data) ? data : []).map(mapMsg).sort((a: Message, b: Message) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
           setChatMessages(prev => {
-            if (sorted.length > prev.length) {
+            const prevIds = prev.map(m => m.id).join(',')
+            const newIds = sorted.map(m => m.id).join(',')
+            if (newIds !== prevIds) {
               const lastNew = sorted[sorted.length - 1]
-              if (lastNew && lastNew.senderId !== user?.id) playMessageSound()
+              if (lastNew && lastNew.senderId !== user?.id && sorted.length > prev.length) playMessageSound()
               return sorted
             }
             return prev
@@ -137,6 +141,17 @@ export default function MobileMessages() {
       setStories(Array.isArray(r) ? r : (r?.data ?? []))
     }).catch(() => {})
   }, [])
+
+  // Open specific chat from notification deep link (?partnerId=xxx&partnerName=xxx)
+  useEffect(() => {
+    const partnerId = searchParams.get('partnerId')
+    const partnerName = searchParams.get('partnerName')
+    if (partnerId && screen === 'chats') {
+      const name = partnerName || contacts.find(c => c.id === partnerId)?.name || '...'
+      openChat({ type: 'direct', id: partnerId, name, unread: 0 })
+      setSearchParams({}, { replace: true })
+    }
+  }, [searchParams, contacts])
 
   // ── Chat conversations list ───────────────────────────────────
 
@@ -235,10 +250,21 @@ export default function MobileMessages() {
       else if (chatTarget.type === 'direct') payload.receiverId = chatTarget.id
       await api.post('/messages', payload)
       setReply('')
-      // Re-fetch conversation
-      await openChat(chatTarget)
+      // Re-fetch thread without resetting loading state (no flash)
+      try {
+        let res: any
+        if (chatTarget.type === 'broadcast') res = await api.get('/messages?pageSize=100&isBroadcast=true')
+        else if (chatTarget.type === 'department' && chatTarget.id) res = await api.get(`/messages?pageSize=100&departmentId=${chatTarget.id}`)
+        else if (chatTarget.type === 'direct' && chatTarget.id) res = await api.get(`/messages/thread/${chatTarget.id}`)
+        const data = res?.data ?? res
+        if (Array.isArray(data)) {
+          setChatMessages(data.map(mapMsg).sort((a: Message, b: Message) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()))
+        }
+      } catch {}
       loadAllMessages()
-    } catch {}
+    } catch (e: any) {
+      alert(e.message || 'Mesaj gonderilemedi')
+    }
     setSending(false)
   }
 

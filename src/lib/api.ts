@@ -88,7 +88,7 @@ async function request<T>(
     }
     const fallback = statusMessages[res.status] ?? 'Islem gerceklestirilemedi'
     // Include field-level errors from Zod validation
-    let detail = body.message ?? fallback
+    let detail = body.message ?? body.error ?? fallback
     if (body.fields) {
       const fieldErrors = Object.entries(body.fields).map(([k, v]) => `${k}: ${(v as string[]).join(', ')}`).join('; ')
       if (fieldErrors) detail += ` (${fieldErrors})`

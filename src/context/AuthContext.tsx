@@ -21,6 +21,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { syncFromBackend } = useCompany()
 
   // ── On mount: try to restore session via refresh token cookie ──────────────
+  // Native Android WebView often loses httpOnly cookies between app restarts,
+  // so we fallback to saved mobile credentials for auto-login.
   useEffect(() => {
     let cancelled = false
     ;(async () => {
@@ -35,16 +37,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const me = await api.get<any>('/auth/me')
           if (!cancelled) {
             setUser(mapUser(me))
-            // Sync company sector from backend so UI reflects actual DB sector
             if (me.company) syncFromBackend(me.company)
+          }
+          return
+        }
+      } catch {
+        // Refresh cookie failed
+      }
+
+      // Fallback: auto-login with saved mobile credentials (native app)
+      try {
+        const savedCode = localStorage.getItem('actledger_mobile_code')
+        const savedPass = localStorage.getItem('actledger_mobile_pass')
+        if (savedCode && savedPass) {
+          const result = await api.post<any>('/mobile-auth/login', { code: savedCode, password: savedPass })
+          if (result?.accessToken && !cancelled) {
+            tokenStore.set(result.accessToken)
+            localStorage.setItem('actledger_token', result.accessToken)
+            setUser(mapUser(result.user))
+            try {
+              const me = await api.get<any>('/auth/me')
+              if (me?.company) syncFromBackend(me.company)
+            } catch {}
           }
         }
       } catch {
-        // No valid session - stay logged out
-      } finally {
-        if (!cancelled) setLoading(false)
+        // Saved credentials invalid - user will see login screen
+        localStorage.removeItem('actledger_mobile_code')
+        localStorage.removeItem('actledger_mobile_pass')
       }
-    })()
+    })().finally(() => {
+      if (!cancelled) setLoading(false)
+    })
     return () => { cancelled = true }
   }, [])
 

@@ -605,7 +605,7 @@ function WorkOrderDetailModal({
             />
             <div className="flex gap-2">
               <button
-                onClick={() => { performAction('reject', { note: rejectionNote || undefined }); setShowRejectInput(false) }}
+                onClick={() => { performAction('reject', { reason: rejectionNote || '-' }); setShowRejectInput(false) }}
                 className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
               >
                 {tr ? 'Onayla' : 'Confirm'}
@@ -881,7 +881,7 @@ export default function WorkOrders() {
   const [departments, setDepartments] = useState<{ id: string; name: string }[]>([])
 
   useEffect(() => {
-    api.get<any>('/departments').then(r => {
+    api.get<any>('/departments?forWorkOrder=true').then(r => {
       setDepartments((r?.data ?? r ?? []).map((d: any) => ({ id: d.id, name: d.name })))
     }).catch(() => {})
   }, [])

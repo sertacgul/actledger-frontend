@@ -101,7 +101,7 @@ export default function MobileWorkOrders() {
 
   // Fetch departments once
   useEffect(() => {
-    api.get<any>('/departments').then(r => {
+    api.get<any>('/departments?forWorkOrder=true').then(r => {
       setDepartments((r?.data ?? r ?? []).map((d: any) => ({ id: d.id, name: d.name })))
     }).catch(() => {})
   }, [])
@@ -644,7 +644,7 @@ function DetailScreen({
             />
             <div className="flex gap-2">
               <button
-                onClick={() => { performAction('reject', { note: rejectionNote || undefined }); setShowRejectInput(false) }}
+                onClick={() => { performAction('reject', { reason: rejectionNote || '-' }); setShowRejectInput(false) }}
                 className="flex-1 py-3 text-sm font-semibold text-white bg-red-600 rounded-lg active:scale-95 transition-transform"
               >
                 {tr ? 'Reddet' : 'Reject'}

@@ -18,8 +18,8 @@ export default function MobileNotifications() {
     if (taskMatch) return `/m/gorev/${taskMatch[1]}`
     // /gorevler -> /m/gorevler
     if (link === '/gorevler') return '/m/gorevler'
-    // /mesajlar -> /m/mesajlar
-    if (link === '/mesajlar') return '/m/mesajlar'
+    // /mesajlar?partnerId=xxx -> /m/mesajlar?partnerId=xxx
+    if (link.startsWith('/mesajlar')) return `/m${link}`
     // /raporlar/xxx -> /m/rapor/xxx
     const reportMatch = link.match(/^\/raporlar\/(.+)/)
     if (reportMatch) return `/m/rapor/${reportMatch[1]}`

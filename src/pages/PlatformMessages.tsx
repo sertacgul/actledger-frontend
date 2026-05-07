@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { MessageSquare, Send, Check, CheckCheck, Users, Building2, Search, Plus, X, Loader2, ArrowLeft, Circle, Pencil, Trash2, MoreVertical } from 'lucide-react'
 import clsx from 'clsx'
 import { useLanguage } from '../context/LanguageContext'
@@ -37,6 +38,7 @@ interface Conv { type: 'direct' | 'department' | 'broadcast'; id?: string; name:
 export default function PlatformMessages() {
   const { lang } = useLanguage()
   const { user } = useAuth()
+  const [searchParams, setSearchParams] = useSearchParams()
   const tr = lang === 'tr'
 
   const [messages, setMessages] = useState<Message[]>([])
@@ -114,8 +116,9 @@ export default function PlatformMessages() {
           const data = res?.data ?? res
           const newMsgs = (Array.isArray(data) ? data : []).map(mapMsg).sort((a: Message, b: Message) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
           setChatMessages(prev => {
-            if (newMsgs.length !== prev.length) {
-              // New message arrived - play sound if not from us
+            const prevIds = prev.map(m => m.id).join(',')
+            const newIds = newMsgs.map(m => m.id).join(',')
+            if (newIds !== prevIds) {
               const lastNew = newMsgs[newMsgs.length - 1]
               if (lastNew && lastNew.senderId !== user?.id && prev.length > 0 && newMsgs.length > prev.length) {
                 playMessageSound()
@@ -169,6 +172,20 @@ export default function PlatformMessages() {
 
   const filtered = search ? conversations.filter(c => c.name.toLowerCase().includes(search.toLowerCase())) : conversations
 
+  // Open specific chat from notification deep link (?partnerId=xxx)
+  const deepLinkHandled = useRef(false)
+  useEffect(() => {
+    if (deepLinkHandled.current) return
+    const partnerId = searchParams.get('partnerId')
+    const partnerName = searchParams.get('partnerName')
+    if (partnerId && contacts.length > 0) {
+      deepLinkHandled.current = true
+      const name = partnerName || contacts.find(c => c.id === partnerId)?.name || '...'
+      openConv({ type: 'direct', id: partnerId, name, lastMsg: {} as any, unread: 0 })
+      setSearchParams({}, { replace: true })
+    }
+  }, [searchParams, contacts])
+
   // Open conversation
   const openConv = async (conv: Conv) => {
     setActiveConv(conv)
@@ -208,7 +225,17 @@ export default function PlatformMessages() {
       else p.receiverId = activeConv.id
       await api.post('/messages', p)
       setReply('')
-      await openConv(activeConv)
+      // Re-fetch thread without resetting loading state (no flash)
+      try {
+        let res: any
+        if (activeConv.type === 'broadcast') res = await api.get('/messages?pageSize=200&isBroadcast=true')
+        else if (activeConv.type === 'department' && activeConv.id) res = await api.get(`/messages?pageSize=200&departmentId=${activeConv.id}`)
+        else if (activeConv.type === 'direct' && activeConv.id) res = await api.get(`/messages/thread/${activeConv.id}`)
+        const data = res?.data ?? res
+        if (Array.isArray(data)) {
+          setChatMessages(data.map(mapMsg).sort((a: Message, b: Message) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()))
+        }
+      } catch {}
       loadAll()
     } catch {}
     setSending(false)

@@ -40,21 +40,31 @@ export default function MobileLayout() {
         if (cap?.isNativePlatform?.()) {
           try {
             const { PushNotifications } = await import('@capacitor/push-notifications')
+            // Add listeners BEFORE register() to avoid race condition
+            await PushNotifications.removeAllListeners()
+            PushNotifications.addListener('registration', async (token) => {
+              const val = token?.value
+              if (!val) return
+              console.log('[Push] Native token received:', val.substring(0, 16) + '...')
+              const platform = cap.getPlatform?.() === 'ios' ? 'apns' : 'fcm'
+              try {
+                await api.post('/notifications/device-token', { token: val, platform })
+                console.log('[Push] Token registered with backend (' + platform + ')')
+              } catch (e) { console.error('[Push] Backend registration failed:', e) }
+            })
+            PushNotifications.addListener('registrationError', (e) => console.error('[Push] Reg error:', e))
+            PushNotifications.addListener('pushNotificationReceived', (n) => {
+              console.log('[Push] Received:', n.title)
+            })
+            PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+              console.log('[Push] Tapped:', action.notification.title)
+            })
             const perm = await PushNotifications.requestPermissions()
             if (perm.receive === 'granted') {
               await PushNotifications.register()
-              PushNotifications.addListener('registration', async (token) => {
-                const val = token?.value
-                if (!val) return
-                console.log('[Push] Native token received:', val.substring(0, 16) + '...')
-                const platform = cap.getPlatform?.() === 'ios' ? 'apns' : 'fcm'
-                try {
-                  await api.post('/notifications/device-token', { token: val, platform })
-                  console.log('[Push] Token registered with backend')
-                } catch (e) { console.error('[Push] Backend registration failed:', e) }
-              })
-              PushNotifications.addListener('registrationError', (e) => console.error('[Push] Reg error:', e.error))
-              PushNotifications.addListener('pushNotificationReceived', (n) => console.log('[Push] Received:', n.title))
+              console.log('[Push] register() called, waiting for token...')
+            } else {
+              console.warn('[Push] Permission denied:', perm.receive)
             }
           } catch (e) { console.warn('[Push] Native push init failed:', e) }
           return // skip web push

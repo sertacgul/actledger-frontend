@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { CompanyProvider } from './context/CompanyContext'
@@ -40,17 +40,17 @@ import TermsOfUse from './pages/TermsOfUse'
 import MobileLayout from './components/layout/MobileLayout'
 import MobileLogin from './pages/mobile/MobileLogin'
 import MobileForcePasswordChange from './pages/mobile/MobileForcePasswordChange'
-import MobileTasks from './pages/mobile/MobileTasks'
-import MobileTaskDetail from './pages/mobile/MobileTaskDetail'
-import MobileForms from './pages/mobile/MobileForms'
-import MobileFormFill from './pages/mobile/MobileFormFill'
-import MobileReportAction from './pages/mobile/MobileReportAction'
-import MobileMessages from './pages/mobile/MobileMessages'
-import MobileNotifications from './pages/mobile/MobileNotifications'
-import MobileProfile from './pages/mobile/MobileProfile'
-import MobileOperIQ from './pages/mobile/MobileOperIQ'
-import MobileQRScanner from './pages/mobile/MobileQRScanner'
-import MobileWorkOrders from './pages/mobile/MobileWorkOrders'
+const MobileTasks = lazy(() => import('./pages/mobile/MobileTasks'))
+const MobileTaskDetail = lazy(() => import('./pages/mobile/MobileTaskDetail'))
+const MobileForms = lazy(() => import('./pages/mobile/MobileForms'))
+const MobileFormFill = lazy(() => import('./pages/mobile/MobileFormFill'))
+const MobileReportAction = lazy(() => import('./pages/mobile/MobileReportAction'))
+const MobileMessages = lazy(() => import('./pages/mobile/MobileMessages'))
+const MobileNotifications = lazy(() => import('./pages/mobile/MobileNotifications'))
+const MobileProfile = lazy(() => import('./pages/mobile/MobileProfile'))
+const MobileOperIQ = lazy(() => import('./pages/mobile/MobileOperIQ'))
+const MobileQRScanner = lazy(() => import('./pages/mobile/MobileQRScanner'))
+const MobileWorkOrders = lazy(() => import('./pages/mobile/MobileWorkOrders'))
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()

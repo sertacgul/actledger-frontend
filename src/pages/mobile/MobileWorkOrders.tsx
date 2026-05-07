@@ -186,7 +186,7 @@ export default function MobileWorkOrders() {
   // ── List screen ──
   return (
     <div className="flex flex-col h-full">
-      <div className="p-4 space-y-3 flex-1 overflow-y-auto pb-24">
+      <div className="p-[var(--space-page)] space-y-3 flex-1 overflow-y-auto pb-24">
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-bold text-slate-900">
             {tr ? 'Is Siparisleri' : 'Work Orders'}
@@ -209,7 +209,7 @@ export default function MobileWorkOrders() {
               type="button"
               onClick={() => setFilter(f.key)}
               className={clsx(
-                'flex-shrink-0 px-3 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap',
+                'flex-shrink-0 px-3 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap min-h-[var(--touch-min)]',
                 filter === f.key
                   ? 'bg-white text-slate-900 shadow-sm'
                   : 'text-slate-500'

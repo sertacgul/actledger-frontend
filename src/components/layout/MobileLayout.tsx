@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { ClipboardList, FileSpreadsheet, MessageSquare, UserCircle, Bell, RefreshCw, Wifi, WifiOff, Cpu, MapPin, X, ScanLine, Briefcase, ChevronUp } from 'lucide-react'
-import { useState, useEffect, useRef } from 'react'
+import { ClipboardList, FileSpreadsheet, MessageSquare, UserCircle, Bell, RefreshCw, Wifi, WifiOff, Cpu, MapPin, X, ScanLine, Briefcase, ChevronUp, Loader2 } from 'lucide-react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import clsx from 'clsx'
 import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
@@ -298,11 +298,13 @@ export default function MobileLayout() {
 
       {/* Content */}
       <main className="flex-1 overflow-y-auto overscroll-contain">
-        <Outlet />
+        <Suspense fallback={<div className="flex items-center justify-center h-32"><Loader2 size={20} className="animate-spin text-slate-400" /></div>}>
+          <Outlet />
+        </Suspense>
       </main>
 
       {/* Bottom nav */}
-      <nav className="flex items-stretch border-t border-slate-200 bg-white relative">
+      <nav className="flex items-stretch border-t border-slate-200 bg-white relative safe-bottom" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         {tabs.map(tab => {
           const isHighlight = (tab as any).highlight
           const isQr = (tab as any).qr
@@ -338,7 +340,7 @@ export default function MobileLayout() {
                   type="button"
                   onClick={() => setWorkMenuOpen(!workMenuOpen)}
                   className={clsx(
-                    'w-full flex flex-col items-center justify-center gap-0.5 transition-colors min-h-[56px] py-2.5',
+                    'w-full flex flex-col items-center justify-center gap-0.5 transition-colors min-h-[var(--touch-min)] tablet:min-h-[56px] py-2.5',
                     isGroupActive || workMenuOpen ? 'text-cyan-600 bg-cyan-50/50' : 'text-slate-400 active:bg-slate-50'
                   )}
                 >
@@ -358,7 +360,7 @@ export default function MobileLayout() {
               to={tab.to}
               onClick={() => setWorkMenuOpen(false)}
               className={({ isActive }) => clsx(
-                'flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors min-h-[56px]',
+                'flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors min-h-[var(--touch-min)] tablet:min-h-[56px]',
                 isHighlight
                   ? 'relative -mt-3'
                   : isQr

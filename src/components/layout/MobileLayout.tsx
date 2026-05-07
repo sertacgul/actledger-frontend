@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext'
 import BrandMark from '../ui/BrandMark'
 import { startSyncManager, stopSyncManager, syncNow, isSyncing } from '../../lib/sync-manager'
 import { api } from '../../lib/api'
+import PushBanner, { triggerPushBanner } from '../ui/PushBanner'
 
 export default function MobileLayout() {
   const { t, lang } = useLanguage()
@@ -45,19 +46,30 @@ export default function MobileLayout() {
             PushNotifications.addListener('registration', async (token) => {
               const val = token?.value
               if (!val) return
-              console.log('[Push] Native token received:', val.substring(0, 16) + '...')
               const platform = cap.getPlatform?.() === 'ios' ? 'apns' : 'fcm'
-              try {
-                await api.post('/notifications/device-token', { token: val, platform })
-                console.log('[Push] Token registered with backend (' + platform + ')')
-              } catch (e) { console.error('[Push] Backend registration failed:', e) }
+              const prevToken = localStorage.getItem('actledger_push_token')
+              if (val !== prevToken) {
+                try {
+                  await api.post('/notifications/device-token', { token: val, platform })
+                  localStorage.setItem('actledger_push_token', val)
+                  console.log('[Push] Token registered (' + platform + ')')
+                } catch (e) { console.error('[Push] Registration failed:', e) }
+              }
             })
             PushNotifications.addListener('registrationError', (e) => console.error('[Push] Reg error:', e))
-            PushNotifications.addListener('pushNotificationReceived', (n) => {
-              console.log('[Push] Received:', n.title)
+            PushNotifications.addListener('pushNotificationReceived', (notification) => {
+              triggerPushBanner({
+                title: notification.title || 'Bildirim',
+                message: notification.body || '',
+                link: (notification.data as any)?.link,
+              })
             })
             PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
-              console.log('[Push] Tapped:', action.notification.title)
+              const data = action.notification.data as any
+              if (data?.link) {
+                const link = data.link.startsWith('/m/') ? data.link : `/m${data.link}`
+                setTimeout(() => navigate(link), 300)
+              }
             })
             const perm = await PushNotifications.requestPermissions()
             if (perm.receive === 'granted') {
@@ -217,6 +229,7 @@ export default function MobileLayout() {
 
   return (
     <div className="flex flex-col h-[100dvh] bg-slate-50 mx-auto w-full max-w-[100vw] tablet:max-w-[768px]" style={{ overflowX: 'hidden', ...(isPWA && { paddingTop: 'max(50px, env(safe-area-inset-top))', boxSizing: 'border-box' }) }}>
+      <PushBanner onNavigate={(link) => navigate(link.startsWith('/m/') ? link : `/m${link}`)} />
       {/* Install PWA banner */}
       {showInstallBanner && (
         <div className="bg-cyan-600 text-white text-xs font-medium py-2.5 px-4 flex items-center gap-2">

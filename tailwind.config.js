@@ -4,6 +4,11 @@ export default {
   darkMode: ['class', '[data-theme="dark"]'],
   theme: {
     extend: {
+      screens: {
+        'xs': '375px',
+        'phone': '430px',
+        'tablet': '600px',
+      },
       colors: {
         brand: {
           50:  '#eff6ff',

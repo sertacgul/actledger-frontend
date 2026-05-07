@@ -70,6 +70,7 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.ataolaitech.actledger
           releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
-          track: production
+          track: internal
           status: completed
+          changesNotSentForReview: true
           whatsNewDirectory: android/release-notes

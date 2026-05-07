@@ -1,0 +1,5 @@
+v1.3.0 - Iyilestirmeler
+- Otomatik giris: Uygulama kapatilip acildiginda tekrar sifre girmeden giris
+- Mesajlasma iyilestirmeleri ve hata duzeltmleri
+- Is siparisi onay ve yetkilendirme iyilestirmeleri
+- Bildirim iyilestirmeleri

@@ -1,0 +1,5 @@
+v1.3.0 - Improvements
+- Auto-login: Stay signed in after closing and reopening the app
+- Messaging improvements and bug fixes
+- Work order approval and authorization improvements
+- Notification improvements

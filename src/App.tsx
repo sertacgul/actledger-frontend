@@ -35,6 +35,9 @@ import UserGuide from './pages/UserGuide'
 import PlatformMessages from './pages/PlatformMessages'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfUse from './pages/TermsOfUse'
+import Sales from './pages/Sales'
+import Accounting from './pages/Accounting'
+import HRPage from './pages/HR'
 
 // Mobile PWA pages
 import MobileLayout from './components/layout/MobileLayout'
@@ -173,6 +176,9 @@ function AppRoutes() {
           <Route path="mesajlar"     element={<PlatformMessages />} />
           <Route path="ayarlar"      element={<Settings />}    />
           <Route path="manuel"       element={<UserGuide />}   />
+          <Route path="satis"            element={<Sales />} />
+          <Route path="muhasebe"         element={<Accounting />} />
+          <Route path="insan-kaynaklari" element={<HRPage />} />
         </Route>
         {/* ── Mobile PWA routes ──────────────────────────────────────────── */}
         <Route path="/m/giris"           element={<MobileLogin />} />

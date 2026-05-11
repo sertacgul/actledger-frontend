@@ -10,6 +10,7 @@ interface AuthContextType {
   login:   (email: string, password: string) => Promise<User | undefined>
   mobileLogin: (code: string, password: string) => Promise<{ user: User; mustChangePassword: boolean }>
   logout:  () => Promise<void>
+  hasModule: (code: string) => boolean
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -36,7 +37,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           tokenStore.set(body.data.accessToken)
           const me = await api.get<any>('/auth/me')
           if (!cancelled) {
-            setUser(mapUser(me))
+            const mapped = mapUser(me)
+            mapped.modules = me.modules ?? []
+            setUser(mapped)
             if (me.company) syncFromBackend(me.company)
           }
           return
@@ -81,10 +84,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const mapped = mapUser(result.user)
       setUser(mapped)
       localStorage.setItem('actledger_user_id', mapped.id)
-      // Fetch full profile to sync company sector
+      // Fetch full profile to sync company sector + modules
       try {
         const me = await api.get<any>('/auth/me')
         if (me?.company) syncFromBackend(me.company)
+        mapped.modules = me?.modules ?? []
+        setUser({ ...mapped })
       } catch { /* non-critical */ }
       return mapped
     } catch (e: any) {
@@ -124,8 +129,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('actledger_user_id')
   }
 
+  const hasModule = (code: string) => user?.modules?.includes(code) ?? false
+
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, mobileLogin, logout }}>
+    <AuthContext.Provider value={{ user, loading, error, login, mobileLogin, logout, hasModule }}>
       {children}
     </AuthContext.Provider>
   )

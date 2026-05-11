@@ -3,7 +3,7 @@ import {
   LayoutDashboard, CheckSquare, FileText, Building2,
   Users, Smartphone, Settings, LogOut, Cpu, FolderOpen, Package, Radio, MapPin,
   ZoomIn, ZoomOut, RotateCcw, Target, Boxes, Zap, GitBranch, ScanLine, MessageSquare,
-  ClipboardList,
+  ClipboardList, ShoppingCart, Calculator, UserCog,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useAuth } from '../../context/AuthContext'
@@ -22,7 +22,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ open = false, collapsed = false, onClose }: SidebarProps) {
-  const { user, logout } = useAuth()
+  const { user, logout, hasModule } = useAuth()
   const { config, sector } = useCompany()
   const { t, lang } = useLanguage()
   const { sidebarFontScale, setSidebarFontScale } = useTheme()
@@ -36,6 +36,7 @@ export default function Sidebar({ open = false, collapsed = false, onClose }: Si
     badge?:    string
     operiq?:   boolean
     minLevel?: number  // Minimum role level to see this menu item
+    moduleCode?: string // ERP module code - only show if company has this module
   }
 
   const userLevel = user ? ROLE_HIERARCHY[user.role as UserRole] ?? 1 : 1
@@ -74,6 +75,14 @@ export default function Sidebar({ open = false, collapsed = false, onClose }: Si
         { to: '/ayarlar',   icon: Settings,   label: t('nav_settings'), desc: t('tooltip_settings' as TranslationKey), shortcut: 'g s' },
       ],
     },
+    {
+      label: 'ERP',
+      items: [
+        { to: '/satis',            icon: ShoppingCart, label: lang === 'tr' ? 'Satis' : 'Sales',             desc: lang === 'tr' ? 'Musteri, siparis ve POS yonetimi' : 'Customer, order and POS management', minLevel: 4, moduleCode: 'SALES' },
+        { to: '/muhasebe',         icon: Calculator,   label: lang === 'tr' ? 'Muhasebe' : 'Accounting',      desc: lang === 'tr' ? 'Hesap plani, yevmiye, e-fatura' : 'Chart of accounts, journal, e-invoice', minLevel: 4, moduleCode: 'ACCOUNTING' },
+        { to: '/insan-kaynaklari', icon: UserCog,      label: lang === 'tr' ? 'Insan Kaynaklari' : 'HR',      desc: lang === 'tr' ? 'Calisan, izin ve bordro yonetimi' : 'Employee, leave and payroll management', minLevel: 4, moduleCode: 'HR' },
+      ],
+    },
   ]
 
   return (
@@ -106,7 +115,10 @@ export default function Sidebar({ open = false, collapsed = false, onClose }: Si
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-1 scrollbar-hide">
         {NAV.map(section => {
-          const visibleItems = section.items.filter(item => !item.minLevel || userLevel >= item.minLevel)
+          const visibleItems = section.items.filter(item =>
+            (!item.minLevel || userLevel >= item.minLevel) &&
+            (!item.moduleCode || hasModule(item.moduleCode))
+          )
           if (visibleItems.length === 0) return null
           return (
           <div key={section.label} className="sidebar-section">

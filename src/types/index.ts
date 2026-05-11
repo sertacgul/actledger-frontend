@@ -54,6 +54,7 @@ export interface User {
   subUnit?: string
   jobTitle?: string
   departments?: { id: string; name: string; code: string; color: string }[]
+  modules?: string[]
 }
 
 export interface Department {

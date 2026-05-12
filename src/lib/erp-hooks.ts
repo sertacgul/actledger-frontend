@@ -593,3 +593,58 @@ export async function fetchAllExportData() {
     payrollPeriods: extract(13),
   }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DATA EXPORT HOOKS
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface DataExportRequest {
+  id: string
+  companyId: string
+  status: 'BEKLIYOR' | 'ONAYLANDI' | 'REDDEDILDI' | 'HAZIRLANIYOR' | 'TAMAMLANDI' | 'SURESI_DOLDU'
+  dateFrom: string
+  dateTo: string
+  departmentId: string | null
+  fileUrl: string | null
+  expiresAt: string | null
+  rejectedReason: string | null
+  createdAt: string
+  requestedBy: { id: string; name: string; email: string }
+  approvedBy: { id: string; name: string } | null
+}
+
+export function useMyExportRequests() {
+  const { data, loading, error, refetch } = useFetch<DataExportRequest[]>(
+    () => api.get<any>('/data-export/my-requests').then((r: any) => r.data ?? r ?? []),
+    [],
+  )
+  return { requests: data ?? [], loading, error, refetch }
+}
+
+export function usePendingExportRequests() {
+  const { data, loading, error, refetch } = useFetch<DataExportRequest[]>(
+    () => api.get<any>('/data-export/pending').then((r: any) => r.data ?? r ?? []),
+    [],
+  )
+  return { requests: data ?? [], loading, error, refetch }
+}
+
+export async function requestDataExport(body: { dateFrom: string; dateTo: string; departmentId?: string }): Promise<DataExportRequest> {
+  const res = await api.post<any>('/data-export/request', body)
+  return res.data ?? res
+}
+
+export async function approveExportRequest(id: string): Promise<DataExportRequest> {
+  const res = await api.post<any>(`/data-export/${id}/approve`)
+  return res.data ?? res
+}
+
+export async function rejectExportRequest(id: string, reason?: string): Promise<DataExportRequest> {
+  const res = await api.post<any>(`/data-export/${id}/reject`, { reason })
+  return res.data ?? res
+}
+
+export async function getExportDownloadUrl(id: string): Promise<string> {
+  const res = await api.get<any>(`/data-export/${id}/download`)
+  return (res.data ?? res).fileUrl
+}

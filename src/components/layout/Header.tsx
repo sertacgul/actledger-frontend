@@ -38,17 +38,17 @@ export default function Header({ title, subtitle, onMenuClick, onToggleCollapse,
     try {
       // Page-specific exports
       const pageExports: Record<string, { endpoint: string; filename: string; sheetName: string; columns: any[] }> = {
-        gorevler:          { endpoint: '/tasks?pageSize=1000', filename: `gorevler_${date}`, sheetName: 'Gorevler', columns: [
+        gorevler:          { endpoint: '/tasks?pageSize=100', filename: `gorevler_${date}`, sheetName: 'Gorevler', columns: [
           { header: 'Baslik', accessor: (t: any) => t.title, width: 32 }, { header: 'Durum', accessor: (t: any) => t.status, width: 14 }, { header: 'Oncelik', accessor: (t: any) => t.priority, width: 12 }, { header: 'Tarih', accessor: (t: any) => t.createdAt?.slice(0, 10), width: 12 }] },
         departmanlar:      { endpoint: '/departments', filename: `departmanlar_${date}`, sheetName: 'Departmanlar', columns: [
           { header: 'Ad', accessor: (d: any) => d.name, width: 24 }, { header: 'Kod', accessor: (d: any) => d.code, width: 10 }] },
-        kullanicilar:      { endpoint: '/users?pageSize=1000', filename: `kullanicilar_${date}`, sheetName: 'Kullanicilar', columns: [
+        kullanicilar:      { endpoint: '/users?pageSize=100', filename: `kullanicilar_${date}`, sheetName: 'Kullanicilar', columns: [
           { header: 'Ad', accessor: (u: any) => u.name, width: 24 }, { header: 'E-posta', accessor: (u: any) => u.email, width: 28 }, { header: 'Rol', accessor: (u: any) => u.role, width: 16 }] },
-        envanter:          { endpoint: '/inventory?pageSize=1000', filename: `envanter_${date}`, sheetName: 'Envanter', columns: [
+        envanter:          { endpoint: '/inventory?pageSize=100', filename: `envanter_${date}`, sheetName: 'Envanter', columns: [
           { header: 'Ad', accessor: (i: any) => i.name, width: 28 }, { header: 'Kod', accessor: (i: any) => i.code ?? '', width: 14 }, { header: 'Tip', accessor: (i: any) => i.type, width: 14 }, { header: 'Miktar', accessor: (i: any) => i.quantity, width: 10 }] },
-        stok:              { endpoint: '/stock-management?pageSize=1000', filename: `stok_${date}`, sheetName: 'Stok', columns: [
+        stok:              { endpoint: '/stock-management?pageSize=100', filename: `stok_${date}`, sheetName: 'Stok', columns: [
           { header: 'Ad', accessor: (s: any) => s.name, width: 28 }, { header: 'Kod', accessor: (s: any) => s.code ?? '', width: 14 }, { header: 'Miktar', accessor: (s: any) => s.quantity, width: 10 }, { header: 'Min', accessor: (s: any) => s.minLevel, width: 8 }] },
-        'is-siparisleri':  { endpoint: '/work-orders?pageSize=1000', filename: `is_siparisleri_${date}`, sheetName: 'Is Siparisleri', columns: [
+        'is-siparisleri':  { endpoint: '/work-orders?pageSize=100', filename: `is_siparisleri_${date}`, sheetName: 'Is Siparisleri', columns: [
           { header: 'Kod', accessor: (w: any) => w.code, width: 14 }, { header: 'Baslik', accessor: (w: any) => w.title, width: 28 }, { header: 'Durum', accessor: (w: any) => w.status, width: 14 }] },
       }
 

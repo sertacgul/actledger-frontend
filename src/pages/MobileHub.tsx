@@ -612,17 +612,44 @@ function CreateFormTemplateModal({
     setStep('customize')
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formType) return
-    onCreated({
-      id:       `f${Date.now()}`,
-      name:     name.trim(),
-      formType,
-      dept,
-      fields,
-      uses:     0,
-      required,
-    })
+    try {
+      // Create form template on backend
+      const fieldDefs = Array.from({ length: fields }, (_, i) => ({
+        id: `field_${i + 1}`,
+        label: `${FORM_TYPE_META[formType].label} #${i + 1}`,
+        type: formType === 'sayisal' ? 'NUMBER' as const : formType === 'coktan_secmeli' ? 'SELECT' as const : 'TEXT' as const,
+        required,
+        order: i,
+      }))
+      const created = await api.post<any>('/form-templates', {
+        name: name.trim(),
+        description: `${FORM_TYPE_META[formType].label} - ${dept}`,
+        fields: fieldDefs,
+      })
+      const templateId = created?.id ?? created?.data?.id
+      // Assign to selected users (send notifications)
+      if (templateId) {
+        const userIds = assignMode === 'all'
+          ? [...mobileUsers, ...platformUsers].map(u => u.id)
+          : [...selectedUserIds]
+        if (userIds.length > 0) {
+          await api.post(`/form-templates/${templateId}/assign`, { userIds }).catch(() => {})
+        }
+      }
+      onCreated({
+        id: templateId || `f${Date.now()}`,
+        name: name.trim(),
+        formType,
+        dept,
+        fields,
+        uses: 0,
+        required,
+      })
+    } catch (e: any) {
+      alert(e.message || 'Form olusturulamadi')
+    }
   }
 
   const matchingPresets = formType ? FORM_PRESETS.filter(p => p.formType === formType) : []

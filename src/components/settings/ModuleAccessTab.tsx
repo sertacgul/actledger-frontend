@@ -26,14 +26,10 @@ export default function ModuleAccessTab() {
 
   useEffect(() => {
     setUsersLoading(true)
-    api.get<any>('/users?pageSize=500').then((res: any) => {
-      console.log('[ModuleAccessTab] raw /users response:', typeof res, Array.isArray(res), res)
+    api.get<any>('/users?pageSize=100').then((res: any) => {
       const list = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : []
-      console.log('[ModuleAccessTab] parsed list:', list.length, list.slice(0, 2))
       setUsers(list.map((u: any) => ({ id: u.id, name: u.name ?? '', email: u.email ?? '', role: u.role ?? '' })))
-    }).catch((e) => {
-      console.error('[ModuleAccessTab] Failed to fetch users:', e)
-    }).finally(() => setUsersLoading(false))
+    }).catch(() => {}).finally(() => setUsersLoading(false))
   }, [])
 
   const assignedIds = useMemo(() => new Set(accessList.map(a => a.userId)), [accessList])
@@ -44,7 +40,6 @@ export default function ModuleAccessTab() {
       const s = search.toLowerCase()
       list = list.filter(u => (u.name || '').toLowerCase().includes(s) || (u.email || '').toLowerCase().includes(s))
     }
-    console.log('[ModuleAccessTab] filteredUsers:', list.length, 'from', users.length, 'search:', search)
     return list
   }, [users, search, user])
 

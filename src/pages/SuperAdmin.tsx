@@ -1356,7 +1356,7 @@ function ModuleAccessAdminTab() {
     if (!selectedCompany) { setCompanyUsers([]); setAccessList([]); return }
     setLoading(true)
     Promise.all([
-      saFetch<any>(`/super-admin/companies/${selectedCompany}/users?pageSize=500`),
+      saFetch<any>(`/super-admin/companies/${selectedCompany}/users?pageSize=100`),
       saFetch<any>(`/super-admin/companies/${selectedCompany}/module-access?moduleCode=${selectedModule}`),
     ]).then(([usersRes, accessRes]) => {
       setCompanyUsers((usersRes.data ?? usersRes ?? []).map((u: any) => ({ id: u.id, name: u.name, email: u.email, role: u.role })))

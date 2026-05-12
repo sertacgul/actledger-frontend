@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Plus, Search, CheckSquare, Calendar, Tag, AlertCircle, Layers, Sparkles, FileSpreadsheet, Camera, MessageSquare, Zap, Loader2, X, Cpu } from 'lucide-react'
-import { api, API_BASE } from '../lib/api'
+import { api, API_BASE, tokenStore } from '../lib/api'
 import clsx from 'clsx'
 import { useTasks, useDepartments, useUsers, createTask, updateTaskStatus, updateChecklistItem } from '../lib/hooks'
 import type { Task, TaskStatus, TaskPriority, CustomAttribute } from '../types'
@@ -206,9 +206,31 @@ KURALLAR:
 JSON formatinda yanit ver:
 {"ozet": "...", "risk": "dusuk|orta|yuksek", "oneriler": ["...", "..."]}`
 
-      const result = await api.post<any>('/operiq-chat/message', { message: prompt.slice(0, 2000), lang: lang ?? 'tr' })
+      let result: any
+      // If there are photo attachments, send the first one for visual analysis
+      const photoAttachment = attachments.find((a: any) => a.mimeType?.startsWith('image/'))
+      if (photoAttachment?.url) {
+        try {
+          const imgRes = await fetch(`${API_BASE.replace('/api/v1', '')}${photoAttachment.url}`)
+          const blob = await imgRes.blob()
+          const formData = new FormData()
+          formData.append('photo', blob, photoAttachment.originalName || 'photo.jpg')
+          formData.append('message', prompt.slice(0, 3000))
+          const res = await fetch(`${API_BASE}/operiq-chat/photo`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${tokenStore.get()}` },
+            body: formData,
+          })
+          const body = await res.json()
+          result = body.data ?? body
+        } catch {
+          // Fallback to text-only analysis
+          result = await api.post<any>('/operiq-chat/message', { message: prompt.slice(0, 3000), lang: lang ?? 'tr' })
+        }
+      } else {
+        result = await api.post<any>('/operiq-chat/message', { message: prompt.slice(0, 3000), lang: lang ?? 'tr' })
+      }
       const aiText = result?.aiMessage?.content || result?.reply || result?.content || ''
-      // Try structured response first, then parse from text
       const structured = result?.aiMessage?.structured
       let parsed: any = structured || null
       if (!parsed) {
@@ -478,21 +500,56 @@ JSON formatinda yanit ver:
         {operiqResult && (
           <div className="p-3 rounded-lg text-[12px] space-y-2" style={{ background: 'var(--border-subtle)', border: '1px solid var(--border)' }}>
             <p className="font-bold flex items-center gap-1" style={{ color: '#14b8a6' }}><Zap size={12} /> OperIQ Gorev Analizi</p>
-            <p style={{ color: 'var(--text-2)' }}>{operiqResult.ozet || operiqResult.content?.ozet || (typeof operiqResult.content === 'string' ? operiqResult.content : '-')}</p>
-            {operiqResult.risk && (
-              <p className="flex items-center gap-1.5">
-                <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded" style={{
-                  background: operiqResult.risk === 'yuksek' ? '#fef2f2' : operiqResult.risk === 'orta' ? '#fffbeb' : '#f0fdf4',
-                  color: operiqResult.risk === 'yuksek' ? '#dc2626' : operiqResult.risk === 'orta' ? '#d97706' : '#16a34a',
-                  border: `1px solid ${operiqResult.risk === 'yuksek' ? '#fecaca' : operiqResult.risk === 'orta' ? '#fde68a' : '#bbf7d0'}`,
-                }}>Risk: {operiqResult.risk}</span>
-              </p>
+            <p style={{ color: 'var(--text-2)' }}>{operiqResult.ozet || operiqResult.mesaj || operiqResult.content?.ozet || operiqResult.content?.mesaj || (typeof operiqResult.content === 'string' ? operiqResult.content : '-')}</p>
+            {(operiqResult.risk || operiqResult.riskSeviyesi) && (() => {
+              const risk = operiqResult.risk || operiqResult.riskSeviyesi
+              return (
+                <p className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded" style={{
+                    background: (risk === 'yuksek' || risk === 'kritik') ? '#fef2f2' : risk === 'orta' ? '#fffbeb' : '#f0fdf4',
+                    color: (risk === 'yuksek' || risk === 'kritik') ? '#dc2626' : risk === 'orta' ? '#d97706' : '#16a34a',
+                    border: `1px solid ${(risk === 'yuksek' || risk === 'kritik') ? '#fecaca' : risk === 'orta' ? '#fde68a' : '#bbf7d0'}`,
+                  }}>Risk: {risk}</span>
+                </p>
+              )
+            })()}
+            {/* Photo findings */}
+            {operiqResult.fotografBulgulari?.length > 0 && (
+              <div>
+                <p className="text-[10px] font-bold uppercase mb-1" style={{ color: 'var(--text-3)' }}>Fotograf Bulgulari</p>
+                <ul className="space-y-0.5">
+                  {operiqResult.fotografBulgulari.map((b: string, i: number) => (
+                    <li key={i} className="flex items-start gap-1.5" style={{ color: 'var(--text-2)' }}>
+                      <span className="text-teal-500 mt-0.5">-</span> {b}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
-            {operiqResult.oneriler?.length > 0 && (
+            {/* Action steps */}
+            {operiqResult.yapilmasiGerekenler?.length > 0 && (
+              <div>
+                <p className="text-[10px] font-bold uppercase mb-1" style={{ color: 'var(--text-3)' }}>Yapilmasi Gerekenler</p>
+                <ul className="space-y-0.5">
+                  {operiqResult.yapilmasiGerekenler.map((a: any, i: number) => (
+                    <li key={i} className="flex items-start gap-1.5" style={{ color: 'var(--text-2)' }}>
+                      <span className={a.kritik ? 'text-red-500' : 'text-teal-500'}>{a.adim}.</span> {a.metin}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {/* Critical note */}
+            {operiqResult.kritikNot && (
+              <div className="p-2 rounded-lg bg-red-50 border border-red-200">
+                <p className="text-[11px] font-bold text-red-700">Kritik Not: {operiqResult.kritikNot}</p>
+              </div>
+            )}
+            {(operiqResult.oneriler?.length > 0 || operiqResult.onerilenSorular?.length > 0) && (
               <div>
                 <p className="text-[10px] font-bold uppercase mb-1" style={{ color: 'var(--text-3)' }}>Oneriler</p>
                 <ul className="space-y-0.5">
-                  {operiqResult.oneriler.map((o: string, i: number) => (
+                  {(operiqResult.oneriler || operiqResult.onerilenSorular || []).map((o: string, i: number) => (
                     <li key={i} className="flex items-start gap-1.5" style={{ color: 'var(--text-2)' }}>
                       <span className="text-teal-500 mt-0.5">-</span> {o}
                     </li>

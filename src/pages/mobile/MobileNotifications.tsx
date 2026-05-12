@@ -61,15 +61,15 @@ export default function MobileNotifications() {
     // /gorevler/xxx -> /m/gorev/xxx
     const taskMatch = link.match(/^\/gorevler\/(.+)/)
     if (taskMatch) return `/m/gorev/${taskMatch[1]}`
-    // /gorevler -> /m/gorevler
-    if (link === '/gorevler') return '/m/gorevler'
+    // /gorevler or /gorevler?taskId=xxx -> /m/gorevler or /m/gorevler?taskId=xxx
+    if (link.startsWith('/gorevler')) return `/m${link.replace('/gorevler', '/gorevler')}`
     // /mesajlar?partnerId=xxx -> /m/mesajlar?partnerId=xxx
     if (link.startsWith('/mesajlar')) return `/m${link}`
     // /raporlar/xxx -> /m/rapor/xxx
     const reportMatch = link.match(/^\/raporlar\/(.+)/)
     if (reportMatch) return `/m/rapor/${reportMatch[1]}`
-    // /formlar -> /m/formlar
-    if (link.startsWith('/formlar')) return '/m/formlar'
+    // /formlar or /formlar?templateId=xxx -> /m/formlar...
+    if (link.startsWith('/formlar')) return `/m${link}`
     return null
   }
 

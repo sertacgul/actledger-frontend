@@ -1038,8 +1038,8 @@ function OperIQSymbol({ size = 28, color = '#ffffff' }: { size?: number; color?:
    OPERIQ LANDING CHATBOT (draggable, branded)
    -------------------------------------------------------------------------- */
 const CHAT_GREETINGS = {
-  tr: 'Merhaba! Ben OperIQ Asistan. ActLedger hakkinda size nasil yardimci olabilirim? Platform özellikleri, sektorler, fiyatlandirma veya demo hakkinda sorularinizi yanitlayabilirim.',
-  en: 'Hello! I am OperIQ Assistant. How can I help you with ActLedger? I can answer questions about platform features, sectors, pricing, or demos.',
+  tr: 'Merhaba! Ben OperIQ Asistan. ActLedger hakkinda size nasil yardimci olabilirim? Platform ozellikleri, sektorler veya demo hakkinda sorularinizi yanitlayabilirim.',
+  en: 'Hello! I am OperIQ Assistant. How can I help you with ActLedger? I can answer questions about platform features, sectors, or demos.',
 }
 
 function OperIQChatbot({ lang }: { lang: 'tr' | 'en' }) {
@@ -1056,7 +1056,7 @@ function OperIQChatbot({ lang }: { lang: 'tr' | 'en' }) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Get effective X position (from right edge)
-  const effectiveRight = posX !== null ? posX : 24
+  const effectiveRight = posX !== null ? posX : 4
 
   // Mouse drag handlers
   const onMouseDown = useCallback((e: React.MouseEvent) => {
@@ -3047,10 +3047,10 @@ export default function Landing() {
                 <img src="/images/warehouse.PNG" alt="" className="absolute top-0 right-0 w-1/3 h-1/2 object-cover" />
                 <img src="/images/hospital.PNG" alt="" className="absolute bottom-0 left-1/3 w-1/3 h-1/2 object-cover" />
               </div>
-              <h2 className="font-extrabold tracking-tight" style={{ fontSize: 'clamp(42px, 5vw, 60px)', color: '#0f2b3d' }}>
+              <h2 className="font-extrabold tracking-tight" style={{ fontSize: 'clamp(22px, 5vw, 60px)', color: '#0f2b3d', wordBreak: 'break-word' }}>
                 {t.ctaTitle}
               </h2>
-              <p className="text-xl mt-4 mx-auto whitespace-nowrap" style={{ color: 'rgba(15,43,61,0.55)' }}>
+              <p className="text-lg md:text-xl mt-4 mx-auto" style={{ color: 'rgba(15,43,61,0.55)', wordBreak: 'break-word' }}>
                 {t.ctaSubtitle}
               </p>
               <div className="flex flex-wrap items-center justify-center gap-4 mt-10">

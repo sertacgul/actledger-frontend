@@ -34,7 +34,7 @@ export default function EmployeesTab() {
 
   const [users, setUsers] = useState<{ id: string; name: string; email: string }[]>([])
   useEffect(() => {
-    api.get<any>('/users?pageSize=500').then((res: any) => {
+    api.get<any>('/users?pageSize=100').then((res: any) => {
       setUsers((res.data ?? res ?? []).map((u: any) => ({ id: u.id, name: u.name, email: u.email })))
     }).catch(() => {})
   }, [])

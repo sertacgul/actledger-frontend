@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import {
-  Server, Key, Building2, Globe, Shield,
+  Server, Building2, Globe, Shield,
   HardDrive, Wifi, CheckCircle, AlertTriangle,
   Save, RefreshCw, ExternalLink, Layers, Languages, Type, Loader2,
 } from 'lucide-react'
@@ -9,10 +9,7 @@ import { useCompany } from '../context/CompanyContext'
 import { useLanguage } from '../context/LanguageContext'
 import { useTheme } from '../context/ThemeContext'
 import { api } from '../lib/api'
-import { useAuth } from '../context/AuthContext'
-import ModuleAccessTab from '../components/settings/ModuleAccessTab'
-
-type SettingsTab = 'deployment' | 'company' | 'security' | 'integrations' | 'module-access'
+type SettingsTab = 'deployment' | 'company' | 'security' | 'integrations'
 
 function Section({ title, description, children }: {
   title: string; description?: string; children: React.ReactNode
@@ -394,15 +391,11 @@ function IntegrationsSettings() {
 export default function Settings() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('deployment')
 
-  const { user } = useAuth()
-  const isAdmin = ['platform_admin', 'super_admin', 'genel_mudur'].includes(user?.role ?? '')
-
-  const TABS: { key: SettingsTab; icon: typeof Server; label: string; adminOnly?: boolean }[] = [
+  const TABS: { key: SettingsTab; icon: typeof Server; label: string }[] = [
     { key: 'deployment',    icon: Server,    label: 'Dağıtım'      },
     { key: 'company',       icon: Building2, label: 'Tercihler' },
     { key: 'security',      icon: Shield,    label: 'Güvenlik'     },
     { key: 'integrations',  icon: Globe,     label: 'Entegrasyonlar' },
-    ...(isAdmin ? [{ key: 'module-access' as SettingsTab, icon: Key, label: 'ERP Yetkileri' }] : []),
   ]
 
   return (
@@ -433,7 +426,6 @@ export default function Settings() {
         {activeTab === 'company'      && <CompanySettings />}
         {activeTab === 'security'     && <SecuritySettings />}
         {activeTab === 'integrations' && <IntegrationsSettings />}
-        {activeTab === 'module-access' && <ModuleAccessTab />}
       </div>
     </div>
   )

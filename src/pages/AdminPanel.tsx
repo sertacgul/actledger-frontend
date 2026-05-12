@@ -15,12 +15,13 @@ import { SECTORS } from '../data/sectors'
 import { useDepartments, useUsers, createUser, deleteUser, createDepartment, deleteDepartment } from '../lib/hooks'
 import { api } from '../lib/api'
 import { ROLE_LABELS, type UserRole } from '../types'
+import ModuleAccessTab from '../components/settings/ModuleAccessTab'
 import { getPositionTemplate, savePositionTemplate } from '../data/positionTemplates'
 import SectorApplyModal from '../components/settings/SectorApplyModal'
 import BrandMark from '../components/ui/BrandMark'
 import { FlagTR, FlagUS } from '../components/ui/Flags'
 
-type AdminTab = 'company' | 'sector' | 'template' | 'departments' | 'positions' | 'users' | 'mobile' | 'system'
+type AdminTab = 'company' | 'sector' | 'template' | 'departments' | 'positions' | 'users' | 'mobile' | 'erp-access' | 'system'
 
 const ROLE_OPTIONS: { key: string; label: string; level: number; descTr: string; descEn: string }[] = [
   { key: 'platform_admin', label: 'Seviye 9', level: 9, descTr: 'Tam yetki. Sektor, sablon, kullanici yönetimi.', descEn: 'Full access. Sector, template, user management.' },
@@ -70,6 +71,7 @@ export default function AdminPanel() {
     { key: 'positions', icon: Shield,       label: lang === 'tr' ? 'Kadro & Gorev' : 'Positions & Titles' },
     { key: 'users',    icon: Users,         label: lang === 'tr' ? 'Kullanici Yönetimi' : 'User Management' },
     { key: 'mobile',   icon: Smartphone,    label: lang === 'tr' ? 'Mobil Kullanici Yönetimi' : 'Mobile User Management' },
+    { key: 'erp-access', icon: KeyRound,    label: lang === 'tr' ? 'ERP Yetkileri' : 'ERP Permissions' },
     { key: 'system',   icon: Shield,        label: lang === 'tr' ? 'Sistem Bilgileri' : 'System Info' },
   ]
 
@@ -280,6 +282,12 @@ export default function AdminPanel() {
           {tab === 'users' && <AdminUserManagement lang={lang as 'tr' | 'en'} sectorId={sector?.id ?? 'manufacturing'} />}
 
           {tab === 'mobile' && <AdminMobileUsers lang={lang} />}
+
+          {tab === 'erp-access' && (
+            <Section title={lang === 'tr' ? 'ERP Modul Yetkileri' : 'ERP Module Permissions'} desc={lang === 'tr' ? 'Satis, Muhasebe ve Insan Kaynaklari modullerine erisebilecek kullanicilari yonetin' : 'Manage user access to Sales, Accounting and HR modules'}>
+              <ModuleAccessTab />
+            </Section>
+          )}
 
           {tab === 'system' && (
             <Section title={lang === 'tr' ? 'Sistem Ozellikleri' : 'System Features'} desc={lang === 'tr' ? 'Lisans kapsamindaki platform özellikleri' : 'Platform features included in the license'}>

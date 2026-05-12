@@ -329,7 +329,12 @@ export async function saveEInvoiceConfig(body: Partial<EInvoiceConfig>): Promise
 type ReportType = 'income-expense' | 'balance-sheet' | 'sales-summary' | 'einvoice-summary' | 'tax-summary' | 'cash-flow'
 
 export function useAccountingReport(type: ReportType, dateFrom: string, dateTo: string) {
-  const params = new URLSearchParams({ dateFrom, dateTo })
+  // Backend expects ISO datetime (z.string().datetime()), not plain date
+  const isoFrom = dateFrom ? new Date(dateFrom + 'T00:00:00.000Z').toISOString() : ''
+  const isoTo = dateTo ? new Date(dateTo + 'T23:59:59.999Z').toISOString() : ''
+  const params = new URLSearchParams()
+  if (isoFrom) params.set('dateFrom', isoFrom)
+  if (isoTo) params.set('dateTo', isoTo)
   const { data, loading, error, refetch } = useFetch<any>(
     () => api.get(`/accounting/reports/${type}?${params}`),
     [type, dateFrom, dateTo],

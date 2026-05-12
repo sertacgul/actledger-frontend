@@ -57,7 +57,8 @@ export default function Header({ title, subtitle, onMenuClick, onToggleCollapse,
       if (pageConfig) {
         // Single page export
         const res = await api.get<any>(pageConfig.endpoint).catch(() => null)
-        const rows = res?.data ?? res ?? []
+        const raw = res?.data ?? res ?? []
+        const rows = Array.isArray(raw) ? raw : []
         exportToExcel({ filename: pageConfig.filename + '.xlsx', sheetName: pageConfig.sheetName, columns: pageConfig.columns, rows })
       } else {
         // Kokpit or unknown page -> full platform export
@@ -328,22 +329,20 @@ export default function Header({ title, subtitle, onMenuClick, onToggleCollapse,
             <span className="hidden lg:inline text-[11px]">{t('header_print_short')}</span>
           </button>
 
-          {/* Global Excel Export */}
-          {['platform_admin', 'super_admin', 'genel_mudur'].includes(user?.role ?? '') && (
-            <button
-              type="button"
-              onClick={handleSmartExport}
-              disabled={globalExporting}
-              className="btn-ghost btn-sm"
-              title={lang === 'tr' ? 'Toplu Excel Export' : 'Export All Data'}
-            >
-              {globalExporting ? (
-                <svg className="animate-spin w-[13px] h-[13px]" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
-              ) : (
-                <FileSpreadsheet size={13} />
-              )}
-            </button>
-          )}
+          {/* Smart Excel Export */}
+          <button
+            type="button"
+            onClick={handleSmartExport}
+            disabled={globalExporting}
+            className="btn-ghost btn-sm"
+            title={lang === 'tr' ? 'Excel Export' : 'Excel Export'}
+          >
+            {globalExporting ? (
+              <svg className="animate-spin w-[13px] h-[13px]" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+            ) : (
+              <FileSpreadsheet size={13} />
+            )}
+          </button>
 
           {/* Notifications */}
           <div className="relative">

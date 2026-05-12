@@ -530,31 +530,50 @@ export async function revokeModuleAccessSuperAdmin(companyId: string, id: string
 }
 
 // ── Global Export ────────────────────────────────────────────────────────────
+function toArray(r: any): any[] {
+  if (Array.isArray(r)) return r
+  if (r?.data && Array.isArray(r.data)) return r.data
+  return []
+}
+
 export async function fetchAllExportData() {
-  const [
-    departments, users, tasks, inventory, stockItems, stockMovements,
-    customers, orders, accounts, journal, einvoices,
-    employees, leaves, payrollPeriods,
-  ] = await Promise.all([
-    api.get<any>('/departments').then((r: any) => r.data ?? r ?? []).catch(() => []),
-    api.get<any>('/users?pageSize=1000').then((r: any) => r.data ?? r ?? []).catch(() => []),
-    api.get<any>('/tasks?pageSize=1000').then((r: any) => r.data ?? r ?? []).catch(() => []),
-    api.get<any>('/inventory?pageSize=1000').then((r: any) => r.data ?? r ?? []).catch(() => []),
-    api.get<any>('/stock-management?pageSize=1000').then((r: any) => r.data ?? r ?? []).catch(() => []),
-    api.get<any>('/stock-management/movements?pageSize=1000').then((r: any) => r.data ?? r ?? []).catch(() => []),
-    api.get<any>('/sales/customers?pageSize=1000').then((r: any) => r.customers ?? r.data ?? []).catch(() => []),
-    api.get<any>('/sales/orders?pageSize=1000').then((r: any) => r.orders ?? r.data ?? []).catch(() => []),
-    api.get<any>('/accounting/accounts').catch(() => []),
-    api.get<any>('/accounting/journal?pageSize=1000').then((r: any) => r.entries ?? r.data ?? []).catch(() => []),
-    api.get<any>('/accounting/einvoice?pageSize=1000').then((r: any) => r.invoices ?? r.data ?? []).catch(() => []),
-    api.get<any>('/hr/employees?pageSize=1000').then((r: any) => r.employees ?? r.data ?? []).catch(() => []),
-    api.get<any>('/hr/leaves?pageSize=1000').then((r: any) => r.leaves ?? r.data ?? []).catch(() => []),
-    api.get<any>('/hr/payroll/periods?pageSize=100').then((r: any) => r.periods ?? r.data ?? []).catch(() => []),
+  const results = await Promise.allSettled([
+    api.get<any>('/departments'),
+    api.get<any>('/users?pageSize=1000'),
+    api.get<any>('/tasks?pageSize=1000'),
+    api.get<any>('/inventory?pageSize=1000'),
+    api.get<any>('/stock-management?pageSize=1000'),
+    api.get<any>('/stock-management/movements?pageSize=1000'),
+    api.get<any>('/sales/customers?pageSize=1000'),
+    api.get<any>('/sales/orders?pageSize=1000'),
+    api.get<any>('/accounting/accounts'),
+    api.get<any>('/accounting/journal?pageSize=1000'),
+    api.get<any>('/accounting/einvoice?pageSize=1000'),
+    api.get<any>('/hr/employees?pageSize=1000'),
+    api.get<any>('/hr/leaves?pageSize=1000'),
+    api.get<any>('/hr/payroll/periods?pageSize=100'),
   ])
 
+  const extract = (i: number) => {
+    const r = results[i]
+    if (r.status === 'rejected') return []
+    return toArray(r.value)
+  }
+
   return {
-    departments, users, tasks, inventory, stockItems, stockMovements,
-    customers, orders, accounts, journal, einvoices,
-    employees, leaves, payrollPeriods,
+    departments:    extract(0),
+    users:          extract(1),
+    tasks:          extract(2),
+    inventory:      extract(3),
+    stockItems:     extract(4),
+    stockMovements: extract(5),
+    customers:      extract(6),
+    orders:         extract(7),
+    accounts:       extract(8),
+    journal:        extract(9),
+    einvoices:      extract(10),
+    employees:      extract(11),
+    leaves:         extract(12),
+    payrollPeriods: extract(13),
   }
 }

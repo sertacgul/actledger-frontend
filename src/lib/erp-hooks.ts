@@ -472,6 +472,22 @@ export async function checkOut(): Promise<any> {
   return api.post('/hr/attendance/check-out')
 }
 
+// ── Barcode Search ──────────────────────────────────────────────────────────
+export async function searchStockByBarcode(barcode: string): Promise<any | null> {
+  try {
+    const res = await api.get<any>(`/stock-management?barcode=${encodeURIComponent(barcode)}&pageSize=1`)
+    const items = res?.data ?? res ?? []
+    const list = Array.isArray(items) ? items : []
+    return list.length > 0 ? list[0] : null
+  } catch {
+    return null
+  }
+}
+
+export async function assignBarcodeToStockItem(stockItemId: string, barcode: string): Promise<void> {
+  await api.patch(`/stock-management/${stockItemId}`, { barcode })
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // MODULE ACCESS HOOKS
 // ═══════════════════════════════════════════════════════════════════════════

@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { ClipboardList, FileSpreadsheet, MessageSquare, UserCircle, Bell, RefreshCw, Wifi, WifiOff, Cpu, MapPin, X, ScanLine, Briefcase, ChevronUp, Loader2 } from 'lucide-react'
+import { ClipboardList, FileSpreadsheet, MessageSquare, UserCircle, Bell, RefreshCw, Wifi, WifiOff, Cpu, MapPin, X, ScanLine, Briefcase, ChevronUp, Loader2, ShoppingCart } from 'lucide-react'
 import { useState, useEffect, useRef, Suspense } from 'react'
 import clsx from 'clsx'
 import { useLanguage } from '../../context/LanguageContext'
@@ -209,6 +209,7 @@ export default function MobileLayout() {
 
   const tabs = [
     { to: '/m/gorevler',  icon: Briefcase,       label: lang === 'tr' ? 'İşler' : 'Work',  group: true },
+    { to: '/m/satis',     icon: ShoppingCart,     label: lang === 'tr' ? 'Satış' : 'Sales' },
     { to: '/m/qr-tarama', icon: ScanLine,        label: 'QR',             highlight: false, qr: true },
     { to: '/m/operiq',    icon: Cpu,             label: 'OperIQ',         highlight: true },
     { to: '/m/mesajlar',  icon: MessageSquare,   label: t('m_nav_messages') },

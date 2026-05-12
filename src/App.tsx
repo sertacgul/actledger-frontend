@@ -54,6 +54,7 @@ const MobileProfile = lazy(() => import('./pages/mobile/MobileProfile'))
 const MobileOperIQ = lazy(() => import('./pages/mobile/MobileOperIQ'))
 const MobileQRScanner = lazy(() => import('./pages/mobile/MobileQRScanner'))
 const MobileWorkOrders = lazy(() => import('./pages/mobile/MobileWorkOrders'))
+const MobilePOS = lazy(() => import('./pages/mobile/MobilePOS'))
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -196,6 +197,7 @@ function AppRoutes() {
           <Route path="operiq"           element={<MobileOperIQ />} />
           <Route path="qr-tarama"       element={<MobileQRScanner />} />
           <Route path="is-siparisleri"  element={<MobileWorkOrders />} />
+          <Route path="satis"           element={<MobilePOS />} />
         </Route>
 
         <Route path="*" element={<StandaloneRedirect><Navigate to="/" replace /></StandaloneRedirect>} />

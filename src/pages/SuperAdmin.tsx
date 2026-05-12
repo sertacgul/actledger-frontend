@@ -3,7 +3,8 @@ import {
   Building2, Users, Shield, Settings, Plus, RefreshCw,
   ChevronRight, Trash2, Edit3, X, Loader2, Activity,
   Search, Filter, Check, AlertTriangle,
-  Smartphone, ClipboardList, LogOut, Lock, ChevronDown,
+  Smartphone, ClipboardList, LogOut, Lock, ChevronDown, Key,
+  ShoppingCart, Calculator, UserCog,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { tokenStore, API_BASE } from '../lib/api'
@@ -76,13 +77,14 @@ interface AuditLog {
 
 // ── Tab type ─────────────────────────────────────────────────────────────────
 
-type SuperAdminTab = 'companies' | 'monitoring' | 'logs' | 'settings'
+type SuperAdminTab = 'companies' | 'monitoring' | 'logs' | 'module-access' | 'settings'
 
 const TABS: { key: SuperAdminTab; icon: typeof Building2; label: string }[] = [
-  { key: 'companies',  icon: Building2,  label: 'Sirketler' },
-  { key: 'monitoring', icon: Activity,   label: 'Izleme' },
-  { key: 'logs',       icon: ClipboardList, label: 'Loglar' },
-  { key: 'settings',   icon: Settings,   label: 'Ayarlar' },
+  { key: 'companies',     icon: Building2,     label: 'Sirketler' },
+  { key: 'monitoring',    icon: Activity,      label: 'Izleme' },
+  { key: 'logs',          icon: ClipboardList, label: 'Loglar' },
+  { key: 'module-access', icon: Key,           label: 'ERP Yetkileri' },
+  { key: 'settings',      icon: Settings,      label: 'Ayarlar' },
 ]
 
 // ── Helper: fetch with auth ──────────────────────────────────────────────────
@@ -230,6 +232,7 @@ export default function SuperAdmin() {
           {tab === 'companies' && <CompaniesTab />}
           {tab === 'monitoring' && <MonitoringTab />}
           {tab === 'logs' && <LogsTab />}
+          {tab === 'module-access' && <ModuleAccessAdminTab />}
           {tab === 'settings' && <SettingsTab />}
         </main>
       </div>
@@ -1321,6 +1324,196 @@ function SettingsTab() {
           </button>
         </div>
       </div>
+    </div>
+  )
+}
+
+// ── Module Access Admin Tab ─────────────────────────────────────────────────
+const MODULES_LIST = [
+  { code: 'SALES', label: 'Satis', icon: ShoppingCart, color: 'text-indigo-500 bg-indigo-50' },
+  { code: 'ACCOUNTING', label: 'Muhasebe', icon: Calculator, color: 'text-emerald-500 bg-emerald-50' },
+  { code: 'HR', label: 'Insan Kaynaklari', icon: UserCog, color: 'text-violet-500 bg-violet-50' },
+]
+
+function ModuleAccessAdminTab() {
+  const [companies, setCompanies] = useState<CompanyItem[]>([])
+  const [selectedCompany, setSelectedCompany] = useState('')
+  const [selectedModule, setSelectedModule] = useState('SALES')
+  const [companyUsers, setCompanyUsers] = useState<{ id: string; name: string; email: string; role: string }[]>([])
+  const [accessList, setAccessList] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+  const [search, setSearch] = useState('')
+
+  // Fetch companies
+  useEffect(() => {
+    saFetch<any>('/super-admin/companies').then(data => {
+      setCompanies((data.data ?? data ?? []).sort((a: any, b: any) => a.name.localeCompare(b.name)))
+    }).catch(() => {})
+  }, [])
+
+  // Fetch company users + access when company or module changes
+  useEffect(() => {
+    if (!selectedCompany) { setCompanyUsers([]); setAccessList([]); return }
+    setLoading(true)
+    Promise.all([
+      saFetch<any>(`/super-admin/companies/${selectedCompany}/users?pageSize=500`),
+      saFetch<any>(`/super-admin/companies/${selectedCompany}/module-access?moduleCode=${selectedModule}`),
+    ]).then(([usersRes, accessRes]) => {
+      setCompanyUsers((usersRes.data ?? usersRes ?? []).map((u: any) => ({ id: u.id, name: u.name, email: u.email, role: u.role })))
+      setAccessList(accessRes.data ?? accessRes ?? [])
+    }).catch(() => {}).finally(() => setLoading(false))
+  }, [selectedCompany, selectedModule])
+
+  const assignedIds = new Set(accessList.map((a: any) => a.userId))
+
+  const handleGrant = async (userId: string) => {
+    try {
+      await saFetch(`/super-admin/companies/${selectedCompany}/module-access`, {
+        method: 'POST',
+        body: JSON.stringify({ userId, moduleCode: selectedModule }),
+      })
+      // Refresh
+      const res = await saFetch<any>(`/super-admin/companies/${selectedCompany}/module-access?moduleCode=${selectedModule}`)
+      setAccessList(res.data ?? res ?? [])
+    } catch (e: any) { alert(e.message) }
+  }
+
+  const handleRevoke = async (accessId: string) => {
+    try {
+      await saFetch(`/super-admin/companies/${selectedCompany}/module-access/${accessId}`, { method: 'DELETE' })
+      setAccessList(accessList.filter((a: any) => a.id !== accessId))
+    } catch (e: any) { alert(e.message) }
+  }
+
+  const handleBulkGrant = async () => {
+    if (!confirm(`Tum firma kullanicilarina ${selectedModule} yetkisi verilsin mi?`)) return
+    try {
+      const userIds = companyUsers.map(u => u.id)
+      await saFetch(`/super-admin/companies/${selectedCompany}/module-access/bulk`, {
+        method: 'POST',
+        body: JSON.stringify({ userIds, moduleCode: selectedModule }),
+      })
+      const res = await saFetch<any>(`/super-admin/companies/${selectedCompany}/module-access?moduleCode=${selectedModule}`)
+      setAccessList(res.data ?? res ?? [])
+    } catch (e: any) { alert(e.message) }
+  }
+
+  const filteredUsers = companyUsers.filter(u => {
+    if (!search) return true
+    const s = search.toLowerCase()
+    return u.name.toLowerCase().includes(s) || u.email.toLowerCase().includes(s)
+  })
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-bold text-white">ERP Modul Yetkileri</h2>
+      <p className="text-sm text-zinc-400">Firma secin, modul secin, kullanicilara yetki verin.</p>
+
+      {/* Company selector */}
+      <select
+        className="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm"
+        value={selectedCompany}
+        onChange={e => setSelectedCompany(e.target.value)}
+      >
+        <option value="">Firma secin...</option>
+        {companies.map(c => (
+          <option key={c.id} value={c.id}>{c.name} ({c.userCount} kullanici)</option>
+        ))}
+      </select>
+
+      {selectedCompany && (
+        <>
+          {/* Module selector */}
+          <div className="flex gap-2">
+            {MODULES_LIST.map(m => (
+              <button
+                key={m.code}
+                onClick={() => setSelectedModule(m.code)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
+                  selectedModule === m.code
+                    ? 'bg-cyan-600 text-white border-cyan-500'
+                    : 'border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                }`}
+              >
+                <m.icon className="w-4 h-4" />
+                {m.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Bulk grant + search */}
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+              <input
+                className="w-full pl-9 pr-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-white text-sm placeholder-zinc-500"
+                placeholder="Kullanici ara..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+            </div>
+            <button
+              onClick={handleBulkGrant}
+              className="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 transition-colors"
+            >
+              Tum Kullanicilara Ver
+            </button>
+          </div>
+
+          {/* Users list */}
+          {loading ? (
+            <div className="text-center py-8 text-zinc-400"><Loader2 className="w-5 h-5 animate-spin mx-auto" /></div>
+          ) : (
+            <div className="rounded-xl border border-zinc-700 overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-zinc-800/50 border-b border-zinc-700">
+                    <th className="text-left px-4 py-2.5 text-zinc-400 font-medium">Kullanici</th>
+                    <th className="text-left px-4 py-2.5 text-zinc-400 font-medium">Rol</th>
+                    <th className="text-center px-4 py-2.5 text-zinc-400 font-medium">{selectedModule}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredUsers.map(u => {
+                    const access = accessList.find((a: any) => a.userId === u.id)
+                    const hasAccess = !!access
+                    return (
+                      <tr key={u.id} className="border-b border-zinc-800 hover:bg-zinc-800/30">
+                        <td className="px-4 py-2.5">
+                          <div className="text-white font-medium">{u.name}</div>
+                          <div className="text-xs text-zinc-500">{u.email}</div>
+                        </td>
+                        <td className="px-4 py-2.5 text-zinc-400 text-xs">{u.role}</td>
+                        <td className="px-4 py-2.5 text-center">
+                          {hasAccess ? (
+                            <button
+                              onClick={() => handleRevoke(access.id)}
+                              className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-medium hover:bg-red-500/20 hover:text-red-400 transition-colors"
+                            >
+                              <Check className="w-3 h-3" /> Yetkili
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleGrant(u.id)}
+                              className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-zinc-700 text-zinc-400 text-xs font-medium hover:bg-cyan-600 hover:text-white transition-colors"
+                            >
+                              <Plus className="w-3 h-3" /> Yetki Ver
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <div className="text-xs text-zinc-500">
+            {accessList.length} / {companyUsers.length} kullanici {selectedModule} modulune yetkili
+          </div>
+        </>
+      )}
     </div>
   )
 }

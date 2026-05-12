@@ -22,11 +22,17 @@ export default function ModuleAccessTab() {
 
   const [search, setSearch] = useState('')
   const [users, setUsers] = useState<{ id: string; name: string; email: string; role: string }[]>([])
+  const [usersLoading, setUsersLoading] = useState(true)
 
   useEffect(() => {
+    setUsersLoading(true)
     api.get<any>('/users?pageSize=500').then((res: any) => {
-      setUsers((res.data ?? res ?? []).map((u: any) => ({ id: u.id, name: u.name, email: u.email, role: u.role })))
-    }).catch(() => {})
+      // api.get returns { data: [...], meta } for paginated, or array directly
+      const list = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : []
+      setUsers(list.map((u: any) => ({ id: u.id, name: u.name ?? '', email: u.email ?? '', role: u.role ?? '' })))
+    }).catch((e) => {
+      console.error('[ModuleAccessTab] Failed to fetch users:', e)
+    }).finally(() => setUsersLoading(false))
   }, [])
 
   const assignedIds = useMemo(() => new Set(accessList.map(a => a.userId)), [accessList])
@@ -91,7 +97,7 @@ export default function ModuleAccessTab() {
       </div>
 
       {/* User list with toggle */}
-      {loading ? (
+      {(loading || usersLoading) ? (
         <div className="text-center py-8 text-[var(--text-3)]">{tr ? 'Yukleniyor...' : 'Loading...'}</div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-[var(--border)]">

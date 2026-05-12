@@ -402,14 +402,14 @@ export default function Settings() {
     { key: 'company',       icon: Building2, label: 'Tercihler' },
     { key: 'security',      icon: Shield,    label: 'Güvenlik'     },
     { key: 'integrations',  icon: Globe,     label: 'Entegrasyonlar' },
-    { key: 'module-access', icon: Key,       label: 'ERP Yetkileri', adminOnly: true },
+    ...(isAdmin ? [{ key: 'module-access' as SettingsTab, icon: Key, label: 'ERP Yetkileri' }] : []),
   ]
 
   return (
     <div className="space-y-5 max-w-3xl">
       {/* Tabs */}
       <div className="flex gap-1 p-1 surface w-fit rounded-xl">
-        {TABS.filter(tab => !tab.adminOnly || isAdmin).map(tab => (
+        {TABS.map(tab => (
           <button
             key={tab.key}
             type="button"
@@ -433,7 +433,7 @@ export default function Settings() {
         {activeTab === 'company'      && <CompanySettings />}
         {activeTab === 'security'     && <SecuritySettings />}
         {activeTab === 'integrations' && <IntegrationsSettings />}
-        {activeTab === 'module-access' && isAdmin && <ModuleAccessTab />}
+        {activeTab === 'module-access' && <ModuleAccessTab />}
       </div>
     </div>
   )

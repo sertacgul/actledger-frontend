@@ -9,7 +9,10 @@ import { useCompany } from '../context/CompanyContext'
 import { useLanguage } from '../context/LanguageContext'
 import { useTheme } from '../context/ThemeContext'
 import { api } from '../lib/api'
-type SettingsTab = 'deployment' | 'company' | 'security' | 'integrations'
+import { useAuth } from '../context/AuthContext'
+import DataExportTab from '../components/settings/DataExportTab'
+
+type SettingsTab = 'deployment' | 'company' | 'security' | 'integrations' | 'data-export'
 
 function Section({ title, description, children }: {
   title: string; description?: string; children: React.ReactNode
@@ -391,11 +394,15 @@ function IntegrationsSettings() {
 export default function Settings() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('deployment')
 
+  const { user } = useAuth()
+  const isGM = ['genel_mudur', 'super_admin', 'gm_yardimcisi', 'direktor'].includes(user?.role ?? '')
+
   const TABS: { key: SettingsTab; icon: typeof Server; label: string }[] = [
     { key: 'deployment',    icon: Server,    label: 'Dağıtım'      },
     { key: 'company',       icon: Building2, label: 'Tercihler' },
     { key: 'security',      icon: Shield,    label: 'Güvenlik'     },
     { key: 'integrations',  icon: Globe,     label: 'Entegrasyonlar' },
+    ...(isGM ? [{ key: 'data-export' as SettingsTab, icon: Shield, label: 'Veri Export Onay' }] : []),
   ]
 
   return (
@@ -426,6 +433,7 @@ export default function Settings() {
         {activeTab === 'company'      && <CompanySettings />}
         {activeTab === 'security'     && <SecuritySettings />}
         {activeTab === 'integrations' && <IntegrationsSettings />}
+        {activeTab === 'data-export' && <DataExportTab />}
       </div>
     </div>
   )

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Check, X } from 'lucide-react'
+import { Plus, Check, X, FileSpreadsheet } from 'lucide-react'
 import clsx from 'clsx'
 import { useLeaves, useEmployees, requestLeave, approveLeave, rejectLeave, cancelLeave } from '../../lib/erp-hooks'
 import { useLanguage } from '../../context/LanguageContext'
@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
 import type { LeaveType } from '../../types/erp'
 import { LEAVE_TYPE_LABELS, LEAVE_STATUS_LABELS, LEAVE_STATUS_STYLES, DATE_FMT } from '../../types/erp'
+import { exportToExcel } from '../../lib/excelExport'
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
 
@@ -71,6 +72,21 @@ export default function LeavesTab() {
           <option value="">{tr ? 'Tum Durumlar' : 'All'}</option>
           {Object.entries(LEAVE_STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
         </select>
+        <button onClick={() => exportToExcel({
+          filename: `izinler_${new Date().toISOString().slice(0, 10)}.xlsx`,
+          sheetName: 'Izinler',
+          columns: [
+            { header: 'Calisan', accessor: (l: any) => l.employee?.user?.name ?? '', width: 24 },
+            { header: 'Izin Turu', accessor: (l: any) => LEAVE_TYPE_LABELS[l.leaveType as keyof typeof LEAVE_TYPE_LABELS] ?? l.leaveType, width: 14 },
+            { header: 'Baslangic', accessor: (l: any) => l.startDate?.slice(0, 10) ?? '', width: 12 },
+            { header: 'Bitis', accessor: (l: any) => l.endDate?.slice(0, 10) ?? '', width: 12 },
+            { header: 'Gun', accessor: (l: any) => l.days, width: 6 },
+            { header: 'Durum', accessor: (l: any) => LEAVE_STATUS_LABELS[l.status as keyof typeof LEAVE_STATUS_LABELS] ?? l.status, width: 12 },
+          ],
+          rows: leaves,
+        })} className="p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--surface)] text-[var(--text-3)]" title="Excel">
+          <FileSpreadsheet className="w-4 h-4" />
+        </button>
         {canManage && (
           <button onClick={() => setCreating(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-500 text-white text-sm font-medium hover:bg-violet-600">
             <Plus className="w-4 h-4" />

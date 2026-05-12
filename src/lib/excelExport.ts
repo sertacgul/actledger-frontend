@@ -60,6 +60,50 @@ export function exportToExcel<T>(opts: {
   XLSX.writeFile(wb, finalName)
 }
 
+// ── Multi-sheet export ──────────────────────────────────────────────────────
+
+export interface SheetData<T = any> {
+  sheetName: string
+  columns: ExcelColumn<T>[]
+  rows: T[]
+}
+
+export function exportMultiSheet(opts: {
+  filename: string
+  sheets: SheetData[]
+}): void {
+  const wb = XLSX.utils.book_new()
+
+  for (const sheet of opts.sheets) {
+    const name = sheet.sheetName.slice(0, 31)
+
+    if (sheet.rows.length === 0) {
+      const ws = XLSX.utils.aoa_to_sheet([sheet.columns.map(c => c.header)])
+      XLSX.utils.book_append_sheet(wb, ws, name)
+      continue
+    }
+
+    const headers = sheet.columns.map(c => c.header)
+    const data = sheet.rows.map(row =>
+      sheet.columns.map(c => {
+        const val = c.accessor(row)
+        if (val === undefined || val === null) return ''
+        if (typeof val === 'boolean') return val ? 'Evet' : 'Hayir'
+        return val
+      })
+    )
+
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...data])
+    ws['!cols'] = sheet.columns.map(c => ({ wch: c.width ?? 16 }))
+    ws['!freeze'] = { xSplit: 0, ySplit: 1 }
+
+    XLSX.utils.book_append_sheet(wb, ws, name)
+  }
+
+  const finalName = opts.filename.endsWith('.xlsx') ? opts.filename : `${opts.filename}.xlsx`
+  XLSX.writeFile(wb, finalName)
+}
+
 /** Quick CSV alternative without xlsx - kept for completeness */
 export function exportToCSV<T>(opts: {
   filename: string

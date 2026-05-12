@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Plus, Search, Pencil, Trash2, ChevronRight, ChevronDown, Database } from 'lucide-react'
+import { Plus, Search, Pencil, Trash2, ChevronRight, ChevronDown, Database, FileSpreadsheet } from 'lucide-react'
 import clsx from 'clsx'
 import { useAccounts, createAccount, updateAccount, deleteAccount, seedDefaultAccounts } from '../../lib/erp-hooks'
 import { useLanguage } from '../../context/LanguageContext'
@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
 import type { AccountingAccount, AccountType } from '../../types/erp'
 import { ACCOUNT_TYPE_LABELS, ACCOUNT_TYPE_STYLES } from '../../types/erp'
+import { exportToExcel } from '../../lib/excelExport'
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
 
@@ -96,6 +97,19 @@ export default function AccountsTab() {
           <option value="">{tr ? 'Tum Tipler' : 'All Types'}</option>
           {Object.entries(ACCOUNT_TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
         </select>
+        <button onClick={() => exportToExcel({
+          filename: `hesap_plani_${new Date().toISOString().slice(0, 10)}.xlsx`,
+          sheetName: 'Hesap Plani',
+          columns: [
+            { header: 'Hesap Kodu', accessor: (a: any) => a.code, width: 12 },
+            { header: 'Hesap Adi', accessor: (a: any) => a.name, width: 28 },
+            { header: 'Tip', accessor: (a: any) => ACCOUNT_TYPE_LABELS[a.accountType as keyof typeof ACCOUNT_TYPE_LABELS] ?? a.accountType, width: 14 },
+            { header: 'Ust Hesap', accessor: (a: any) => a.parentCode ?? '', width: 12 },
+          ],
+          rows: filtered,
+        })} className="p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--surface)] text-[var(--text-3)]" title="Excel">
+          <FileSpreadsheet className="w-4 h-4" />
+        </button>
         {canManage && (
           <>
             {accounts.length === 0 && (

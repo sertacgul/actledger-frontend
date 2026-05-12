@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Bell, RefreshCw, LogOut, ChevronDown, Printer, Sun, Moon, ZoomIn, ZoomOut, RotateCcw, Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { Bell, RefreshCw, LogOut, ChevronDown, Printer, Sun, Moon, ZoomIn, ZoomOut, RotateCcw, Menu, PanelLeftClose, PanelLeftOpen, FileSpreadsheet } from 'lucide-react'
 import clsx from 'clsx'
 import { io, type Socket } from 'socket.io-client'
 import { useAuth } from '../../context/AuthContext'
@@ -7,6 +7,8 @@ import { useCompany } from '../../context/CompanyContext'
 import { useTheme } from '../../context/ThemeContext'
 import { useLanguage } from '../../context/LanguageContext'
 import { useNotifications, markAllNotificationsRead, markNotificationRead, usePrintLog } from '../../lib/hooks'
+import { fetchAllExportData } from '../../lib/erp-hooks'
+import { exportMultiSheet } from '../../lib/excelExport'
 import { tokenStore, SERVER_BASE } from '../../lib/api'
 import LiveClock from '../ui/LiveClock'
 import { FlagTR, FlagUS, FlagRU, FlagDE } from '../ui/Flags'
@@ -24,6 +26,107 @@ export default function Header({ title, subtitle, onMenuClick, onToggleCollapse,
   const [notifOpen, setNotifOpen] = useState(false)
   const [menuOpen,  setMenuOpen]  = useState(false)
   const [syncing,   setSyncing]   = useState(false)
+  const [globalExporting, setGlobalExporting] = useState(false)
+
+  const handleGlobalExport = async () => {
+    setGlobalExporting(true)
+    try {
+      const data = await fetchAllExportData()
+      exportMultiSheet({
+        filename: `ActLedger_TumVeriler_${new Date().toISOString().slice(0, 10)}.xlsx`,
+        sheets: [
+          { sheetName: 'Departmanlar', columns: [
+            { header: 'Ad', accessor: (d: any) => d.name, width: 24 },
+            { header: 'Kod', accessor: (d: any) => d.code, width: 10 },
+          ], rows: data.departments },
+          { sheetName: 'Kullanicilar', columns: [
+            { header: 'Ad', accessor: (u: any) => u.name, width: 24 },
+            { header: 'E-posta', accessor: (u: any) => u.email, width: 28 },
+            { header: 'Rol', accessor: (u: any) => u.role, width: 16 },
+          ], rows: data.users },
+          { sheetName: 'Gorevler', columns: [
+            { header: 'Baslik', accessor: (t: any) => t.title, width: 32 },
+            { header: 'Durum', accessor: (t: any) => t.status, width: 14 },
+            { header: 'Oncelik', accessor: (t: any) => t.priority, width: 12 },
+            { header: 'Tarih', accessor: (t: any) => t.createdAt?.slice(0, 10), width: 12 },
+          ], rows: data.tasks },
+          { sheetName: 'Envanter', columns: [
+            { header: 'Ad', accessor: (i: any) => i.name, width: 28 },
+            { header: 'Kod', accessor: (i: any) => i.code ?? '', width: 14 },
+            { header: 'Tip', accessor: (i: any) => i.type, width: 14 },
+            { header: 'Miktar', accessor: (i: any) => i.quantity, width: 10 },
+          ], rows: data.inventory },
+          { sheetName: 'Stok Durum', columns: [
+            { header: 'Ad', accessor: (s: any) => s.name, width: 28 },
+            { header: 'Kod', accessor: (s: any) => s.code ?? '', width: 14 },
+            { header: 'Miktar', accessor: (s: any) => s.quantity, width: 10 },
+            { header: 'Min', accessor: (s: any) => s.minLevel, width: 8 },
+            { header: 'Kritik', accessor: (s: any) => s.criticalLevel, width: 8 },
+          ], rows: data.stockItems },
+          { sheetName: 'Stok Hareketleri', columns: [
+            { header: 'Tip', accessor: (m: any) => m.type, width: 12 },
+            { header: 'Miktar', accessor: (m: any) => m.quantity, width: 10 },
+            { header: 'Onceki', accessor: (m: any) => m.previousQty, width: 10 },
+            { header: 'Sonraki', accessor: (m: any) => m.newQty, width: 10 },
+            { header: 'Tarih', accessor: (m: any) => m.createdAt?.slice(0, 10), width: 12 },
+          ], rows: data.stockMovements },
+          { sheetName: 'Musteriler', columns: [
+            { header: 'Ad', accessor: (c: any) => c.name, width: 28 },
+            { header: 'Tip', accessor: (c: any) => c.customerType, width: 14 },
+            { header: 'Telefon', accessor: (c: any) => c.phone ?? '', width: 16 },
+            { header: 'Bakiye', accessor: (c: any) => Number(c.balance) || 0, width: 14 },
+          ], rows: data.customers },
+          { sheetName: 'Siparisler', columns: [
+            { header: 'Siparis No', accessor: (o: any) => o.orderNumber, width: 16 },
+            { header: 'Musteri', accessor: (o: any) => o.customer?.name ?? '', width: 24 },
+            { header: 'Durum', accessor: (o: any) => o.status, width: 14 },
+            { header: 'Tutar', accessor: (o: any) => Number(o.totalAmount) || 0, width: 14 },
+          ], rows: data.orders },
+          { sheetName: 'Hesap Plani', columns: [
+            { header: 'Kod', accessor: (a: any) => a.code, width: 12 },
+            { header: 'Ad', accessor: (a: any) => a.name, width: 28 },
+            { header: 'Tip', accessor: (a: any) => a.accountType, width: 14 },
+          ], rows: data.accounts },
+          { sheetName: 'Yevmiye', columns: [
+            { header: 'Fis No', accessor: (j: any) => j.entryNumber, width: 16 },
+            { header: 'Tarih', accessor: (j: any) => j.date?.slice(0, 10), width: 12 },
+            { header: 'Aciklama', accessor: (j: any) => j.description, width: 32 },
+            { header: 'Borc', accessor: (j: any) => Number(j.totalDebit) || 0, width: 14 },
+            { header: 'Alacak', accessor: (j: any) => Number(j.totalCredit) || 0, width: 14 },
+          ], rows: data.journal },
+          { sheetName: 'E-Faturalar', columns: [
+            { header: 'Fatura No', accessor: (i: any) => i.invoiceNumber, width: 16 },
+            { header: 'Alici', accessor: (i: any) => i.receiverName, width: 24 },
+            { header: 'Durum', accessor: (i: any) => i.status, width: 14 },
+            { header: 'Tutar', accessor: (i: any) => Number(i.totalAmount) || 0, width: 14 },
+          ], rows: data.einvoices },
+          { sheetName: 'Calisanlar', columns: [
+            { header: 'Ad', accessor: (e: any) => e.user?.name ?? '', width: 24 },
+            { header: 'Sicil No', accessor: (e: any) => e.employeeNumber, width: 12 },
+            { header: 'Durum', accessor: (e: any) => e.employmentStatus, width: 12 },
+            { header: 'Maas', accessor: (e: any) => Number(e.grossSalary) || 0, width: 14 },
+          ], rows: data.employees },
+          { sheetName: 'Izinler', columns: [
+            { header: 'Calisan', accessor: (l: any) => l.employee?.user?.name ?? '', width: 24 },
+            { header: 'Tur', accessor: (l: any) => l.leaveType, width: 14 },
+            { header: 'Baslangic', accessor: (l: any) => l.startDate?.slice(0, 10), width: 12 },
+            { header: 'Bitis', accessor: (l: any) => l.endDate?.slice(0, 10), width: 12 },
+            { header: 'Gun', accessor: (l: any) => l.days, width: 6 },
+          ], rows: data.leaves },
+          { sheetName: 'Bordro', columns: [
+            { header: 'Donem', accessor: (p: any) => `${p.year}-${String(p.month).padStart(2, '0')}`, width: 10 },
+            { header: 'Durum', accessor: (p: any) => p.status, width: 14 },
+            { header: 'Brut', accessor: (p: any) => Number(p.totalGross) || 0, width: 14 },
+            { header: 'Net', accessor: (p: any) => Number(p.totalNet) || 0, width: 14 },
+          ], rows: data.payrollPeriods },
+        ],
+      })
+    } catch (e: any) {
+      alert(e.message ?? 'Export basarisiz')
+    } finally {
+      setGlobalExporting(false)
+    }
+  }
   const [bellPulse, setBellPulse] = useState(false)
   const socketRef = useRef<Socket | null>(null)
 
@@ -263,6 +366,23 @@ export default function Header({ title, subtitle, onMenuClick, onToggleCollapse,
             <Printer size={13} />
             <span className="hidden lg:inline text-[11px]">{t('header_print_short')}</span>
           </button>
+
+          {/* Global Excel Export */}
+          {['platform_admin', 'super_admin', 'genel_mudur'].includes(user?.role ?? '') && (
+            <button
+              type="button"
+              onClick={handleGlobalExport}
+              disabled={globalExporting}
+              className="btn-ghost btn-sm"
+              title={lang === 'tr' ? 'Toplu Excel Export' : 'Export All Data'}
+            >
+              {globalExporting ? (
+                <svg className="animate-spin w-[13px] h-[13px]" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+              ) : (
+                <FileSpreadsheet size={13} />
+              )}
+            </button>
+          )}
 
           {/* Notifications */}
           <div className="relative">

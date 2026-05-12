@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Search, Pencil, UserX, User } from 'lucide-react'
+import { Plus, Search, Pencil, UserX, User, FileSpreadsheet } from 'lucide-react'
 import clsx from 'clsx'
 import { useEmployees, createEmployee, updateEmployee, terminateEmployee } from '../../lib/erp-hooks'
 import { api } from '../../lib/api'
@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
 import type { HREmployee, EmploymentStatus } from '../../types/erp'
 import { EMPLOYMENT_STATUS_LABELS, EMPLOYMENT_STATUS_STYLES, TRY_FMT, DATE_FMT } from '../../types/erp'
+import { exportToExcel } from '../../lib/excelExport'
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
 
@@ -100,6 +101,22 @@ export default function EmployeesTab() {
           <option value="">{tr ? 'Tum Durumlar' : 'All'}</option>
           {Object.entries(EMPLOYMENT_STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
         </select>
+        <button onClick={() => exportToExcel({
+          filename: `calisanlar_${new Date().toISOString().slice(0, 10)}.xlsx`,
+          sheetName: 'Calisanlar',
+          columns: [
+            { header: 'Ad', accessor: (e: any) => e.user?.name ?? '', width: 24 },
+            { header: 'Sicil No', accessor: (e: any) => e.employeeNumber, width: 12 },
+            { header: 'E-posta', accessor: (e: any) => e.user?.email ?? '', width: 24 },
+            { header: 'Departman', accessor: (e: any) => e.user?.departments?.[0]?.name ?? '', width: 18 },
+            { header: 'Durum', accessor: (e: any) => EMPLOYMENT_STATUS_LABELS[e.employmentStatus as keyof typeof EMPLOYMENT_STATUS_LABELS] ?? e.employmentStatus, width: 12 },
+            { header: 'Brut Maas', accessor: (e: any) => Number(e.grossSalary) || 0, width: 14 },
+            { header: 'Ise Baslama', accessor: (e: any) => e.startDate?.slice(0, 10) ?? '', width: 12 },
+          ],
+          rows: employees,
+        })} className="p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--surface)] text-[var(--text-3)]" title="Excel">
+          <FileSpreadsheet className="w-4 h-4" />
+        </button>
         {canManage && (
           <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-500 text-white text-sm font-medium hover:bg-violet-600">
             <Plus className="w-4 h-4" />

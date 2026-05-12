@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Search, Eye, Check, X, Trash2 } from 'lucide-react'
+import { Plus, Search, Eye, Check, X, Trash2, FileSpreadsheet } from 'lucide-react'
 import clsx from 'clsx'
 import { useJournalEntries, useAccounts, createJournalEntry, approveJournalEntry, cancelJournalEntry } from '../../lib/erp-hooks'
 import { useLanguage } from '../../context/LanguageContext'
@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
 import type { JournalEntry, JournalStatus } from '../../types/erp'
 import { JOURNAL_STATUS_LABELS, JOURNAL_STATUS_STYLES, TRY_FMT, DATE_FMT } from '../../types/erp'
+import { exportToExcel } from '../../lib/excelExport'
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
 
@@ -86,6 +87,21 @@ export default function JournalTab() {
           <option value="">{tr ? 'Tum Durumlar' : 'All'}</option>
           {Object.entries(JOURNAL_STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
         </select>
+        <button onClick={() => exportToExcel({
+          filename: `yevmiye_${new Date().toISOString().slice(0, 10)}.xlsx`,
+          sheetName: 'Yevmiye',
+          columns: [
+            { header: 'Fis No', accessor: (e: any) => e.entryNumber, width: 16 },
+            { header: 'Tarih', accessor: (e: any) => e.date?.slice(0, 10) ?? '', width: 12 },
+            { header: 'Aciklama', accessor: (e: any) => e.description, width: 32 },
+            { header: 'Durum', accessor: (e: any) => JOURNAL_STATUS_LABELS[e.status as keyof typeof JOURNAL_STATUS_LABELS] ?? e.status, width: 12 },
+            { header: 'Borc', accessor: (e: any) => Number(e.totalDebit) || 0, width: 14 },
+            { header: 'Alacak', accessor: (e: any) => Number(e.totalCredit) || 0, width: 14 },
+          ],
+          rows: entries,
+        })} className="p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--surface)] text-[var(--text-3)]" title="Excel">
+          <FileSpreadsheet className="w-4 h-4" />
+        </button>
         {canManage && (
           <button onClick={() => setCreating(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-medium hover:bg-emerald-600">
             <Plus className="w-4 h-4" />

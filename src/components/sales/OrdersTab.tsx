@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Search, Eye, Check, X, Package, Trash2 } from 'lucide-react'
+import { Plus, Search, Eye, Check, X, Package, Trash2, FileSpreadsheet } from 'lucide-react'
 import clsx from 'clsx'
 import {
   useOrders, useCustomers, createOrder, approveOrder, completeOrder, cancelOrder, createPayment,
@@ -9,6 +9,7 @@ import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
 import type { SalesOrder, OrderStatus, PaymentMethod } from '../../types/erp'
 import { ORDER_STATUS_LABELS, ORDER_STATUS_STYLES, PAYMENT_METHOD_LABELS, TRY_FMT, DATE_FMT } from '../../types/erp'
+import { exportToExcel } from '../../lib/excelExport'
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
 
@@ -128,6 +129,20 @@ export default function OrdersTab() {
           <option value="">{tr ? 'Tum Durumlar' : 'All Statuses'}</option>
           {Object.entries(ORDER_STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
         </select>
+        <button onClick={() => exportToExcel({
+          filename: `siparisler_${new Date().toISOString().slice(0, 10)}.xlsx`,
+          sheetName: 'Siparisler',
+          columns: [
+            { header: 'Siparis No', accessor: (o: any) => o.orderNumber, width: 16 },
+            { header: 'Musteri', accessor: (o: any) => o.customer?.name ?? '', width: 24 },
+            { header: 'Durum', accessor: (o: any) => ORDER_STATUS_LABELS[o.status as keyof typeof ORDER_STATUS_LABELS] ?? o.status, width: 14 },
+            { header: 'Tutar', accessor: (o: any) => Number(o.totalAmount) || 0, width: 14 },
+            { header: 'Tarih', accessor: (o: any) => o.createdAt?.slice(0, 10) ?? '', width: 12 },
+          ],
+          rows: orders,
+        })} className="p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--surface)] text-[var(--text-3)]" title="Excel">
+          <FileSpreadsheet className="w-4 h-4" />
+        </button>
         {canManage && (
           <button onClick={() => setCreating(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-500 text-white text-sm font-medium hover:bg-indigo-600 transition-colors">
             <Plus className="w-4 h-4" />

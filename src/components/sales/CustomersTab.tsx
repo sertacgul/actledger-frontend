@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Search, Pencil, Trash2, Phone, Mail, Building2 } from 'lucide-react'
+import { Plus, Search, Pencil, Trash2, Phone, Mail, Building2, FileSpreadsheet } from 'lucide-react'
 import clsx from 'clsx'
 import { useCustomers, createCustomer, updateCustomer, deleteCustomer } from '../../lib/erp-hooks'
 import { useLanguage } from '../../context/LanguageContext'
@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
 import type { SalesCustomer, CustomerType } from '../../types/erp'
 import { CUSTOMER_TYPE_LABELS, TRY_FMT, DATE_FMT } from '../../types/erp'
+import { exportToExcel } from '../../lib/excelExport'
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
 
@@ -111,6 +112,22 @@ export default function CustomersTab() {
             <option key={k} value={k}>{v}</option>
           ))}
         </select>
+        <button onClick={() => exportToExcel({
+          filename: `musteriler_${new Date().toISOString().slice(0, 10)}.xlsx`,
+          sheetName: 'Musteriler',
+          columns: [
+            { header: 'Musteri Adi', accessor: (c: SalesCustomer) => c.name, width: 28 },
+            { header: 'Tip', accessor: (c: SalesCustomer) => CUSTOMER_TYPE_LABELS[c.customerType], width: 14 },
+            { header: 'Telefon', accessor: (c: SalesCustomer) => c.phone ?? '', width: 16 },
+            { header: 'E-posta', accessor: (c: SalesCustomer) => c.email ?? '', width: 24 },
+            { header: 'Vergi No', accessor: (c: SalesCustomer) => c.taxNumber ?? '', width: 14 },
+            { header: 'Bakiye', accessor: (c: SalesCustomer) => Number(c.balance) || 0, width: 14 },
+            { header: 'Tarih', accessor: (c: SalesCustomer) => c.createdAt?.slice(0, 10) ?? '', width: 12 },
+          ],
+          rows: customers,
+        })} className="p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--surface)] text-[var(--text-3)]" title="Excel">
+          <FileSpreadsheet className="w-4 h-4" />
+        </button>
         {canManage && (
           <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-500 text-white text-sm font-medium hover:bg-indigo-600 transition-colors">
             <Plus className="w-4 h-4" />

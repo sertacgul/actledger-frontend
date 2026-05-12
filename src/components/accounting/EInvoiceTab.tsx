@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Search, Eye, Check, Send, X, Trash2, Settings } from 'lucide-react'
+import { Plus, Search, Eye, Check, Send, X, Trash2, Settings, FileSpreadsheet } from 'lucide-react'
 import clsx from 'clsx'
 import {
   useEInvoices, useCustomers, createEInvoice, approveEInvoice, sendEInvoice, cancelEInvoice,
@@ -10,6 +10,7 @@ import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
 import type { EInvoice, EInvoiceType, EInvoiceStatus } from '../../types/erp'
 import { EINVOICE_STATUS_LABELS, EINVOICE_STATUS_STYLES, EINVOICE_TYPE_LABELS, TRY_FMT, DATE_FMT } from '../../types/erp'
+import { exportToExcel } from '../../lib/excelExport'
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
 
@@ -119,6 +120,21 @@ export default function EInvoiceTab() {
           <option value="">{tr ? 'Tum Durumlar' : 'All'}</option>
           {Object.entries(EINVOICE_STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
         </select>
+        <button onClick={() => exportToExcel({
+          filename: `efaturalar_${new Date().toISOString().slice(0, 10)}.xlsx`,
+          sheetName: 'E-Faturalar',
+          columns: [
+            { header: 'Fatura No', accessor: (i: any) => i.invoiceNumber, width: 16 },
+            { header: 'Alici', accessor: (i: any) => i.receiverName, width: 24 },
+            { header: 'Tip', accessor: (i: any) => EINVOICE_TYPE_LABELS[i.type as keyof typeof EINVOICE_TYPE_LABELS] ?? i.type, width: 12 },
+            { header: 'Durum', accessor: (i: any) => EINVOICE_STATUS_LABELS[i.status as keyof typeof EINVOICE_STATUS_LABELS] ?? i.status, width: 14 },
+            { header: 'Tutar', accessor: (i: any) => Number(i.totalAmount) || 0, width: 14 },
+            { header: 'Tarih', accessor: (i: any) => i.issueDate?.slice(0, 10) ?? '', width: 12 },
+          ],
+          rows: invoices,
+        })} className="p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--surface)] text-[var(--text-3)]" title="Excel">
+          <FileSpreadsheet className="w-4 h-4" />
+        </button>
         {canManage && (
           <>
             <button onClick={openConfig} className="p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--surface)] text-[var(--text-3)]">

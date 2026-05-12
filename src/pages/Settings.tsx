@@ -395,7 +395,7 @@ export default function Settings() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('deployment')
 
   const { user } = useAuth()
-  const isAdmin = user?.role === 'platform_admin' || user?.role === 'super_admin'
+  const isAdmin = ['platform_admin', 'super_admin', 'genel_mudur'].includes(user?.role ?? '')
 
   const TABS: { key: SettingsTab; icon: typeof Server; label: string; adminOnly?: boolean }[] = [
     { key: 'deployment',    icon: Server,    label: 'Dağıtım'      },

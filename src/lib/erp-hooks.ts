@@ -466,3 +466,90 @@ export async function checkIn(): Promise<any> {
 export async function checkOut(): Promise<any> {
   return api.post('/hr/attendance/check-out')
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MODULE ACCESS HOOKS
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface ModuleAccessEntry {
+  id: string
+  userId: string
+  moduleCode: string
+  grantedAt: string
+  user: { id: string; name: string; email: string; role: string }
+  grantedBy: { id: string; name: string }
+}
+
+export function useModuleAccess(moduleCode?: string) {
+  const params = new URLSearchParams()
+  if (moduleCode) params.set('moduleCode', moduleCode)
+  const { data, loading, error, refetch } = useFetch<ModuleAccessEntry[]>(
+    () => api.get(`/module-access/my-company${params.toString() ? `?${params}` : ''}`).then((r: any) => r.data ?? r),
+    [moduleCode],
+  )
+  return { accessList: data ?? [], loading, error, refetch }
+}
+
+export async function grantModuleAccessKAM(userId: string, moduleCode: string): Promise<ModuleAccessEntry> {
+  const res = await api.post<any>('/module-access/my-company', { userId, moduleCode })
+  return res.data ?? res
+}
+
+export async function revokeModuleAccessKAM(id: string): Promise<void> {
+  await api.delete(`/module-access/my-company/${id}`)
+}
+
+export async function bulkGrantModuleAccessKAM(userIds: string[], moduleCode: string): Promise<ModuleAccessEntry[]> {
+  const res = await api.post<any>('/module-access/my-company/bulk', { userIds, moduleCode })
+  return res.data ?? res
+}
+
+// ── Super Admin Module Access ───────────────────────────────────────────────
+export function useSuperAdminModuleAccess(companyId: string, moduleCode?: string) {
+  const params = new URLSearchParams()
+  if (moduleCode) params.set('moduleCode', moduleCode)
+  const { data, loading, error, refetch } = useFetch<ModuleAccessEntry[]>(
+    () => companyId ? api.get(`/super-admin/companies/${companyId}/module-access${params.toString() ? `?${params}` : ''}`).then((r: any) => r.data ?? r) : Promise.resolve([]),
+    [companyId, moduleCode],
+  )
+  return { accessList: data ?? [], loading, error, refetch }
+}
+
+export async function grantModuleAccessSuperAdmin(companyId: string, userId: string, moduleCode: string): Promise<ModuleAccessEntry> {
+  const res = await api.post<any>(`/super-admin/companies/${companyId}/module-access`, { userId, moduleCode })
+  return res.data ?? res
+}
+
+export async function revokeModuleAccessSuperAdmin(companyId: string, id: string): Promise<void> {
+  await api.delete(`/super-admin/companies/${companyId}/module-access/${id}`)
+}
+
+// ── Global Export ────────────────────────────────────────────────────────────
+export async function fetchAllExportData() {
+  const [
+    departments, users, tasks, inventory, stockItems, stockMovements,
+    customers, orders, accounts, journal, einvoices,
+    employees, leaves, payrollPeriods,
+  ] = await Promise.all([
+    api.get<any>('/departments').then((r: any) => r.data ?? r ?? []).catch(() => []),
+    api.get<any>('/users?pageSize=1000').then((r: any) => r.data ?? r ?? []).catch(() => []),
+    api.get<any>('/tasks?pageSize=1000').then((r: any) => r.data ?? r ?? []).catch(() => []),
+    api.get<any>('/inventory?pageSize=1000').then((r: any) => r.data ?? r ?? []).catch(() => []),
+    api.get<any>('/stock-management?pageSize=1000').then((r: any) => r.data ?? r ?? []).catch(() => []),
+    api.get<any>('/stock-management/movements?pageSize=1000').then((r: any) => r.data ?? r ?? []).catch(() => []),
+    api.get<any>('/sales/customers?pageSize=1000').then((r: any) => r.customers ?? r.data ?? []).catch(() => []),
+    api.get<any>('/sales/orders?pageSize=1000').then((r: any) => r.orders ?? r.data ?? []).catch(() => []),
+    api.get<any>('/accounting/accounts').catch(() => []),
+    api.get<any>('/accounting/journal?pageSize=1000').then((r: any) => r.entries ?? r.data ?? []).catch(() => []),
+    api.get<any>('/accounting/einvoice?pageSize=1000').then((r: any) => r.invoices ?? r.data ?? []).catch(() => []),
+    api.get<any>('/hr/employees?pageSize=1000').then((r: any) => r.employees ?? r.data ?? []).catch(() => []),
+    api.get<any>('/hr/leaves?pageSize=1000').then((r: any) => r.leaves ?? r.data ?? []).catch(() => []),
+    api.get<any>('/hr/payroll/periods?pageSize=100').then((r: any) => r.periods ?? r.data ?? []).catch(() => []),
+  ])
+
+  return {
+    departments, users, tasks, inventory, stockItems, stockMovements,
+    customers, orders, accounts, journal, einvoices,
+    employees, leaves, payrollPeriods,
+  }
+}

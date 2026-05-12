@@ -39,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (!cancelled) {
             const mapped = mapUser(me)
             mapped.modules = me.modules ?? []
+            mapped.moduleAccess = me.moduleAccess ?? []
             setUser(mapped)
             if (me.company) syncFromBackend(me.company)
           }
@@ -89,6 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const me = await api.get<any>('/auth/me')
         if (me?.company) syncFromBackend(me.company)
         mapped.modules = me?.modules ?? []
+        mapped.moduleAccess = me?.moduleAccess ?? []
         setUser({ ...mapped })
       } catch { /* non-critical */ }
       return mapped
@@ -129,7 +131,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('actledger_user_id')
   }
 
-  const hasModule = (code: string) => user?.modules?.includes(code) ?? false
+  const hasModule = (code: string) => {
+    if (!user) return false
+    const role = user.role?.toUpperCase()
+    // PLATFORM_ADMIN and SUPER_ADMIN see all licensed modules
+    if (role === 'SUPER_ADMIN' || role === 'PLATFORM_ADMIN') {
+      return user.modules?.includes(code) ?? false
+    }
+    // Others see only their assigned modules
+    return user.moduleAccess?.includes(code) ?? false
+  }
 
   return (
     <AuthContext.Provider value={{ user, loading, error, login, mobileLogin, logout, hasModule }}>

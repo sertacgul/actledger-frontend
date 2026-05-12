@@ -9,8 +9,10 @@ import { useCompany } from '../context/CompanyContext'
 import { useLanguage } from '../context/LanguageContext'
 import { useTheme } from '../context/ThemeContext'
 import { api } from '../lib/api'
+import { useAuth } from '../context/AuthContext'
+import ModuleAccessTab from '../components/settings/ModuleAccessTab'
 
-type SettingsTab = 'deployment' | 'company' | 'security' | 'integrations'
+type SettingsTab = 'deployment' | 'company' | 'security' | 'integrations' | 'module-access'
 
 function Section({ title, description, children }: {
   title: string; description?: string; children: React.ReactNode
@@ -392,18 +394,22 @@ function IntegrationsSettings() {
 export default function Settings() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('deployment')
 
-  const TABS: { key: SettingsTab; icon: typeof Server; label: string }[] = [
-    { key: 'deployment',   icon: Server,    label: 'Dağıtım'      },
-    { key: 'company',      icon: Building2, label: 'Tercihler' },
-    { key: 'security',     icon: Shield,    label: 'Güvenlik'     },
-    { key: 'integrations', icon: Globe,     label: 'Entegrasyonlar' },
+  const { user } = useAuth()
+  const isAdmin = user?.role === 'platform_admin' || user?.role === 'super_admin'
+
+  const TABS: { key: SettingsTab; icon: typeof Server; label: string; adminOnly?: boolean }[] = [
+    { key: 'deployment',    icon: Server,    label: 'Dağıtım'      },
+    { key: 'company',       icon: Building2, label: 'Tercihler' },
+    { key: 'security',      icon: Shield,    label: 'Güvenlik'     },
+    { key: 'integrations',  icon: Globe,     label: 'Entegrasyonlar' },
+    { key: 'module-access', icon: Key,       label: 'ERP Yetkileri', adminOnly: true },
   ]
 
   return (
     <div className="space-y-5 max-w-3xl">
       {/* Tabs */}
       <div className="flex gap-1 p-1 surface w-fit rounded-xl">
-        {TABS.map(tab => (
+        {TABS.filter(tab => !tab.adminOnly || isAdmin).map(tab => (
           <button
             key={tab.key}
             type="button"
@@ -427,6 +433,7 @@ export default function Settings() {
         {activeTab === 'company'      && <CompanySettings />}
         {activeTab === 'security'     && <SecuritySettings />}
         {activeTab === 'integrations' && <IntegrationsSettings />}
+        {activeTab === 'module-access' && isAdmin && <ModuleAccessTab />}
       </div>
     </div>
   )

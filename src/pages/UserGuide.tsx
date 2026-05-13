@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { BookOpen, ChevronDown, ChevronRight, Monitor, Smartphone, Layers, BarChart3, ClipboardList, FileText, Map, MessageSquare, Settings, Users, Package, Cpu, Zap, FolderOpen, Shield, Building2, ArrowRight, Bell, HelpCircle, Rocket, Lock, Workflow } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useLanguage } from '../context/LanguageContext'
+import { useAuth } from '../context/AuthContext'
 
 interface SectionItem { q: string; a: string }
 interface Section {
@@ -17,7 +18,7 @@ const PLATFORM_GUIDE_TR: Section[] = [
  items: [
  { q: 'ActLedger nedir ve ne işe yarar?', a: 'ActLedger, işletmenizin tüm operasyonel süreçlerini tek bir platformda yönetmenizi sağlayan kapsamlı bir operasyon yönetim sistemidir. Görev takibi, saha raporları, KPI ölçümü, stok yönetimi, IoT entegrasyonu, canlı harita, iş akışları ve yapay zeka destekli analiz gibi onlarca modülü bir arada sunar.\n\nPlatforma ilk giriş yaptığınızda, yöneticiniz tarafından size atanan rol ve departmana göre erişim yetkiniz belirlenir. Sol taraftaki ana menüden tüm modüllere ulaşabilirsiniz. Üst barda bildirimler, mesajlar ve profil ayarlarına hızlı erişim butonları bulunur.\n\nBaşlamak için aşağıdaki adımları izleyin:\n1. Sol menüden "Kokpit" e tıklayarak dashboard ekranını inceleyin\n2. "Görevler" bölümüne giderek size atanmış görevleri kontrol edin\n3. Profil sayfanızdan bildirim tercihlerinizi ayarlayın\n4. OperIQ asistanına herhangi bir sorunuzu sormak için sağ alttaki sohbet balonuna tıklayın' },
  { q: 'İlk giriş ve şifre belirleme', a: 'Platformu kullanmaya başlamak için yöneticinizin size verdiği e-posta adresi ve geçici şifre ile giriş yapın. Giriş ekranında "E-posta" ve "Şifre" alanlarını doldurun, ardından "Giriş Yap" butonuna basın.\n\nİlk girişte sistem sizden şifrenizi değiştirmenizi isteyecektir. Yeni şifreniz en az 8 karakter uzunluğunda olmalı ve büyük harf, küçük harf, rakam ve özel karakter içermelidir. Şifrenizi belirledikten sonra tekrar giriş yaparak platforma erişebilirsiniz.\n\nŞifrenizi unuttuysanız yöneticinizden (Key Account Manager) yeni şifre talep edin. Platform üzerinde şifre sıfırlama sadece yönetici tarafından yapılabilir.' },
- { q: 'Sol menü ve navigasyon yapısı', a: 'Platformun sol tarafında ana navigasyon menüsü bulunur. Bu menü üzerinden tüm modüllere erişebilirsiniz. Menüdeki ana başlıklar şunlardır:\n\n- Kokpit: Ana dashboard ve özet görünümler\n- Görevler: Görev oluşturma, takip ve yönetim\n- Raporlar: Saha raporları ve analizler\n- KPI Panel: Performans göstergeleri ve hedefler\n- Kullanıcılar: Personel ve departman yönetimi\n- Canlı Harita: Konum takibi ve tesis haritaları\n- IoT Cihazlar: Sensör ve cihaz izleme\n- Stok: Envanter ve malzeme yönetimi\n- Dosyalar: Doküman ve dosya paylaşımı\n- Otomasyon: İş akışları ve otomatik kurallar\n- Mesajlar: Dahili iletişim sistemi\n\nMenüyü daraltmak için sol üstteki hamburger ikonuna tıklayabilirsiniz. Bu sayede çalışma alanınız genişler. Tekrar tıklayarak menüyü açabilirsiniz.' },
+ { q: 'Sol menü ve navigasyon yapısı', a: 'Platformun sol tarafında ana navigasyon menüsü bulunur. Bu menü üzerinden tüm modüllere erişebilirsiniz.\n\nOperasyonlar:\n- Kokpit: Ana dashboard ve özet görünümler\n- Görevler: Görev oluşturma, takip ve yönetim\n- İş Siparişleri: Departmanlar arası iş talep sistemi\n- Raporlar: Saha raporları ve analizler\n- Operasyon & Tesis: Canlı harita ve tesis kat planları\n\nOrganizasyon:\n- Departmanlar: Departman yapısı ve KPI yönetimi\n- Kullanıcılar: Personel yönetimi\n- Dosyalar: Doküman ve dosya paylaşımı\n- Envanter: Demirbaş, tüketim malzemesi, yedek parça\n- Stok Yönetimi: Stok takibi, hareketler ve alarmlar\n- AssetIQ: Yapay zeka destekli envanter analizi\n\nPlatform:\n- KPI Panel: Performans göstergeleri ve hedefler\n- Otomasyon: İş akışları ve otomatik kurallar\n- OperIQ: Yapay zeka analiz ve sohbet\n- Ayarlar: Sistem ve kullanıcı ayarları\n\nERP Modülleri (yetki gerektirir):\n- Satış: Cari hesaplar, teklifler, siparişler, şubeler, POS\n- Muhasebe: Hesap planı, yevmiye, e-fatura, banka, raporlar\n- İnsan Kaynakları: Çalışanlar, izinler, bordro\n\nNot: ERP modülleri sadece yetkilendirilmiş kullanıcılara görünür. Yetki ataması Key Account Manager veya Super Admin tarafından yapılır.\n\nMenüyü daraltmak için sol üstteki hamburger ikonuna tıklayabilirsiniz. Bu sayede çalışma alanınız genişler.' },
  { q: 'OperIQ yapay zeka asistanı nedir?', a: 'OperIQ, ActLedger platformunun içine entegre edilmiş yapay zeka motorudur. Platformda üç farklı OperIQ modülü bulunur:\n\n1. OperIQ Anlık Analiz (sol menüden "İç Görüler"): Şirketinizin operasyonel verilerini analiz eder. Genel özet, verimlilik analizi, risk değerlendirmesi, görev önceliklendirme, departman performansı ve anormallik tespiti yapabilir.\n\n2. OperIQ Asistan (sol menüden "OperIQ"): Doğal dilde soru sorabileceğiniz sohbet arayüzüdür. Görevler, raporlar, KPI ve stok hakkında sorular sorabilirsiniz. Fotoğraf analizi de yapabilir.\n\n3. Görsel Oluşturma (Dashboard içerisinde): Doğal dil ile tarif ettiğiniz grafik ve görselleştirmeleri otomatik oluşturur.\n\nOperIQ, şirketinize özel verileri kullanarak bağlama uygun sonuçlar üretir. Türkçe veya İngilizce kullanabilirsiniz.' },
  { q: 'Dil ve tema ayarları', a: 'ActLedger Türkçe ve İngilizce dillerini destekler. Dili değiştirmek için sağ üst köşedeki profil ikonunuza tıklayın ve dil seçeneklerinden istediğinizi seçin. Dil değişikliği anında uygulanır ve sayfa yenilenmesine gerek kalmaz.\n\nPlatform açık (light) tema ile çalışır. Tüm sayfalar tutarlı ve okunabilir bir tasarımla sunulur. Tarayıcınızın yakınlaştırma (zoom) özelliğini kullanarak metin boyutunu ihtiyacınıza göre ayarlayabilirsiniz (Ctrl + veya Ctrl - kısayolları ile).' },
  ],
@@ -334,12 +335,26 @@ const MOBILE_GUIDE_TR: Section[] = [
 // ── Full English translations (imported from separate file) ──
 import { PLATFORM_GUIDE_EN, MOBILE_GUIDE_EN } from './UserGuide.en'
 
+// ERP paths that require module access
+const ERP_PATH_MODULE: Record<string, string> = {
+ '/satis': 'SALES',
+ '/muhasebe': 'ACCOUNTING',
+ '/insan-kaynaklari': 'HR',
+}
+
 export default function UserGuide() {
  const { lang } = useLanguage()
+ const { hasModule } = useAuth()
  const navigate = useNavigate()
  const [tab, setTab] = useState<'platform' | 'mobile'>('platform')
  const [openSections, setOpenSections] = useState<Set<number>>(new Set([0]))
  const [navTarget, setNavTarget] = useState<string | null>(null)
+
+ const canNavigate = (path: string) => {
+  const moduleCode = ERP_PATH_MODULE[path]
+  if (!moduleCode) return true
+  return hasModule(moduleCode)
+ }
 
  const tr = lang === 'tr'
  const sections = tab === 'platform'
@@ -404,7 +419,7 @@ export default function UserGuide() {
  <p className="text-[12px] text-zinc-500 leading-relaxed whitespace-pre-line">{item.a}</p>
  </div>
  ))}
- {section.path && (
+ {section.path && canNavigate(section.path) && (
  <div className="pl-11 pt-2">
  <button type="button"
  onClick={(e) => { e.stopPropagation(); setNavTarget(section.path!); setTimeout(() => navigate(section.path!), 800) }}

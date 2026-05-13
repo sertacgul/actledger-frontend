@@ -1,18 +1,20 @@
 import { useState } from 'react'
-import { Calculator, List, BookOpen, FileText, BarChart3 } from 'lucide-react'
+import { Calculator, List, BookOpen, FileText, BarChart3, Landmark } from 'lucide-react'
 import clsx from 'clsx'
 import { useLanguage } from '../context/LanguageContext'
 import AccountsTab from '../components/accounting/AccountsTab'
 import JournalTab from '../components/accounting/JournalTab'
 import EInvoiceTab from '../components/accounting/EInvoiceTab'
 import ReportsTab from '../components/accounting/ReportsTab'
+import BankTab from '../components/accounting/BankTab'
 
-type AccTab = 'accounts' | 'journal' | 'einvoice' | 'reports'
+type AccTab = 'accounts' | 'journal' | 'einvoice' | 'bank' | 'reports'
 
 const TABS: { id: AccTab; icon: typeof List; labelTr: string; labelEn: string }[] = [
   { id: 'accounts', icon: List,      labelTr: 'Hesap Plani',  labelEn: 'Chart of Accounts' },
   { id: 'journal',  icon: BookOpen,  labelTr: 'Yevmiye',      labelEn: 'Journal' },
   { id: 'einvoice', icon: FileText,  labelTr: 'E-Fatura',     labelEn: 'E-Invoice' },
+  { id: 'bank',     icon: Landmark,  labelTr: 'Banka',        labelEn: 'Bank' },
   { id: 'reports',  icon: BarChart3, labelTr: 'Raporlar',     labelEn: 'Reports' },
 ]
 
@@ -57,6 +59,7 @@ export default function Accounting() {
       {tab === 'accounts' && <AccountsTab />}
       {tab === 'journal' && <JournalTab />}
       {tab === 'einvoice' && <EInvoiceTab />}
+      {tab === 'bank' && <BankTab />}
       {tab === 'reports' && <ReportsTab />}
     </div>
   )

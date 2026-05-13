@@ -255,6 +255,48 @@ export async function posCheckout(body: {
 // ACCOUNTING HOOKS
 // ═══════════════════════════════════════════════════════════════════════════
 
+// ── Bank Accounts ───────────────────────────────────────────────────────────
+export function useBankAccounts() {
+  const { data, loading, error, refetch } = useFetch<any>(
+    () => api.get('/accounting/bank-accounts'),
+    [],
+  )
+  const accounts = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : []
+  return { bankAccounts: accounts, loading, error, refetch }
+}
+
+export async function createBankAccount(body: { name: string; bankName: string; accountNumber?: string; iban?: string; currency?: string; accountCode?: string }): Promise<any> {
+  const res = await api.post<any>('/accounting/bank-accounts', body)
+  return res.data ?? res
+}
+
+export async function updateBankAccount(id: string, body: any): Promise<any> {
+  return api.patch(`/accounting/bank-accounts/${id}`, body)
+}
+
+export async function deleteBankAccount(id: string): Promise<void> {
+  await api.delete(`/accounting/bank-accounts/${id}`)
+}
+
+export function useBankTransactions(bankAccountId: string) {
+  const { data, loading, error, refetch } = useFetch<any>(
+    () => bankAccountId ? api.get(`/accounting/bank-accounts/${bankAccountId}/transactions?pageSize=100`) : Promise.resolve({ data: [] }),
+    [bankAccountId],
+  )
+  const transactions = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : []
+  return { transactions, total: data?.meta?.total ?? 0, loading, error, refetch }
+}
+
+export async function createBankTransaction(bankAccountId: string, body: { type: string; amount: number; date: string; description: string; reference?: string; category?: string; customerId?: string }): Promise<any> {
+  const res = await api.post<any>(`/accounting/bank-accounts/${bankAccountId}/transactions`, body)
+  return res.data ?? res
+}
+
+export async function reconcileTransaction(transactionId: string): Promise<any> {
+  const res = await api.post<any>(`/accounting/bank-transactions/${transactionId}/reconcile`)
+  return res.data ?? res
+}
+
 // ── Accounts ────────────────────────────────────────────────────────────────
 export function useAccounts() {
   const { data, loading, error, refetch } = useFetch<AccountingAccount[]>(

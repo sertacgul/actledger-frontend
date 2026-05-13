@@ -25,7 +25,8 @@ export default function EInvoiceTab() {
 
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
-  const { invoices, loading, refetch } = useEInvoices({ search: search || undefined, status: statusFilter || undefined })
+  const [directionFilter, setDirectionFilter] = useState<'' | 'GIDEN' | 'GELEN'>('')
+  const { invoices, loading, refetch } = useEInvoices({ search: search || undefined, status: statusFilter || undefined, direction: directionFilter || undefined })
   const { customers } = useCustomers()
   const { config: einvoiceConfig, refetch: refetchConfig } = useEInvoiceConfig()
 
@@ -34,11 +35,18 @@ export default function EInvoiceTab() {
   const [configOpen, setConfigOpen] = useState(false)
   const [saving, setSaving] = useState(false)
 
+  const [invoiceDirection, setInvoiceDirection] = useState<'GIDEN' | 'GELEN'>('GIDEN')
   const [invoiceType, setInvoiceType] = useState<EInvoiceType>('SATIS')
   const [customerId, setCustomerId] = useState('')
   const [issueDate, setIssueDate] = useState(new Date().toISOString().slice(0, 10))
   const [notes, setNotes] = useState('')
+  const [addToStock, setAddToStock] = useState(false)
   const [lines, setLines] = useState<InvoiceLineForm[]>([{ ...EMPTY_LINE }])
+
+  // Filter customers based on direction
+  const filteredCustomers = invoiceDirection === 'GELEN'
+    ? customers.filter(c => ['TEDARIKCI', 'HER_IKISI'].includes(c.customerType))
+    : customers
 
   const [cfgIntegrator, setCfgIntegrator] = useState('')
   const [cfgApiUrl, setCfgApiUrl] = useState('')
@@ -58,6 +66,7 @@ export default function EInvoiceTab() {
     try {
       await createEInvoice({
         type: invoiceType,
+        direction: invoiceDirection,
         customerId,
         issueDate: toISO(issueDate),
         notes: notes || undefined,
@@ -116,6 +125,11 @@ export default function EInvoiceTab() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-4)]" />
           <input className="input pl-9 w-full" placeholder={tr ? 'Fatura ara...' : 'Search invoices...'} value={search} onChange={e => setSearch(e.target.value)} />
         </div>
+        <div className="flex gap-0.5 p-0.5 rounded-lg bg-[var(--surface)] border border-[var(--border)]">
+          <button onClick={() => setDirectionFilter('')} className={clsx('px-3 py-1.5 rounded-md text-xs font-medium transition-colors', !directionFilter ? 'bg-emerald-500 text-white' : 'text-[var(--text-3)] hover:text-[var(--text-1)]')}>{tr ? 'Tumu' : 'All'}</button>
+          <button onClick={() => setDirectionFilter('GIDEN')} className={clsx('px-3 py-1.5 rounded-md text-xs font-medium transition-colors', directionFilter === 'GIDEN' ? 'bg-blue-500 text-white' : 'text-[var(--text-3)] hover:text-[var(--text-1)]')}>{tr ? 'Giden' : 'Out'}</button>
+          <button onClick={() => setDirectionFilter('GELEN')} className={clsx('px-3 py-1.5 rounded-md text-xs font-medium transition-colors', directionFilter === 'GELEN' ? 'bg-amber-500 text-white' : 'text-[var(--text-3)] hover:text-[var(--text-1)]')}>{tr ? 'Gelen' : 'In'}</button>
+        </div>
         <select className="select" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
           <option value="">{tr ? 'Tum Durumlar' : 'All'}</option>
           {Object.entries(EINVOICE_STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
@@ -140,9 +154,13 @@ export default function EInvoiceTab() {
             <button onClick={openConfig} className="p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--surface)] text-[var(--text-3)]">
               <Settings className="w-4 h-4" />
             </button>
-            <button onClick={() => setCreating(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-medium hover:bg-emerald-600">
+            <button onClick={() => { setInvoiceDirection('GIDEN'); setCreating(true) }} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-medium hover:bg-emerald-600">
               <Plus className="w-4 h-4" />
-              {tr ? 'Yeni E-Fatura' : 'New E-Invoice'}
+              {tr ? 'Satis Faturasi' : 'Sales Invoice'}
+            </button>
+            <button onClick={() => { setInvoiceDirection('GELEN'); setAddToStock(false); setCreating(true) }} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium hover:bg-amber-600">
+              <Plus className="w-4 h-4" />
+              {tr ? 'Alis Faturasi' : 'Purchase Invoice'}
             </button>
           </>
         )}
@@ -185,7 +203,7 @@ export default function EInvoiceTab() {
 
       {creating && (
         <DraggableModal
-          title={tr ? 'Yeni E-Fatura' : 'New E-Invoice'}
+          title={invoiceDirection === 'GELEN' ? (tr ? 'Yeni Alis Faturasi' : 'New Purchase Invoice') : (tr ? 'Yeni Satis Faturasi' : 'New Sales Invoice')}
           onClose={() => setCreating(false)}
           width={680}
           footer={
@@ -206,10 +224,10 @@ export default function EInvoiceTab() {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Musteri *' : 'Customer *'}</label>
+                <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{invoiceDirection === 'GELEN' ? (tr ? 'Tedarikci *' : 'Supplier *') : (tr ? 'Musteri *' : 'Customer *')}</label>
                 <select className="select w-full" value={customerId} onChange={e => setCustomerId(e.target.value)}>
                   <option value="">{tr ? 'Sec...' : 'Select...'}</option>
-                  {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  {filteredCustomers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
               <div>

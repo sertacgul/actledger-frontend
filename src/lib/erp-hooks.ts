@@ -294,8 +294,8 @@ export function useEInvoices(filter: EInvoiceFilter = {}) {
 }
 
 export async function createEInvoice(body: {
-  type: string; customerId: string; issueDate: string; currency?: string; notes?: string
-  lines: { productName: string; unit: string; quantity: number; unitPrice: number; taxRate: number }[]
+  type: string; direction?: string; customerId: string; issueDate: string; currency?: string; notes?: string
+  lines: { productName: string; unit: string; quantity: number; unitPrice: number; taxRate: number; stockItemId?: string }[]
 }): Promise<EInvoice> {
   return api.post<EInvoice>('/accounting/einvoice', body)
 }

@@ -32,12 +32,14 @@ export const DATETIME_FMT = (d: string | undefined | null) => {
 
 // ── Sales Types ─────────────────────────────────────────────────────────────
 
-export type CustomerType = 'PERAKENDE' | 'TOPTAN' | 'KURUMSAL'
+export type CustomerType = 'PERAKENDE' | 'TOPTAN' | 'KURUMSAL' | 'TEDARIKCI' | 'HER_IKISI'
 
 export const CUSTOMER_TYPE_LABELS: Record<CustomerType, string> = {
   PERAKENDE: 'Perakende',
   TOPTAN: 'Toptan',
   KURUMSAL: 'Kurumsal',
+  TEDARIKCI: 'Tedarikci',
+  HER_IKISI: 'Musteri & Tedarikci',
 }
 
 export interface SalesCustomer {

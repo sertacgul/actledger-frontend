@@ -131,7 +131,7 @@ export default function CustomersTab() {
         {canManage && (
           <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-500 text-white text-sm font-medium hover:bg-indigo-600 transition-colors">
             <Plus className="w-4 h-4" />
-            {tr ? 'Yeni Musteri' : 'New Customer'}
+            {tr ? 'Yeni Cari Hesap' : 'New Account'}
           </button>
         )}
       </div>

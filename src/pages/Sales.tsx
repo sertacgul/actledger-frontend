@@ -10,7 +10,7 @@ import BranchesTab from '../components/sales/BranchesTab'
 type SalesTab = 'customers' | 'orders' | 'branches' | 'pos'
 
 const TABS: { id: SalesTab; icon: typeof Users; labelTr: string; labelEn: string }[] = [
-  { id: 'customers', icon: Users,    labelTr: 'Musteriler',  labelEn: 'Customers' },
+  { id: 'customers', icon: Users,    labelTr: 'Cari Hesaplar', labelEn: 'Accounts' },
   { id: 'orders',    icon: FileText, labelTr: 'Siparisler',  labelEn: 'Orders' },
   { id: 'branches',  icon: Store,    labelTr: 'Subeler & Kasalar', labelEn: 'Branches & Tills' },
   { id: 'pos',       icon: Monitor,  labelTr: 'POS',         labelEn: 'POS' },

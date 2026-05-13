@@ -111,7 +111,7 @@ export default function PayrollTab() {
         <DraggableModal
           title={tr ? 'Yeni Bordro Donemi' : 'New Payroll Period'}
           onClose={() => setCreating(false)}
-          width={360}
+          width={420}
           footer={
             <div className="flex gap-2 justify-end">
               <button onClick={() => setCreating(false)} className="px-4 py-2 rounded-lg text-sm text-[var(--text-2)] hover:bg-[var(--surface)]">{tr ? 'Iptal' : 'Cancel'}</button>

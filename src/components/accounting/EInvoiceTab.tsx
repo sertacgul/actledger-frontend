@@ -9,7 +9,7 @@ import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
 import type { EInvoice, EInvoiceType, EInvoiceStatus } from '../../types/erp'
-import { EINVOICE_STATUS_LABELS, EINVOICE_STATUS_STYLES, EINVOICE_TYPE_LABELS, TRY_FMT, DATE_FMT, toISO } from '../../types/erp'
+import { EINVOICE_STATUS_LABELS, EINVOICE_STATUS_STYLES, EINVOICE_TYPE_LABELS, TRY_FMT, DATE_FMT, DATE_CELL, toISO } from '../../types/erp'
 import { exportToExcel } from '../../lib/excelExport'
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
@@ -143,7 +143,7 @@ export default function EInvoiceTab() {
             { header: 'Tip', accessor: (i: any) => EINVOICE_TYPE_LABELS[i.type as keyof typeof EINVOICE_TYPE_LABELS] ?? i.type, width: 12 },
             { header: 'Durum', accessor: (i: any) => EINVOICE_STATUS_LABELS[i.status as keyof typeof EINVOICE_STATUS_LABELS] ?? i.status, width: 14 },
             { header: 'Tutar', accessor: (i: any) => Number(i.totalAmount) || 0, width: 14 },
-            { header: 'Tarih', accessor: (i: any) => i.issueDate?.slice(0, 10) ?? '', width: 12 },
+            { header: 'Tarih', accessor: (i: any) => DATE_CELL(i.issueDate), width: 12 },
           ],
           rows: invoices,
         })} className="p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--surface)] text-[var(--text-3)]" title="Excel">
@@ -361,7 +361,7 @@ export default function EInvoiceTab() {
           title={tr ? 'E-Fatura Ayarlari' : 'E-Invoice Settings'}
           icon={<Settings className="w-5 h-5 text-emerald-500" />}
           onClose={() => setConfigOpen(false)}
-          width={460}
+          width={520}
           footer={
             <div className="flex gap-2 justify-end">
               <button onClick={() => setConfigOpen(false)} className="px-4 py-2 rounded-lg text-sm text-[var(--text-2)] hover:bg-[var(--surface)]">{tr ? 'Iptal' : 'Cancel'}</button>

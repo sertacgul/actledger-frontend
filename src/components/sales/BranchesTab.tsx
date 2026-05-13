@@ -143,7 +143,7 @@ export default function BranchesTab() {
           title={editingBranch ? (tr ? 'Sube Duzenle' : 'Edit Branch') : (tr ? 'Yeni Sube' : 'New Branch')}
           icon={<Store className="w-5 h-5 text-indigo-500" />}
           onClose={() => setBranchModal(false)}
-          width={460}
+          width={520}
           footer={
             <div className="flex justify-end gap-2">
               <button onClick={() => setBranchModal(false)} className="px-4 py-2 rounded-lg text-sm text-[var(--text-2)] hover:bg-[var(--surface)]">{tr ? 'Iptal' : 'Cancel'}</button>
@@ -178,7 +178,7 @@ export default function BranchesTab() {
 
       {/* Till Modal */}
       {tillModal && (
-        <DraggableModal title={tr ? 'Yeni Kasa' : 'New Till'} onClose={() => setTillModal(false)} width={360}
+        <DraggableModal title={tr ? 'Yeni Kasa' : 'New Till'} onClose={() => setTillModal(false)} width={420}
           footer={
             <div className="flex justify-end gap-2">
               <button onClick={() => setTillModal(false)} className="px-4 py-2 rounded-lg text-sm text-[var(--text-2)]">{tr ? 'Iptal' : 'Cancel'}</button>
@@ -195,7 +195,7 @@ export default function BranchesTab() {
 
       {/* Open Till Modal */}
       {openingTillId && (
-        <DraggableModal title={tr ? 'Kasa Ac' : 'Open Till'} onClose={() => setOpeningTillId(null)} width={360}
+        <DraggableModal title={tr ? 'Kasa Ac' : 'Open Till'} onClose={() => setOpeningTillId(null)} width={420}
           footer={
             <div className="flex justify-end gap-2">
               <button onClick={() => setOpeningTillId(null)} className="px-4 py-2 rounded-lg text-sm text-[var(--text-2)]">{tr ? 'Iptal' : 'Cancel'}</button>
@@ -212,7 +212,7 @@ export default function BranchesTab() {
 
       {/* Close Till Modal */}
       {closingTillId && (
-        <DraggableModal title={tr ? 'Kasa Kapat' : 'Close Till'} onClose={() => setClosingTillId(null)} width={360}
+        <DraggableModal title={tr ? 'Kasa Kapat' : 'Close Till'} onClose={() => setClosingTillId(null)} width={420}
           footer={
             <div className="flex justify-end gap-2">
               <button onClick={() => setClosingTillId(null)} className="px-4 py-2 rounded-lg text-sm text-[var(--text-2)]">{tr ? 'Iptal' : 'Cancel'}</button>

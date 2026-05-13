@@ -22,7 +22,22 @@ export const NUM_FMT = (n: number | string | undefined | null) => {
 
 export const DATE_FMT = (d: string | undefined | null) => {
   if (!d) return '-'
-  return new Date(d).toLocaleDateString('tr-TR')
+  const dt = new Date(d)
+  if (isNaN(dt.getTime())) return '-'
+  const day = String(dt.getDate()).padStart(2, '0')
+  const month = String(dt.getMonth() + 1).padStart(2, '0')
+  const year = dt.getFullYear()
+  return `${day}/${month}/${year}`
+}
+
+/** For Excel export - DD/MM/YYYY */
+export const DATE_CELL = (d: string | undefined | null) => {
+  if (!d) return ''
+  const dt = new Date(d)
+  if (isNaN(dt.getTime())) return ''
+  const day = String(dt.getDate()).padStart(2, '0')
+  const month = String(dt.getMonth() + 1).padStart(2, '0')
+  return `${day}/${month}/${dt.getFullYear()}`
 }
 
 export const DATETIME_FMT = (d: string | undefined | null) => {

@@ -6,7 +6,7 @@ import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
 import type { LeaveType } from '../../types/erp'
-import { LEAVE_TYPE_LABELS, LEAVE_STATUS_LABELS, LEAVE_STATUS_STYLES, DATE_FMT, toISO } from '../../types/erp'
+import { LEAVE_TYPE_LABELS, LEAVE_STATUS_LABELS, LEAVE_STATUS_STYLES, DATE_FMT, DATE_CELL, toISO } from '../../types/erp'
 import { exportToExcel } from '../../lib/excelExport'
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
@@ -78,8 +78,8 @@ export default function LeavesTab() {
           columns: [
             { header: 'Calisan', accessor: (l: any) => l.employee?.user?.name ?? '', width: 24 },
             { header: 'Izin Turu', accessor: (l: any) => LEAVE_TYPE_LABELS[l.leaveType as keyof typeof LEAVE_TYPE_LABELS] ?? l.leaveType, width: 14 },
-            { header: 'Baslangic', accessor: (l: any) => l.startDate?.slice(0, 10) ?? '', width: 12 },
-            { header: 'Bitis', accessor: (l: any) => l.endDate?.slice(0, 10) ?? '', width: 12 },
+            { header: 'Baslangic', accessor: (l: any) => DATE_CELL(l.startDate), width: 12 },
+            { header: 'Bitis', accessor: (l: any) => DATE_CELL(l.endDate), width: 12 },
             { header: 'Gun', accessor: (l: any) => l.days, width: 6 },
             { header: 'Durum', accessor: (l: any) => LEAVE_STATUS_LABELS[l.status as keyof typeof LEAVE_STATUS_LABELS] ?? l.status, width: 12 },
           ],
@@ -155,7 +155,7 @@ export default function LeavesTab() {
         <DraggableModal
           title={tr ? 'Izin Talebi' : 'Leave Request'}
           onClose={() => setCreating(false)}
-          width={460}
+          width={520}
           footer={
             <div className="flex gap-2 justify-end">
               <button onClick={() => setCreating(false)} className="px-4 py-2 rounded-lg text-sm text-[var(--text-2)] hover:bg-[var(--surface)]">{tr ? 'Iptal' : 'Cancel'}</button>
@@ -201,7 +201,7 @@ export default function LeavesTab() {
         <DraggableModal
           title={tr ? 'Izin Reddi' : 'Reject Leave'}
           onClose={() => setRejectingId(null)}
-          width={400}
+          width={420}
           footer={
             <div className="flex gap-2 justify-end">
               <button onClick={() => setRejectingId(null)} className="px-4 py-2 rounded-lg text-sm text-[var(--text-2)] hover:bg-[var(--surface)]">{tr ? 'Iptal' : 'Cancel'}</button>

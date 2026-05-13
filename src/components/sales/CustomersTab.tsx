@@ -6,7 +6,7 @@ import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
 import type { SalesCustomer, CustomerType } from '../../types/erp'
-import { CUSTOMER_TYPE_LABELS, TRY_FMT, DATE_FMT } from '../../types/erp'
+import { CUSTOMER_TYPE_LABELS, TRY_FMT, DATE_FMT, DATE_CELL } from '../../types/erp'
 import { exportToExcel } from '../../lib/excelExport'
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
@@ -122,7 +122,7 @@ export default function CustomersTab() {
             { header: 'E-posta', accessor: (c: SalesCustomer) => c.email ?? '', width: 24 },
             { header: 'Vergi No', accessor: (c: SalesCustomer) => c.taxNumber ?? '', width: 14 },
             { header: 'Bakiye', accessor: (c: SalesCustomer) => Number(c.balance) || 0, width: 14 },
-            { header: 'Tarih', accessor: (c: SalesCustomer) => c.createdAt?.slice(0, 10) ?? '', width: 12 },
+            { header: 'Tarih', accessor: (c: SalesCustomer) => DATE_CELL(c.createdAt), width: 12 },
           ],
           rows: customers,
         })} className="p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--surface)] text-[var(--text-3)]" title="Excel">
@@ -196,7 +196,7 @@ export default function CustomersTab() {
           subtitle={editing ? editing.name : undefined}
           icon={<Building2 className="w-5 h-5 text-indigo-500" />}
           onClose={() => { setCreating(false); setEditing(null) }}
-          width={520}
+          width={600}
           footer={
             <div className="flex justify-end gap-2">
               <button onClick={() => { setCreating(false); setEditing(null) }} className="px-4 py-2 rounded-lg text-sm text-[var(--text-2)] hover:bg-[var(--surface)] transition-colors">

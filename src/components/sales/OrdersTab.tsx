@@ -8,7 +8,7 @@ import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
 import type { SalesOrder, OrderStatus, PaymentMethod } from '../../types/erp'
-import { ORDER_STATUS_LABELS, ORDER_STATUS_STYLES, PAYMENT_METHOD_LABELS, TRY_FMT, DATE_FMT } from '../../types/erp'
+import { ORDER_STATUS_LABELS, ORDER_STATUS_STYLES, PAYMENT_METHOD_LABELS, TRY_FMT, DATE_FMT, DATE_CELL } from '../../types/erp'
 import { exportToExcel } from '../../lib/excelExport'
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
@@ -162,7 +162,7 @@ export default function OrdersTab() {
             { header: 'Musteri', accessor: (o: any) => o.customer?.name ?? '', width: 24 },
             { header: 'Durum', accessor: (o: any) => ORDER_STATUS_LABELS[o.status as keyof typeof ORDER_STATUS_LABELS] ?? o.status, width: 14 },
             { header: 'Tutar', accessor: (o: any) => Number(o.totalAmount) || 0, width: 14 },
-            { header: 'Tarih', accessor: (o: any) => o.createdAt?.slice(0, 10) ?? '', width: 12 },
+            { header: 'Tarih', accessor: (o: any) => DATE_CELL(o.createdAt), width: 12 },
           ],
           rows: orders,
         })} className="p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--surface)] text-[var(--text-3)]" title="Excel">
@@ -375,7 +375,7 @@ export default function OrdersTab() {
           title={tr ? 'Odeme Al' : 'Add Payment'}
           subtitle={payingOrder.orderNumber}
           onClose={() => setPayingOrder(null)}
-          width={400}
+          width={420}
           footer={
             <div className="flex gap-2 justify-end">
               <button onClick={() => setPayingOrder(null)} className="px-4 py-2 rounded-lg text-sm text-[var(--text-2)] hover:bg-[var(--surface)]">{tr ? 'Iptal' : 'Cancel'}</button>
@@ -409,7 +409,7 @@ export default function OrdersTab() {
           title={tr ? 'Siparisi Tamamla' : 'Complete Order'}
           subtitle={completingOrder.orderNumber}
           onClose={() => setCompletingOrder(null)}
-          width={400}
+          width={420}
           footer={
             <div className="flex gap-2 justify-end">
               <button onClick={() => setCompletingOrder(null)} className="px-4 py-2 rounded-lg text-sm text-[var(--text-2)] hover:bg-[var(--surface)]">{tr ? 'Iptal' : 'Cancel'}</button>

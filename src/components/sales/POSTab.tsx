@@ -211,7 +211,7 @@ export default function POSTab() {
           subtitle={receipt.orderNumber}
           icon={<Receipt className="w-5 h-5 text-emerald-500" />}
           onClose={() => setReceipt(null)}
-          width={360}
+          width={420}
         >
           <div className="p-4 font-mono text-sm space-y-3">
             <div className="text-center">

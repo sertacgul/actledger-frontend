@@ -5,7 +5,7 @@ import { useQuotes, useCustomers, createQuote, sendQuote, approveQuote, rejectQu
 import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
-import { TRY_FMT, DATE_FMT, toISO } from '../../types/erp'
+import { TRY_FMT, DATE_FMT, DATE_CELL, toISO } from '../../types/erp'
 import { exportToExcel } from '../../lib/excelExport'
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
@@ -103,7 +103,7 @@ export default function QuotesTab() {
             { header: 'Musteri', accessor: (q: any) => q.customer?.name ?? '', width: 24 },
             { header: 'Durum', accessor: (q: any) => STATUS_LABELS[q.status] ?? q.status, width: 16 },
             { header: 'Tutar', accessor: (q: any) => Number(q.totalAmount) || 0, width: 14 },
-            { header: 'Tarih', accessor: (q: any) => q.createdAt?.slice(0, 10) ?? '', width: 12 },
+            { header: 'Tarih', accessor: (q: any) => DATE_CELL(q.createdAt), width: 12 },
           ], rows: quotes,
         })} className="p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--surface)] text-[var(--text-3)]" title="Excel">
           <FileSpreadsheet className="w-4 h-4" />

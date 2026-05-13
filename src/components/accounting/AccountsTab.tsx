@@ -180,7 +180,7 @@ export default function AccountsTab() {
         <DraggableModal
           title={editing ? (tr ? 'Hesap Duzenle' : 'Edit Account') : (tr ? 'Yeni Hesap' : 'New Account')}
           onClose={() => { setCreating(false); setEditing(null) }}
-          width={460}
+          width={520}
           footer={
             <div className="flex justify-end gap-2">
               <button onClick={() => { setCreating(false); setEditing(null) }} className="px-4 py-2 rounded-lg text-sm text-[var(--text-2)] hover:bg-[var(--surface)]">{tr ? 'Iptal' : 'Cancel'}</button>

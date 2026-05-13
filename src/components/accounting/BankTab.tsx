@@ -9,7 +9,7 @@ import {
 import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
-import { TRY_FMT, DATE_FMT, toISO } from '../../types/erp'
+import { TRY_FMT, DATE_FMT, DATE_CELL, toISO } from '../../types/erp'
 import { exportToExcel } from '../../lib/excelExport'
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
@@ -142,7 +142,7 @@ export default function BankTab() {
               <button onClick={() => exportToExcel({
                 filename: `banka_${selectedAccount?.name}_${new Date().toISOString().slice(0, 10)}.xlsx`, sheetName: 'Hareketler',
                 columns: [
-                  { header: 'Tarih', accessor: (t: any) => t.date?.slice(0, 10) ?? '', width: 12 },
+                  { header: 'Tarih', accessor: (t: any) => DATE_CELL(t.date), width: 12 },
                   { header: 'Tip', accessor: (t: any) => t.type === 'GIRIS' ? 'Giris' : 'Cikis', width: 8 },
                   { header: 'Tutar', accessor: (t: any) => Number(t.amount) || 0, width: 14 },
                   { header: 'Aciklama', accessor: (t: any) => t.description, width: 28 },
@@ -237,7 +237,7 @@ export default function BankTab() {
 
       {/* Transaction Modal */}
       {txModal && (
-        <DraggableModal title={tr ? 'Yeni Hareket' : 'New Transaction'} onClose={() => setTxModal(false)} width={440}
+        <DraggableModal title={tr ? 'Yeni Hareket' : 'New Transaction'} onClose={() => setTxModal(false)} width={520}
           footer={<div className="flex justify-end gap-2">
             <button onClick={() => setTxModal(false)} className="px-4 py-2 rounded-lg text-sm text-[var(--text-2)]">{tr ? 'Iptal' : 'Cancel'}</button>
             <button onClick={handleCreateTx} disabled={saving || !txForm.amount || !txForm.description} className="px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-medium disabled:opacity-50">{saving ? '...' : (tr ? 'Kaydet' : 'Save')}</button>

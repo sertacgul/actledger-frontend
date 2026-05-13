@@ -7,7 +7,7 @@ import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
 import type { HREmployee, EmploymentStatus } from '../../types/erp'
-import { EMPLOYMENT_STATUS_LABELS, EMPLOYMENT_STATUS_STYLES, TRY_FMT, DATE_FMT, toISO } from '../../types/erp'
+import { EMPLOYMENT_STATUS_LABELS, EMPLOYMENT_STATUS_STYLES, TRY_FMT, DATE_FMT, DATE_CELL, toISO } from '../../types/erp'
 import { exportToExcel } from '../../lib/excelExport'
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
@@ -111,7 +111,7 @@ export default function EmployeesTab() {
             { header: 'Departman', accessor: (e: any) => e.user?.departments?.[0]?.name ?? '', width: 18 },
             { header: 'Durum', accessor: (e: any) => EMPLOYMENT_STATUS_LABELS[e.employmentStatus as keyof typeof EMPLOYMENT_STATUS_LABELS] ?? e.employmentStatus, width: 12 },
             { header: 'Brut Maas', accessor: (e: any) => Number(e.grossSalary) || 0, width: 14 },
-            { header: 'Ise Baslama', accessor: (e: any) => e.startDate?.slice(0, 10) ?? '', width: 12 },
+            { header: 'Ise Baslama', accessor: (e: any) => DATE_CELL(e.startDate), width: 12 },
           ],
           rows: employees,
         })} className="p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--surface)] text-[var(--text-3)]" title="Excel">
@@ -181,7 +181,7 @@ export default function EmployeesTab() {
           title={editing ? (tr ? 'Calisan Duzenle' : 'Edit Employee') : (tr ? 'Yeni Calisan' : 'New Employee')}
           icon={<User className="w-5 h-5 text-violet-500" />}
           onClose={() => { setCreating(false); setEditing(null) }}
-          width={560}
+          width={600}
           footer={
             <div className="flex justify-end gap-2">
               <button onClick={() => { setCreating(false); setEditing(null) }} className="px-4 py-2 rounded-lg text-sm text-[var(--text-2)] hover:bg-[var(--surface)]">{tr ? 'Iptal' : 'Cancel'}</button>

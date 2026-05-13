@@ -6,7 +6,7 @@ import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
 import type { JournalEntry, JournalStatus } from '../../types/erp'
-import { JOURNAL_STATUS_LABELS, JOURNAL_STATUS_STYLES, TRY_FMT, DATE_FMT, toISO } from '../../types/erp'
+import { JOURNAL_STATUS_LABELS, JOURNAL_STATUS_STYLES, TRY_FMT, DATE_FMT, DATE_CELL, toISO } from '../../types/erp'
 import { exportToExcel } from '../../lib/excelExport'
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
@@ -92,7 +92,7 @@ export default function JournalTab() {
           sheetName: 'Yevmiye',
           columns: [
             { header: 'Fis No', accessor: (e: any) => e.entryNumber, width: 16 },
-            { header: 'Tarih', accessor: (e: any) => e.date?.slice(0, 10) ?? '', width: 12 },
+            { header: 'Tarih', accessor: (e: any) => DATE_CELL(e.date), width: 12 },
             { header: 'Aciklama', accessor: (e: any) => e.description, width: 32 },
             { header: 'Durum', accessor: (e: any) => JOURNAL_STATUS_LABELS[e.status as keyof typeof JOURNAL_STATUS_LABELS] ?? e.status, width: 12 },
             { header: 'Borc', accessor: (e: any) => Number(e.totalDebit) || 0, width: 14 },

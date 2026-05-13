@@ -215,7 +215,7 @@ export default function EInvoiceTab() {
             </div>
           }
         >
-          <div className="space-y-4 p-1">
+          <div className="space-y-4 px-5 py-4">
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Fatura Tipi' : 'Type'}</label>
@@ -306,7 +306,7 @@ export default function EInvoiceTab() {
             ) : undefined
           }
         >
-          <div className="space-y-3 p-1">
+          <div className="space-y-3 px-5 py-4">
             <div className="flex flex-wrap items-center gap-3 text-sm">
               <span className={clsx('px-2 py-0.5 rounded-full border text-xs', EINVOICE_STATUS_STYLES[viewing.status])}>{EINVOICE_STATUS_LABELS[viewing.status]}</span>
               <span className="text-[var(--text-3)]">{EINVOICE_TYPE_LABELS[viewing.type]}</span>
@@ -369,7 +369,7 @@ export default function EInvoiceTab() {
             </div>
           }
         >
-          <div className="space-y-3 p-1">
+          <div className="space-y-3 px-5 py-4">
             <div>
               <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Entegrator' : 'Integrator'}</label>
               <select className="select w-full" value={cfgIntegrator} onChange={e => setCfgIntegrator(e.target.value)}>

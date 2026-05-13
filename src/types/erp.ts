@@ -24,20 +24,15 @@ export const DATE_FMT = (d: string | undefined | null) => {
   if (!d) return '-'
   const dt = new Date(d)
   if (isNaN(dt.getTime())) return '-'
-  const day = String(dt.getDate()).padStart(2, '0')
-  const month = String(dt.getMonth() + 1).padStart(2, '0')
-  const year = dt.getFullYear()
-  return `${day}/${month}/${year}`
+  return dt.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
-/** For Excel export - DD/MM/YYYY */
+/** For Excel export - DD.MM.YYYY */
 export const DATE_CELL = (d: string | undefined | null) => {
   if (!d) return ''
   const dt = new Date(d)
   if (isNaN(dt.getTime())) return ''
-  const day = String(dt.getDate()).padStart(2, '0')
-  const month = String(dt.getMonth() + 1).padStart(2, '0')
-  return `${day}/${month}/${dt.getFullYear()}`
+  return dt.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 export const DATETIME_FMT = (d: string | undefined | null) => {

@@ -190,7 +190,7 @@ export default function AccountsTab() {
             </div>
           }
         >
-          <div className="space-y-3 p-1">
+          <div className="space-y-3 px-5 py-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Hesap Kodu *' : 'Account Code *'}</label>

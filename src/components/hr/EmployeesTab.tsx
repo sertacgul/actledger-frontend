@@ -191,7 +191,7 @@ export default function EmployeesTab() {
             </div>
           }
         >
-          <div className="space-y-3 p-1">
+          <div className="space-y-3 px-5 py-4">
             {!editing && (
               <div>
                 <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Kullanici *' : 'User *'}</label>

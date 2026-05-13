@@ -153,7 +153,7 @@ export default function BranchesTab() {
             </div>
           }
         >
-          <div className="space-y-3 p-1">
+          <div className="space-y-3 px-5 py-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Sube Adi *' : 'Branch Name *'}</label>
@@ -186,7 +186,7 @@ export default function BranchesTab() {
             </div>
           }
         >
-          <div className="p-1">
+          <div className="px-5 py-4">
             <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Kasa Adi *' : 'Till Name *'}</label>
             <input className="input w-full" value={tillName} onChange={e => setTillName(e.target.value)} placeholder={tr ? 'Kasa 1' : 'Till 1'} />
           </div>
@@ -203,7 +203,7 @@ export default function BranchesTab() {
             </div>
           }
         >
-          <div className="p-1">
+          <div className="px-5 py-4">
             <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Acilis Bakiyesi' : 'Opening Balance'}</label>
             <input className="input w-full" type="number" value={openingBalance} onChange={e => setOpeningBalance(e.target.value)} placeholder="0" />
           </div>
@@ -220,7 +220,7 @@ export default function BranchesTab() {
             </div>
           }
         >
-          <div className="p-1">
+          <div className="px-5 py-4">
             <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Kapanis Bakiyesi' : 'Closing Balance'}</label>
             <input className="input w-full" type="number" value={closingBalance} onChange={e => setClosingBalance(e.target.value)} placeholder="0" />
           </div>

@@ -165,7 +165,7 @@ export default function QuotesTab() {
             </div>
           }
         >
-          <div className="space-y-4 p-1">
+          <div className="space-y-4 px-5 py-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Musteri *' : 'Customer *'}</label>
@@ -261,7 +261,7 @@ export default function QuotesTab() {
             ) : undefined
           }
         >
-          <div className="space-y-4 p-1">
+          <div className="space-y-4 px-5 py-4">
             <div className="flex items-center gap-3">
               <span className={clsx('text-xs px-2 py-0.5 rounded-full border', STATUS_STYLES[viewing.status])}>{STATUS_LABELS[viewing.status]}</span>
               <span className="text-sm text-[var(--text-3)]">{DATE_FMT(viewing.createdAt)}</span>

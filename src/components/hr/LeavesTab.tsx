@@ -165,7 +165,7 @@ export default function LeavesTab() {
             </div>
           }
         >
-          <div className="space-y-3 p-1">
+          <div className="space-y-3 px-5 py-4">
             <div>
               <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Calisan *' : 'Employee *'}</label>
               <select className="select w-full" value={form.employeeId} onChange={e => setForm({ ...form, employeeId: e.target.value })}>
@@ -209,7 +209,7 @@ export default function LeavesTab() {
             </div>
           }
         >
-          <div className="p-1">
+          <div className="px-5 py-4">
             <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Red Nedeni' : 'Rejection Reason'}</label>
             <textarea className="input w-full h-20" value={rejectReason} onChange={e => setRejectReason(e.target.value)} placeholder={tr ? 'Opsiyonel...' : 'Optional...'} />
           </div>

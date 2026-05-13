@@ -216,7 +216,7 @@ export default function BankTab() {
             <button onClick={handleSaveAccount} disabled={saving || !accountForm.name || !accountForm.bankName} className="px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-medium disabled:opacity-50">{saving ? '...' : (tr ? 'Kaydet' : 'Save')}</button>
           </div>}
         >
-          <div className="space-y-3 p-1">
+          <div className="space-y-3 px-5 py-4">
             <div className="grid grid-cols-2 gap-3">
               <div><label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Hesap Adi *' : 'Account Name *'}</label>
                 <input className="input w-full" value={accountForm.name} onChange={e => setAccountForm({ ...accountForm, name: e.target.value })} placeholder={tr ? 'Ziraat TL' : 'Main Account'} /></div>
@@ -243,7 +243,7 @@ export default function BankTab() {
             <button onClick={handleCreateTx} disabled={saving || !txForm.amount || !txForm.description} className="px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-medium disabled:opacity-50">{saving ? '...' : (tr ? 'Kaydet' : 'Save')}</button>
           </div>}
         >
-          <div className="space-y-3 p-1">
+          <div className="space-y-3 px-5 py-4">
             <div className="grid grid-cols-2 gap-3">
               <div><label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Tip *' : 'Type *'}</label>
                 <select className="select w-full" value={txForm.type} onChange={e => setTxForm({ ...txForm, type: e.target.value })}>

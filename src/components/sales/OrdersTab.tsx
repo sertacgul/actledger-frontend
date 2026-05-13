@@ -233,7 +233,7 @@ export default function OrdersTab() {
             </div>
           }
         >
-          <div className="space-y-4 p-1">
+          <div className="space-y-4 px-5 py-4">
             <div>
               <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Musteri *' : 'Customer *'}</label>
               <select className="select w-full" value={customerId} onChange={e => setCustomerId(e.target.value)}>
@@ -316,7 +316,7 @@ export default function OrdersTab() {
             </div>
           }
         >
-          <div className="space-y-4 p-1">
+          <div className="space-y-4 px-5 py-4">
             <div className="flex items-center gap-3">
               <span className={clsx('text-xs px-2 py-0.5 rounded-full border', ORDER_STATUS_STYLES[viewing.status])}>{ORDER_STATUS_LABELS[viewing.status]}</span>
               <span className="text-sm text-[var(--text-3)]">{DATE_FMT(viewing.createdAt)}</span>
@@ -385,7 +385,7 @@ export default function OrdersTab() {
             </div>
           }
         >
-          <div className="space-y-3 p-1">
+          <div className="space-y-3 px-5 py-4">
             <div>
               <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Tutar *' : 'Amount *'}</label>
               <input className="input w-full" type="number" value={payAmount} onChange={e => setPayAmount(e.target.value)} />
@@ -419,7 +419,7 @@ export default function OrdersTab() {
             </div>
           }
         >
-          <div className="space-y-3 p-1">
+          <div className="space-y-3 px-5 py-4">
             <div>
               <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Odeme Yontemi *' : 'Payment Method *'}</label>
               <select className="select w-full" value={completeMethod} onChange={e => setCompleteMethod(e.target.value as PaymentMethod)}>

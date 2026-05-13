@@ -208,7 +208,7 @@ export default function CustomersTab() {
             </div>
           }
         >
-          <div className="space-y-3 p-1">
+          <div className="space-y-3 px-5 py-4">
             <div>
               <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Musteri Adi *' : 'Customer Name *'}</label>
               <input className="input w-full" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />

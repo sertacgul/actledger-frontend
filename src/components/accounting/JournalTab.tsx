@@ -166,7 +166,7 @@ export default function JournalTab() {
             </div>
           }
         >
-          <div className="space-y-4 p-1">
+          <div className="space-y-4 px-5 py-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Tarih *' : 'Date *'}</label>
@@ -234,7 +234,7 @@ export default function JournalTab() {
             ) : undefined
           }
         >
-          <div className="space-y-3 p-1">
+          <div className="space-y-3 px-5 py-4">
             <div className="flex items-center gap-3 text-sm">
               <span className={clsx('px-2 py-0.5 rounded-full border text-xs', JOURNAL_STATUS_STYLES[viewing.status])}>{JOURNAL_STATUS_LABELS[viewing.status]}</span>
               <span className="text-[var(--text-3)]">{DATE_FMT(viewing.date)}</span>

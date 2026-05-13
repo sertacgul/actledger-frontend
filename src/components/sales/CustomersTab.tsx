@@ -57,15 +57,15 @@ export default function CustomersTab() {
     try {
       const body = {
         name: form.name,
-        taxNumber: form.taxNumber || null,
-        phone: form.phone || null,
-        email: form.email || null,
-        address: form.address || null,
+        taxNumber: form.taxNumber || undefined,
+        phone: form.phone || undefined,
+        email: form.email || undefined,
+        address: form.address || undefined,
         customerType: form.customerType,
-        creditLimit: form.creditLimit ? Number(form.creditLimit) : null,
+        creditLimit: form.creditLimit ? Number(form.creditLimit) : undefined,
         paymentTermDays: Number(form.paymentTermDays) || 30,
         isEInvoiceCustomer: form.isEInvoiceCustomer,
-        notes: form.notes || null,
+        notes: form.notes || undefined,
       }
       if (editing) {
         await updateCustomer(editing.id, body)

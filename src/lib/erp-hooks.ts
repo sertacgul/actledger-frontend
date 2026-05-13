@@ -120,6 +120,50 @@ export async function cancelOrder(id: string): Promise<SalesOrder> {
   return api.post<SalesOrder>(`/sales/orders/${id}/cancel`)
 }
 
+// ── Quotes ──────────────────────────────────────────────────────────────────
+interface QuoteFilter { status?: string; customerId?: string; search?: string }
+
+export function useQuotes(filter: QuoteFilter = {}) {
+  const params = new URLSearchParams({ pageSize: '100' })
+  if (filter.status) params.set('status', filter.status)
+  if (filter.customerId) params.set('customerId', filter.customerId)
+  if (filter.search) params.set('search', filter.search)
+
+  const { data, loading, error, refetch } = useFetch<any>(
+    () => api.get(`/sales/quotes?${params}`),
+    [filter.status, filter.customerId, filter.search],
+  )
+  return { quotes: (data?.data ?? data ?? []) as any[], total: data?.meta?.total ?? 0, loading, error, refetch }
+}
+
+export async function createQuote(body: {
+  customerId: string; validUntil?: string; notes?: string
+  lines: { productName: string; unit: string; quantity: number; unitPrice: number; discountPercent?: number; taxRate?: number }[]
+}): Promise<any> {
+  const res = await api.post<any>('/sales/quotes', body)
+  return res.data ?? res
+}
+
+export async function sendQuote(id: string): Promise<any> {
+  return api.post(`/sales/quotes/${id}/send`)
+}
+
+export async function approveQuote(id: string): Promise<any> {
+  return api.post(`/sales/quotes/${id}/approve`)
+}
+
+export async function rejectQuote(id: string): Promise<any> {
+  return api.post(`/sales/quotes/${id}/reject`)
+}
+
+export async function quoteToOrder(id: string): Promise<any> {
+  return api.post(`/sales/quotes/${id}/to-order`)
+}
+
+export async function deleteQuote(id: string): Promise<void> {
+  await api.delete(`/sales/quotes/${id}`)
+}
+
 // ── Payments ────────────────────────────────────────────────────────────────
 export function useOrderPayments(orderId: string) {
   const { data, loading, error, refetch } = useFetch<SalesPayment[]>(

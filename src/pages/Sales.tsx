@@ -1,16 +1,18 @@
 import { useState } from 'react'
-import { ShoppingCart, Users, FileText, Monitor, Store } from 'lucide-react'
+import { ShoppingCart, Users, FileText, Monitor, Store, Tag } from 'lucide-react'
 import clsx from 'clsx'
 import { useLanguage } from '../context/LanguageContext'
 import CustomersTab from '../components/sales/CustomersTab'
 import OrdersTab from '../components/sales/OrdersTab'
+import QuotesTab from '../components/sales/QuotesTab'
 import POSTab from '../components/sales/POSTab'
 import BranchesTab from '../components/sales/BranchesTab'
 
-type SalesTab = 'customers' | 'orders' | 'branches' | 'pos'
+type SalesTab = 'customers' | 'quotes' | 'orders' | 'branches' | 'pos'
 
 const TABS: { id: SalesTab; icon: typeof Users; labelTr: string; labelEn: string }[] = [
   { id: 'customers', icon: Users,    labelTr: 'Cari Hesaplar', labelEn: 'Accounts' },
+  { id: 'quotes',    icon: Tag,      labelTr: 'Teklifler',   labelEn: 'Quotes' },
   { id: 'orders',    icon: FileText, labelTr: 'Siparisler',  labelEn: 'Orders' },
   { id: 'branches',  icon: Store,    labelTr: 'Subeler & Kasalar', labelEn: 'Branches & Tills' },
   { id: 'pos',       icon: Monitor,  labelTr: 'POS',         labelEn: 'POS' },
@@ -55,6 +57,7 @@ export default function Sales() {
       </div>
 
       {tab === 'customers' && <CustomersTab />}
+      {tab === 'quotes' && <QuotesTab />}
       {tab === 'orders' && <OrdersTab />}
       {tab === 'branches' && <BranchesTab />}
       {tab === 'pos' && <POSTab />}

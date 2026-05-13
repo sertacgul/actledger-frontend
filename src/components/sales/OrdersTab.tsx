@@ -86,13 +86,38 @@ export default function OrdersTab() {
     }
   }
 
+  // Complete order state
+  const [completingOrder, setCompletingOrder] = useState<SalesOrder | null>(null)
+  const [completeMethod, setCompleteMethod] = useState<PaymentMethod>('NAKIT')
+  const [completeAmount, setCompleteAmount] = useState('')
+
   const handleAction = async (order: SalesOrder, action: 'approve' | 'complete' | 'cancel') => {
+    if (action === 'complete') {
+      setCompletingOrder(order)
+      setCompleteAmount(String(Number(order.totalAmount) || 0))
+      setCompleteMethod('NAKIT')
+      return
+    }
     const confirmMsg = action === 'cancel' ? 'Siparisi iptal etmek istediginizden emin misiniz?' : undefined
     if (confirmMsg && !confirm(confirmMsg)) return
     try {
       if (action === 'approve') await approveOrder(order.id)
-      else if (action === 'complete') await completeOrder(order.id)
       else await cancelOrder(order.id)
+      setViewing(null)
+      refetch()
+    } catch (e: any) {
+      alert(e.message)
+    }
+  }
+
+  const handleCompleteOrder = async () => {
+    if (!completingOrder) return
+    try {
+      await completeOrder(completingOrder.id, {
+        paymentMethod: completeMethod,
+        paymentAmount: Number(completeAmount) || 0,
+      })
+      setCompletingOrder(null)
       setViewing(null)
       refetch()
     } catch (e: any) {
@@ -374,6 +399,36 @@ export default function OrdersTab() {
             <div>
               <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Referans' : 'Reference'}</label>
               <input className="input w-full" value={payRef} onChange={e => setPayRef(e.target.value)} />
+            </div>
+          </div>
+        </DraggableModal>
+      )}
+      {/* Complete Order Modal */}
+      {completingOrder && (
+        <DraggableModal
+          title={tr ? 'Siparisi Tamamla' : 'Complete Order'}
+          subtitle={completingOrder.orderNumber}
+          onClose={() => setCompletingOrder(null)}
+          width={400}
+          footer={
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setCompletingOrder(null)} className="px-4 py-2 rounded-lg text-sm text-[var(--text-2)] hover:bg-[var(--surface)]">{tr ? 'Iptal' : 'Cancel'}</button>
+              <button onClick={handleCompleteOrder} disabled={!completeAmount} className="px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-medium hover:bg-emerald-600 disabled:opacity-50">
+                {tr ? 'Tamamla' : 'Complete'}
+              </button>
+            </div>
+          }
+        >
+          <div className="space-y-3 p-1">
+            <div>
+              <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Odeme Yontemi *' : 'Payment Method *'}</label>
+              <select className="select w-full" value={completeMethod} onChange={e => setCompleteMethod(e.target.value as PaymentMethod)}>
+                {Object.entries(PAYMENT_METHOD_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Odeme Tutari *' : 'Payment Amount *'}</label>
+              <input className="input w-full" type="number" value={completeAmount} onChange={e => setCompleteAmount(e.target.value)} />
             </div>
           </div>
         </DraggableModal>

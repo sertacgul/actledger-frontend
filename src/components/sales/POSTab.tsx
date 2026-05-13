@@ -102,7 +102,7 @@ export default function POSTab() {
         </div>
 
         {/* Till status warning */}
-        {tillId && !tillIsOpen && (
+        {tillId && !tillSessionId && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800">
             {tr ? 'Secilen kasa kapali. Once "Subeler & Kasalar" tab\'indan kasayi acin.' : 'Selected till is closed. Open it from "Branches & Tills" tab first.'}
           </div>
@@ -123,7 +123,7 @@ export default function POSTab() {
               <button
                 key={p.id}
                 onClick={() => addToCart(p)}
-                disabled={!tillIsOpen}
+                disabled={!tillSessionId}
                 className="p-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] hover:border-indigo-300 hover:bg-indigo-50/50 transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="text-sm font-medium text-[var(--text-1)] truncate">{p.name}</div>
@@ -195,7 +195,7 @@ export default function POSTab() {
 
           <button
             onClick={handleCheckout}
-            disabled={processing || cart.length === 0 || !tillIsOpen}
+            disabled={processing || cart.length === 0 || !tillSessionId}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-500 text-white font-semibold hover:bg-emerald-600 disabled:opacity-50 transition-colors"
           >
             <CreditCard className="w-5 h-5" />

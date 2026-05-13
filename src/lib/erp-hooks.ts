@@ -110,8 +110,10 @@ export async function approveOrder(id: string): Promise<SalesOrder> {
   return api.post<SalesOrder>(`/sales/orders/${id}/approve`)
 }
 
-export async function completeOrder(id: string): Promise<SalesOrder> {
-  return api.post<SalesOrder>(`/sales/orders/${id}/complete`)
+export async function completeOrder(id: string, body: {
+  paymentMethod: string; paymentAmount: number; paymentReference?: string
+}): Promise<SalesOrder> {
+  return api.post<SalesOrder>(`/sales/orders/${id}/complete`, body)
 }
 
 export async function cancelOrder(id: string): Promise<SalesOrder> {

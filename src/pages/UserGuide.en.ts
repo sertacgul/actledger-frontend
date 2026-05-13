@@ -219,6 +219,31 @@ const PLATFORM_GUIDE_EN: Section[] = [
  { q: 'Bulk data upload via Excel or CSV is failing, what should I do?', a: 'If you encounter issues with bulk data upload, check the following:\n\n- File Format: Ensure your file is in .xlsx or .csv format (.xls is not supported)\n- Column Headers: Do not modify the column headers from the template\n- Empty Rows: Do not leave blank rows between data\n- Special Characters: Make sure there are no unexpected special characters in the data\n- File Size: Maximum file size is 10 MB\n- Row Limit: Maximum 5,000 rows can be uploaded at once\n\nErrors are highlighted in red in the preview screen with error descriptions. Fix the flagged rows and try again. OperIQ also offers automatic correction suggestions during column matching.' },
  ],
  },
+ {
+ icon: Shield, title: 'Sales Management', path: '/satis',
+ items: [
+ { q: 'How to access the Sales module?', a: 'Click "Sales" under the "ERP" section in the left menu. Access requires module permission assigned by Key Account Manager (Admin Panel > ERP Permissions) or Super Admin.\n\nThe Sales module has five tabs:\n- Accounts: Customer and supplier management\n- Quotes: Price quotation creation and tracking\n- Orders: Sales order management\n- Branches & Tills: Branch and POS register setup\n- POS: Quick point-of-sale transactions' },
+ { q: 'How to create a quote and convert to order?', a: 'Go to Sales > Quotes and click "New Quote":\n\n1. Select customer\n2. Set validity date\n3. Add line items: product name, unit, quantity, unit price, discount %, VAT %\n4. Add notes for special conditions\n5. Click "Create"\n\nAfter creation:\n- Send: Mark as "Sent"\n- Approve: Mark as "Approved" when customer accepts\n- Reject: Mark as "Rejected"\n- Convert to Order: All line items are automatically copied to a new sales order\n\nQuote numbers are auto-generated: TEK-2026-0001 format.' },
+ { q: 'How does POS work?', a: 'Go to Sales > POS for quick sales:\n\n1. Select branch and open till\n2. Select customer (optional - defaults to walk-in)\n3. Search and add products to cart\n4. Adjust quantities\n5. Select payment method: Cash, Credit Card, Check, or Bank Transfer\n6. Enter payment amount\n7. Click "Checkout"\n\nOn completion: receipt is displayed, stock automatically decreases, till balance updates, and accounting entry is created.\n\nNote: A branch and till must be set up and the till must be open before POS can be used.' },
+ ],
+ },
+ {
+ icon: Shield, title: 'Accounting', path: '/muhasebe',
+ items: [
+ { q: 'How to use the Accounting module?', a: 'Click "Accounting" under "ERP" in the left menu. The module has five tabs:\n\n- Chart of Accounts: Account plan management\n- Journal: Journal entries (debit/credit)\n- E-Invoice: Outgoing (sales) and incoming (purchase) invoices\n- Bank: Bank accounts and transaction management\n- Reports: Financial reports (income/expense, balance sheet, VAT, etc.)' },
+ { q: 'How to create journal entries?', a: 'Go to Accounting > Journal and click "New Entry":\n\n1. Select date\n2. Enter description\n3. Add lines: select account, enter debit or credit amount\n4. Total debit and credit must be equal (balance check)\n5. Click "Save"\n\nEntries are saved as draft. Click "Approve" to finalize.\n\nNote: Sales and POS transactions automatically create journal entries.' },
+ { q: 'How to manage invoices (sales and purchase)?', a: 'Go to Accounting > E-Invoice:\n\nSales Invoice (Outgoing):\n- Click "Sales Invoice", select customer, add items, create\n- Approve to generate XML\n\nPurchase Invoice (Incoming):\n- Click "Purchase Invoice", select supplier, add items\n- Check "Add to Stock" to auto-increase stock on approval\n- Create and approve\n\nUse the Outgoing/Incoming filter to switch between invoice types.' },
+ { q: 'How to manage bank accounts?', a: 'Go to Accounting > Bank:\n\n- Create bank accounts with name, bank, IBAN\n- Add transactions: Income (receipt) or Expense (payment)\n- Each transaction can be reconciled to auto-create a journal entry\n- Bank balance updates automatically with each transaction' },
+ ],
+ },
+ {
+ icon: Users, title: 'Human Resources', path: '/insan-kaynaklari',
+ items: [
+ { q: 'How to use the HR module?', a: 'Click "HR" under "ERP" in the left menu. The module has three tabs:\n\n- Employees: Employee records and personal information\n- Leaves: Leave requests, approval, and tracking\n- Payroll: Monthly payroll calculation and approval' },
+ { q: 'How to create employee records?', a: 'Go to HR > Employees and click "New Employee":\n\n1. Select platform user\n2. Set start date\n3. Enter gross salary\n4. Add ID number, SSI number, bank/IBAN\n5. Add emergency contact\n\nEmployee gets auto-generated number: EMP-001 format.\nUse "Terminate" to end employment.' },
+ { q: 'How does payroll work?', a: 'Go to HR > Payroll:\n\n1. Click "New Period", select year and month\n2. Click "Calculate" - system computes all active employees:\n   - Gross salary, SSI employee/employer, income tax, stamp tax, net salary\n3. Expand period to see individual records\n4. Click "Approve" to finalize\n5. Export each period to Excel\n\nApproved payroll auto-creates accounting journal entry.' },
+ ],
+ },
 ]
 
 const MOBILE_GUIDE_EN: Section[] = [

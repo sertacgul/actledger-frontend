@@ -19,9 +19,15 @@ export default function POSTab() {
   const [tillId, setTillId] = useState('')
   const { tills } = useTills(branchId)
 
+  // Get selected till's session ID
+  const selectedTill = tills.find(t => t.id === tillId)
+  const tillSessionId = selectedTill?.currentSession?.id ?? ''
+  const tillIsOpen = selectedTill?.status === 'ACIK' && !!tillSessionId
+
   const [customerId, setCustomerId] = useState('')
   const [cart, setCart] = useState<POSCartItem[]>([])
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('NAKIT')
+  const [paymentAmount, setPaymentAmount] = useState('')
   const [receipt, setReceipt] = useState<POSReceiptData | null>(null)
   const [processing, setProcessing] = useState(false)
 
@@ -49,24 +55,25 @@ export default function POSTab() {
   }
 
   const handleCheckout = async () => {
-    if (!customerId || !branchId || !tillId || cart.length === 0) return
+    if (!tillSessionId || cart.length === 0) return
     setProcessing(true)
     try {
+      const amount = paymentAmount ? Number(paymentAmount) : cartTotal
       const result = await posCheckout({
-        customerId,
-        branchId,
-        tillId,
+        tillSessionId,
+        customerId: customerId || undefined,
         paymentMethod,
+        paymentAmount: amount,
         items: cart.map(c => ({
           stockItemId: c.product.id,
           productName: c.product.name,
-          unit: c.product.unit,
           quantity: c.qty,
           unitPrice: c.unitPrice,
         })),
       })
       setReceipt(result.receiptData)
       setCart([])
+      setPaymentAmount('')
     } catch (e: any) {
       alert(e.message)
     } finally {
@@ -76,7 +83,9 @@ export default function POSTab() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-4">
+      {/* Product Grid */}
       <div className="space-y-4">
+        {/* POS Config Bar */}
         <div className="flex flex-wrap gap-3">
           <select className="select flex-1 min-w-[140px]" value={branchId} onChange={e => { setBranchId(e.target.value); setTillId('') }}>
             <option value="">{tr ? 'Sube secin' : 'Select branch'}</option>
@@ -84,13 +93,20 @@ export default function POSTab() {
           </select>
           <select className="select flex-1 min-w-[140px]" value={tillId} onChange={e => setTillId(e.target.value)} disabled={!branchId}>
             <option value="">{tr ? 'Kasa secin' : 'Select till'}</option>
-            {tills.filter(t => t.status === 'ACIK').map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+            {tills.map(t => <option key={t.id} value={t.id}>{t.name} ({t.status === 'ACIK' ? 'Acik' : 'Kapali'})</option>)}
           </select>
           <select className="select flex-1 min-w-[140px]" value={customerId} onChange={e => setCustomerId(e.target.value)}>
-            <option value="">{tr ? 'Musteri secin' : 'Select customer'}</option>
+            <option value="">{tr ? 'Musteri (opsiyonel)' : 'Customer (optional)'}</option>
             {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </div>
+
+        {/* Till status warning */}
+        {tillId && !tillIsOpen && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800">
+            {tr ? 'Secilen kasa kapali. Once "Subeler & Kasalar" tab\'indan kasayi acin.' : 'Selected till is closed. Open it from "Branches & Tills" tab first.'}
+          </div>
+        )}
 
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-4)]" />
@@ -101,13 +117,14 @@ export default function POSTab() {
           {productsLoading ? (
             <div className="col-span-full text-center py-8 text-[var(--text-3)]">{tr ? 'Yukleniyor...' : 'Loading...'}</div>
           ) : products.length === 0 ? (
-            <div className="col-span-full text-center py-8 text-[var(--text-3)]">{tr ? 'Urun bulunamadi' : 'No products found'}</div>
+            <div className="col-span-full text-center py-8 text-[var(--text-3)]">{tr ? 'Urun bulunamadi. Stok Yonetimi\'nden urun ekleyin.' : 'No products found. Add products from Stock Management.'}</div>
           ) : (
             products.map(p => (
               <button
                 key={p.id}
                 onClick={() => addToCart(p)}
-                className="p-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] hover:border-indigo-300 hover:bg-indigo-50/50 transition-all text-left"
+                disabled={!tillIsOpen}
+                className="p-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] hover:border-indigo-300 hover:bg-indigo-50/50 transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="text-sm font-medium text-[var(--text-1)] truncate">{p.name}</div>
                 <div className="text-xs text-[var(--text-3)] mt-0.5">{p.code} - {p.unit}</div>
@@ -119,6 +136,7 @@ export default function POSTab() {
         </div>
       </div>
 
+      {/* Cart Panel */}
       <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] flex flex-col h-fit lg:sticky lg:top-4">
         <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--border)]">
           <ShoppingCart className="w-5 h-5 text-indigo-500" />
@@ -164,9 +182,20 @@ export default function POSTab() {
             {Object.entries(PAYMENT_METHOD_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
 
+          <div>
+            <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Odeme Tutari' : 'Payment Amount'}</label>
+            <input
+              className="input w-full"
+              type="number"
+              value={paymentAmount}
+              onChange={e => setPaymentAmount(e.target.value)}
+              placeholder={cartTotal > 0 ? String(cartTotal.toFixed(2)) : '0'}
+            />
+          </div>
+
           <button
             onClick={handleCheckout}
-            disabled={processing || cart.length === 0 || !customerId || !branchId || !tillId}
+            disabled={processing || cart.length === 0 || !tillIsOpen}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-500 text-white font-semibold hover:bg-emerald-600 disabled:opacity-50 transition-colors"
           >
             <CreditCard className="w-5 h-5" />
@@ -175,6 +204,7 @@ export default function POSTab() {
         </div>
       </div>
 
+      {/* Receipt Modal */}
       {receipt && (
         <DraggableModal
           title={tr ? 'Satis Fisi' : 'Receipt'}

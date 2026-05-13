@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Calculator, Check, ChevronDown, ChevronRight } from 'lucide-react'
+import { Plus, Calculator, Check, ChevronDown, ChevronRight, FileSpreadsheet } from 'lucide-react'
 import clsx from 'clsx'
 import { usePayrollPeriods, usePayrollRecords, createPayrollPeriod, calculatePayroll, approvePayroll } from '../../lib/erp-hooks'
 import { useLanguage } from '../../context/LanguageContext'
@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
 import type { PayrollPeriod } from '../../types/erp'
 import { PAYROLL_STATUS_LABELS, PAYROLL_STATUS_STYLES, MONTH_LABELS, TRY_FMT } from '../../types/erp'
+import { exportToExcel } from '../../lib/excelExport'
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
 
@@ -143,11 +144,35 @@ function PayrollRecordsTable({ periodId }: { periodId: string }) {
   const tr = lang === 'tr'
   const { records, loading } = usePayrollRecords(periodId)
 
+  const handleExport = () => {
+    exportToExcel({
+      filename: `bordro_${periodId}_${new Date().toISOString().slice(0, 10)}.xlsx`,
+      sheetName: 'Bordro',
+      columns: [
+        { header: 'Calisan', accessor: (r: any) => r.employee?.user?.name ?? '', width: 24 },
+        { header: 'Brut Maas', accessor: (r: any) => Number(r.grossSalary) || 0, width: 14 },
+        { header: 'SGK Isci', accessor: (r: any) => Number(r.sgkEmployee) || 0, width: 12 },
+        { header: 'SGK Isveren', accessor: (r: any) => Number(r.sgkEmployer) || 0, width: 12 },
+        { header: 'Gelir Vergisi', accessor: (r: any) => Number(r.incomeTax) || 0, width: 12 },
+        { header: 'Damga Vergisi', accessor: (r: any) => Number(r.stampTax) || 0, width: 12 },
+        { header: 'Toplam Kesinti', accessor: (r: any) => Number(r.totalDeductions) || 0, width: 14 },
+        { header: 'Net Maas', accessor: (r: any) => Number(r.netSalary) || 0, width: 14 },
+      ],
+      rows: records,
+    })
+  }
+
   if (loading) return <div className="text-center py-4 text-sm text-[var(--text-3)]">{tr ? 'Yukleniyor...' : 'Loading...'}</div>
-  if (records.length === 0) return <div className="text-center py-4 text-sm text-[var(--text-3)]">{tr ? 'Kayit yok' : 'No records'}</div>
+  if (records.length === 0) return <div className="text-center py-4 text-sm text-[var(--text-3)]">{tr ? 'Kayit yok - once bordroyu hesaplayin' : 'No records - calculate payroll first'}</div>
 
   return (
-    <div className="mt-3 overflow-x-auto rounded-lg border border-[var(--border)]">
+    <div className="mt-3 space-y-2">
+      <div className="flex justify-end">
+        <button onClick={handleExport} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--surface)] text-[var(--text-3)] text-xs">
+          <FileSpreadsheet className="w-3.5 h-3.5" /> Excel
+        </button>
+      </div>
+      <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
       <table className="w-full text-xs">
         <thead>
           <tr className="bg-[var(--surface)] border-b border-[var(--border)]">
@@ -174,6 +199,7 @@ function PayrollRecordsTable({ periodId }: { periodId: string }) {
           ))}
         </tbody>
       </table>
+    </div>
     </div>
   )
 }

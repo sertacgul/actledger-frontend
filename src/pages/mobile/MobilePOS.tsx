@@ -26,6 +26,9 @@ export default function MobilePOS() {
   const { branches } = useBranches()
   const { tills } = useTills(branchId)
 
+  const selectedTill = tills.find(t => t.id === tillId)
+  const tillSessionId = selectedTill?.currentSession?.id ?? ''
+
   const needsSetup = !branchId || !tillId
   const [screen, setScreen] = useState<Screen>(needsSetup ? 'setup' : 'pos')
 
@@ -168,18 +171,17 @@ export default function MobilePOS() {
 
   // ── Checkout ───────────────────────────────────────────────────────────
   const handleCheckout = async () => {
-    if (cart.length === 0 || !tillId) return
+    if (cart.length === 0 || !tillSessionId) return
     setProcessing(true)
     try {
       const result = await posCheckout({
-        customerId: '',
-        branchId,
-        tillId,
+        tillSessionId,
+        customerId: undefined,
         paymentMethod,
+        paymentAmount: cart.reduce((s, c) => s + c.qty * c.unitPrice, 0),
         items: cart.map(c => ({
           stockItemId: c.product.id,
           productName: c.product.name,
-          unit: c.product.unit,
           quantity: c.qty,
           unitPrice: c.unitPrice,
         })),

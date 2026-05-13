@@ -195,11 +195,12 @@ export function usePOSProducts(search?: string) {
 }
 
 export async function posCheckout(body: {
-  customerId: string
-  branchId: string
-  tillId: string
+  tillSessionId: string
+  customerId?: string
+  customerName?: string
   paymentMethod: string
-  items: { stockItemId: string; productName: string; unit: string; quantity: number; unitPrice: number }[]
+  paymentAmount: number
+  items: { stockItemId?: string; productName: string; quantity: number; unitPrice: number; discountPercent?: number }[]
 }): Promise<{ order: SalesOrder; receiptData: any }> {
   return api.post('/sales/pos/checkout', body)
 }
@@ -444,11 +445,12 @@ export async function approvePayroll(periodId: string): Promise<PayrollPeriod> {
 }
 
 export function usePayrollRecords(periodId: string) {
-  const { data, loading, error, refetch } = useFetch<PayrollRecord[]>(
-    () => api.get(`/hr/payroll/periods/${periodId}/records`),
+  const { data, loading, error, refetch } = useFetch<any>(
+    () => periodId ? api.get(`/hr/payroll/periods/${periodId}/records`) : Promise.resolve([]),
     [periodId],
   )
-  return { records: data ?? [], loading, error, refetch }
+  const records = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : []
+  return { records: records as PayrollRecord[], loading, error, refetch }
 }
 
 // ── Attendance ──────────────────────────────────────────────────────────────

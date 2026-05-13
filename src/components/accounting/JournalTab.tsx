@@ -6,7 +6,7 @@ import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
 import type { JournalEntry, JournalStatus } from '../../types/erp'
-import { JOURNAL_STATUS_LABELS, JOURNAL_STATUS_STYLES, TRY_FMT, DATE_FMT } from '../../types/erp'
+import { JOURNAL_STATUS_LABELS, JOURNAL_STATUS_STYLES, TRY_FMT, DATE_FMT, toISO } from '../../types/erp'
 import { exportToExcel } from '../../lib/excelExport'
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
@@ -51,7 +51,7 @@ export default function JournalTab() {
     setSaving(true)
     try {
       await createJournalEntry({
-        date, description,
+        date: toISO(date), description,
         lines: lines.filter(l => l.accountCode).map(l => ({
           accountCode: l.accountCode,
           debit: Number(l.debit) || 0,

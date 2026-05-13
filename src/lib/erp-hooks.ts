@@ -45,16 +45,16 @@ function useFetch<T>(fetcher: () => Promise<T>, deps: unknown[] = []) {
 interface CustomerFilter { search?: string; customerType?: string; active?: boolean }
 
 export function useCustomers(filter: CustomerFilter = {}) {
-  const params = new URLSearchParams({ pageSize: '200' })
+  const params = new URLSearchParams({ pageSize: '100' })
   if (filter.search) params.set('search', filter.search)
   if (filter.customerType) params.set('customerType', filter.customerType)
   if (filter.active !== undefined) params.set('active', String(filter.active))
 
-  const { data, loading, error, refetch } = useFetch<{ customers: SalesCustomer[]; total: number }>(
+  const { data, loading, error, refetch } = useFetch<any>(
     () => api.get(`/sales/customers?${params}`),
     [filter.search, filter.customerType, filter.active],
   )
-  return { customers: data?.customers ?? [], total: data?.total ?? 0, loading, error, refetch }
+  return { customers: (data?.data ?? data ?? []) as SalesCustomer[], total: data?.total ?? 0, loading, error, refetch }
 }
 
 export function useCustomer(id: string) {
@@ -86,11 +86,11 @@ export function useOrders(filter: OrderFilter = {}) {
   if (filter.customerId) params.set('customerId', filter.customerId)
   if (filter.search) params.set('search', filter.search)
 
-  const { data, loading, error, refetch } = useFetch<{ orders: SalesOrder[]; total: number }>(
+  const { data, loading, error, refetch } = useFetch<any>(
     () => api.get(`/sales/orders?${params}`),
     [filter.status, filter.customerId, filter.search],
   )
-  return { orders: data?.orders ?? [], total: data?.total ?? 0, loading, error, refetch }
+  return { orders: (data?.data ?? data ?? []) as SalesOrder[], total: data?.total ?? 0, loading, error, refetch }
 }
 
 export async function createOrder(body: {
@@ -135,11 +135,11 @@ export async function createPayment(body: {
 
 // ── Branches ────────────────────────────────────────────────────────────────
 export function useBranches() {
-  const { data, loading, error, refetch } = useFetch<{ branches: SalesBranch[]; total: number }>(
+  const { data, loading, error, refetch } = useFetch<any>(
     () => api.get('/sales/branches?pageSize=100'),
     [],
   )
-  return { branches: data?.branches ?? [], total: data?.total ?? 0, loading, error, refetch }
+  return { branches: (data?.data ?? data ?? []) as SalesBranch[], total: data?.total ?? 0, loading, error, refetch }
 }
 
 export async function createBranch(body: { name: string; code: string; address?: string; phone?: string; managerId?: string }): Promise<SalesBranch> {
@@ -243,11 +243,11 @@ export function useJournalEntries(filter: JournalFilter = {}) {
   if (filter.dateTo) params.set('dateTo', filter.dateTo)
   if (filter.search) params.set('search', filter.search)
 
-  const { data, loading, error, refetch } = useFetch<{ entries: JournalEntry[]; total: number }>(
+  const { data, loading, error, refetch } = useFetch<any>(
     () => api.get(`/accounting/journal?${params}`),
     [filter.status, filter.dateFrom, filter.dateTo, filter.search],
   )
-  return { entries: data?.entries ?? [], total: data?.total ?? 0, loading, error, refetch }
+  return { entries: (data?.data ?? data ?? []) as JournalEntry[], total: data?.total ?? 0, loading, error, refetch }
 }
 
 export async function createJournalEntry(body: {
@@ -283,11 +283,11 @@ export function useEInvoices(filter: EInvoiceFilter = {}) {
   if (filter.direction) params.set('direction', filter.direction)
   if (filter.search) params.set('search', filter.search)
 
-  const { data, loading, error, refetch } = useFetch<{ invoices: EInvoice[]; total: number }>(
+  const { data, loading, error, refetch } = useFetch<any>(
     () => api.get(`/accounting/einvoice?${params}`),
     [filter.status, filter.direction, filter.search],
   )
-  return { invoices: data?.invoices ?? [], total: data?.total ?? 0, loading, error, refetch }
+  return { invoices: (data?.data ?? data ?? []) as EInvoice[], total: data?.total ?? 0, loading, error, refetch }
 }
 
 export async function createEInvoice(body: {
@@ -350,15 +350,15 @@ export function useAccountingReport(type: ReportType, dateFrom: string, dateTo: 
 interface EmployeeFilter { status?: string; search?: string }
 
 export function useEmployees(filter: EmployeeFilter = {}) {
-  const params = new URLSearchParams({ pageSize: '200' })
+  const params = new URLSearchParams({ pageSize: '100' })
   if (filter.status) params.set('status', filter.status)
   if (filter.search) params.set('search', filter.search)
 
-  const { data, loading, error, refetch } = useFetch<{ employees: HREmployee[]; total: number }>(
+  const { data, loading, error, refetch } = useFetch<any>(
     () => api.get(`/hr/employees?${params}`),
     [filter.status, filter.search],
   )
-  return { employees: data?.employees ?? [], total: data?.total ?? 0, loading, error, refetch }
+  return { employees: (data?.data ?? data ?? []) as HREmployee[], total: data?.total ?? 0, loading, error, refetch }
 }
 
 export async function createEmployee(body: {
@@ -385,11 +385,11 @@ export function useLeaves(filter: LeaveFilter = {}) {
   if (filter.status) params.set('status', filter.status)
   if (filter.employeeId) params.set('employeeId', filter.employeeId)
 
-  const { data, loading, error, refetch } = useFetch<{ leaves: HRLeave[]; total: number }>(
+  const { data, loading, error, refetch } = useFetch<any>(
     () => api.get(`/hr/leaves?${params}`),
     [filter.status, filter.employeeId],
   )
-  return { leaves: data?.leaves ?? [], total: data?.total ?? 0, loading, error, refetch }
+  return { leaves: (data?.data ?? data ?? []) as HRLeave[], total: data?.total ?? 0, loading, error, refetch }
 }
 
 export function useLeaveBalance(employeeId: string) {
@@ -424,11 +424,11 @@ export async function initLeaveBalances(): Promise<any> {
 
 // ── Payroll ─────────────────────────────────────────────────────────────────
 export function usePayrollPeriods() {
-  const { data, loading, error, refetch } = useFetch<{ periods: PayrollPeriod[]; total: number }>(
+  const { data, loading, error, refetch } = useFetch<any>(
     () => api.get('/hr/payroll/periods?pageSize=100'),
     [],
   )
-  return { periods: data?.periods ?? [], total: data?.total ?? 0, loading, error, refetch }
+  return { periods: (data?.data ?? data ?? []) as PayrollPeriod[], total: data?.total ?? 0, loading, error, refetch }
 }
 
 export async function createPayrollPeriod(body: { year: number; month: number }): Promise<PayrollPeriod> {
@@ -453,7 +453,7 @@ export function usePayrollRecords(periodId: string) {
 
 // ── Attendance ──────────────────────────────────────────────────────────────
 export function useAttendance(filter: { date?: string; employeeId?: string } = {}) {
-  const params = new URLSearchParams({ pageSize: '200' })
+  const params = new URLSearchParams({ pageSize: '100' })
   if (filter.date) params.set('date', filter.date)
   if (filter.employeeId) params.set('employeeId', filter.employeeId)
 

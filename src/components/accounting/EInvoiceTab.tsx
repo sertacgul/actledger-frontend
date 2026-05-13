@@ -9,7 +9,7 @@ import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
 import type { EInvoice, EInvoiceType, EInvoiceStatus } from '../../types/erp'
-import { EINVOICE_STATUS_LABELS, EINVOICE_STATUS_STYLES, EINVOICE_TYPE_LABELS, TRY_FMT, DATE_FMT } from '../../types/erp'
+import { EINVOICE_STATUS_LABELS, EINVOICE_STATUS_STYLES, EINVOICE_TYPE_LABELS, TRY_FMT, DATE_FMT, toISO } from '../../types/erp'
 import { exportToExcel } from '../../lib/excelExport'
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
@@ -59,7 +59,7 @@ export default function EInvoiceTab() {
       await createEInvoice({
         type: invoiceType,
         customerId,
-        issueDate,
+        issueDate: toISO(issueDate),
         notes: notes || undefined,
         lines: lines.filter(l => l.productName).map(l => ({
           productName: l.productName,

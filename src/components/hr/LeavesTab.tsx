@@ -6,7 +6,7 @@ import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
 import type { LeaveType } from '../../types/erp'
-import { LEAVE_TYPE_LABELS, LEAVE_STATUS_LABELS, LEAVE_STATUS_STYLES, DATE_FMT } from '../../types/erp'
+import { LEAVE_TYPE_LABELS, LEAVE_STATUS_LABELS, LEAVE_STATUS_STYLES, DATE_FMT, toISO } from '../../types/erp'
 import { exportToExcel } from '../../lib/excelExport'
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
@@ -37,8 +37,8 @@ export default function LeavesTab() {
       await requestLeave({
         employeeId: form.employeeId,
         leaveType: form.leaveType,
-        startDate: form.startDate,
-        endDate: form.endDate,
+        startDate: toISO(form.startDate),
+        endDate: toISO(form.endDate),
         reason: form.reason || undefined,
       })
       setCreating(false)

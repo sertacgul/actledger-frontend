@@ -7,7 +7,7 @@ import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
 import type { HREmployee, EmploymentStatus } from '../../types/erp'
-import { EMPLOYMENT_STATUS_LABELS, EMPLOYMENT_STATUS_STYLES, TRY_FMT, DATE_FMT } from '../../types/erp'
+import { EMPLOYMENT_STATUS_LABELS, EMPLOYMENT_STATUS_STYLES, TRY_FMT, DATE_FMT, toISO } from '../../types/erp'
 import { exportToExcel } from '../../lib/excelExport'
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
@@ -65,7 +65,7 @@ export default function EmployeesTab() {
     try {
       const body = {
         userId: form.userId,
-        startDate: form.startDate,
+        startDate: toISO(form.startDate),
         grossSalary: Number(form.grossSalary) || 0,
         nationalId: form.nationalId || undefined,
         sgkNumber: form.sgkNumber || undefined,

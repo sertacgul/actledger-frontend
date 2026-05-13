@@ -1,6 +1,11 @@
 // src/types/erp.ts
 
 // ── Shared ──────────────────────────────────────────────────────────────────
+
+/** Convert plain date (2026-05-12) to ISO datetime for backend z.string().datetime() */
+export const toISO = (d: string) => d ? new Date(d + 'T00:00:00.000Z').toISOString() : ''
+export const toISOEnd = (d: string) => d ? new Date(d + 'T23:59:59.999Z').toISOString() : ''
+
 export const TRY_FMT = (n: number | string | undefined | null) => {
   if (n === undefined || n === null) return '-'
   const v = typeof n === 'string' ? Number(n) : n

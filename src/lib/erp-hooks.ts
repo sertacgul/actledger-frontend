@@ -738,3 +738,19 @@ export async function getExportDownloadUrl(id: string): Promise<string> {
   const res = await api.get<any>(`/data-export/${id}/download`)
   return (res.data ?? res).fileUrl
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PERIOD COMPARISON
+// ═══════════════════════════════════════════════════════════════════════════
+
+export function useCompare(dateFrom1: string, dateTo1: string, dateFrom2: string, dateTo2: string, departmentId?: string) {
+  const params = new URLSearchParams({ dateFrom1, dateTo1, dateFrom2, dateTo2 })
+  if (departmentId) params.set('departmentId', departmentId)
+  const { data, loading, error, refetch } = useFetch<any>(
+    () => (dateFrom1 && dateTo1 && dateFrom2 && dateTo2)
+      ? api.get(`/companies/me/compare?${params}`).then((r: any) => r.data ?? r)
+      : Promise.resolve(null),
+    [dateFrom1, dateTo1, dateFrom2, dateTo2, departmentId],
+  )
+  return { compare: data, loading, error, refetch }
+}

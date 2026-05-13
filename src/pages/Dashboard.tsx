@@ -28,6 +28,7 @@ import DashboardFilter, { DASHBOARD_FILTER_TOGGLE_EVENT } from '../components/da
 import WidgetWrapper from '../components/dashboard/WidgetWrapper'
 import NLWidgetGenerator from '../components/dashboard/NLWidgetGenerator'
 import DossierFormatEditor from '../components/dashboard/DossierFormatEditor'
+import CompareWidget from '../components/dashboard/CompareWidget'
 import { resolveFormat } from '../lib/dossierFormat'
 import type { DossierFormat } from '../lib/dossierFormat'
 
@@ -1312,6 +1313,13 @@ function DashboardInner() {
       )}
 
       {/* ── Format Editor modal ── */}
+      {/* ── Dönem Karşılaştırma ── */}
+      {(user?.role && ['super_admin','platform_admin','genel_mudur','gm_yardimcisi','direktor','mudur','supervizor'].includes(user.role)) && (
+        <div className="mt-6">
+          <CompareWidget />
+        </div>
+      )}
+
       {formatOpen && (
         <DossierFormatEditor
           dashboardId={store.activeId}

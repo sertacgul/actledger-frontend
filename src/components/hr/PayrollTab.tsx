@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { Plus, Calculator, Check, ChevronDown, ChevronRight, FileSpreadsheet } from 'lucide-react'
+import { Plus, Calculator, Check, ChevronDown, ChevronRight, FileSpreadsheet, Pencil } from 'lucide-react'
 import clsx from 'clsx'
-import { usePayrollPeriods, usePayrollRecords, createPayrollPeriod, calculatePayroll, approvePayroll } from '../../lib/erp-hooks'
+import { usePayrollPeriods, usePayrollRecords, createPayrollPeriod, calculatePayroll, approvePayroll, updatePayrollRecord } from '../../lib/erp-hooks'
 import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import DraggableModal from '../ui/DraggableModal'
-import type { PayrollPeriod } from '../../types/erp'
+import type { PayrollPeriod, PayrollRecord } from '../../types/erp'
 import { PAYROLL_STATUS_LABELS, PAYROLL_STATUS_STYLES, MONTH_LABELS, TRY_FMT } from '../../types/erp'
 import { exportToExcel } from '../../lib/excelExport'
 
@@ -86,9 +86,14 @@ export default function PayrollTab() {
                   </button>
                 )}
                 {canManage && period.status === 'HESAPLANDI' && (
-                  <button onClick={() => handleApprove(period)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500 text-white text-xs hover:bg-emerald-600">
-                    <Check className="w-3.5 h-3.5" />{tr ? 'Onayla' : 'Approve'}
-                  </button>
+                  <>
+                    <button onClick={() => handleCalculate(period)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-500 text-white text-xs hover:bg-blue-600">
+                      <Calculator className="w-3.5 h-3.5" />{tr ? 'Yeniden Hesapla' : 'Recalculate'}
+                    </button>
+                    <button onClick={() => handleApprove(period)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500 text-white text-xs hover:bg-emerald-600">
+                      <Check className="w-3.5 h-3.5" />{tr ? 'Onayla' : 'Approve'}
+                    </button>
+                  </>
                 )}
               </div>
 
@@ -101,7 +106,7 @@ export default function PayrollTab() {
                 </div>
               )}
 
-              {viewingPeriodId === period.id && <PayrollRecordsTable periodId={period.id} />}
+              {viewingPeriodId === period.id && <PayrollRecordsTable periodId={period.id} periodStatus={period.status} />}
             </div>
           ))}
         </div>
@@ -139,10 +144,19 @@ export default function PayrollTab() {
   )
 }
 
-function PayrollRecordsTable({ periodId }: { periodId: string }) {
+function PayrollRecordsTable({ periodId, periodStatus }: { periodId: string; periodStatus: string }) {
+  const { user } = useAuth()
   const { lang } = useLanguage()
   const tr = lang === 'tr'
-  const { records, loading } = usePayrollRecords(periodId)
+  const canManage = MANAGER_ROLES.includes(user?.role?.toUpperCase() ?? '')
+  const editable = canManage && periodStatus !== 'ONAYLANDI'
+  const { records, loading, refetch } = usePayrollRecords(periodId)
+  const [editingRecord, setEditingRecord] = useState<PayrollRecord | null>(null)
+
+  const hasExtras = records.some(r =>
+    Number(r.bonus) > 0 || Number(r.overtime) > 0 ||
+    Number(r.otherEarnings) > 0 || Number(r.otherDeductions) > 0
+  )
 
   const handleExport = () => {
     exportToExcel({
@@ -151,10 +165,14 @@ function PayrollRecordsTable({ periodId }: { periodId: string }) {
       columns: [
         { header: 'Calisan', accessor: (r: any) => r.employee?.user?.name ?? '', width: 24 },
         { header: 'Brut Maas', accessor: (r: any) => Number(r.grossSalary) || 0, width: 14 },
+        { header: 'Prim', accessor: (r: any) => Number(r.bonus) || 0, width: 12 },
+        { header: 'Fazla Mesai', accessor: (r: any) => Number(r.overtime) || 0, width: 12 },
+        { header: 'Diger Kazanc', accessor: (r: any) => Number(r.otherEarnings) || 0, width: 14 },
         { header: 'SGK Isci', accessor: (r: any) => Number(r.sgkEmployee) || 0, width: 12 },
         { header: 'SGK Isveren', accessor: (r: any) => Number(r.sgkEmployer) || 0, width: 12 },
         { header: 'Gelir Vergisi', accessor: (r: any) => Number(r.incomeTax) || 0, width: 12 },
         { header: 'Damga Vergisi', accessor: (r: any) => Number(r.stampTax) || 0, width: 12 },
+        { header: 'Diger Kesinti', accessor: (r: any) => Number(r.otherDeductions) || 0, width: 14 },
         { header: 'Toplam Kesinti', accessor: (r: any) => Number(r.totalDeductions) || 0, width: 14 },
         { header: 'Net Maas', accessor: (r: any) => Number(r.netSalary) || 0, width: 14 },
       ],
@@ -178,11 +196,22 @@ function PayrollRecordsTable({ periodId }: { periodId: string }) {
           <tr className="bg-[var(--surface)] border-b border-[var(--border)]">
             <th className="text-left px-3 py-2 font-medium text-[var(--text-3)]">{tr ? 'Calisan' : 'Employee'}</th>
             <th className="text-right px-3 py-2 font-medium text-[var(--text-3)]">{tr ? 'Brut' : 'Gross'}</th>
+            {hasExtras && (
+              <>
+                <th className="text-right px-3 py-2 font-medium text-violet-500">{tr ? 'Prim' : 'Bonus'}</th>
+                <th className="text-right px-3 py-2 font-medium text-violet-500">{tr ? 'F.Mesai' : 'OT'}</th>
+                <th className="text-right px-3 py-2 font-medium text-emerald-600">{tr ? 'Diger +' : 'Other +'}</th>
+              </>
+            )}
             <th className="text-right px-3 py-2 font-medium text-[var(--text-3)]">SGK</th>
             <th className="text-right px-3 py-2 font-medium text-[var(--text-3)]">{tr ? 'Gelir V.' : 'Income Tax'}</th>
             <th className="text-right px-3 py-2 font-medium text-[var(--text-3)]">{tr ? 'Damga' : 'Stamp'}</th>
+            {hasExtras && (
+              <th className="text-right px-3 py-2 font-medium text-rose-500">{tr ? 'Diger -' : 'Other -'}</th>
+            )}
             <th className="text-right px-3 py-2 font-medium text-[var(--text-3)]">{tr ? 'Kesintiler' : 'Deductions'}</th>
             <th className="text-right px-3 py-2 font-medium text-[var(--text-3)]">{tr ? 'Net' : 'Net'}</th>
+            {editable && <th className="px-2 py-2 w-8" />}
           </tr>
         </thead>
         <tbody>
@@ -190,16 +219,106 @@ function PayrollRecordsTable({ periodId }: { periodId: string }) {
             <tr key={r.id} className="border-b border-[var(--border)]">
               <td className="px-3 py-2 text-[var(--text-1)]">{r.employee?.user.name ?? '-'}</td>
               <td className="px-3 py-2 text-right font-mono">{TRY_FMT(r.grossSalary)}</td>
+              {hasExtras && (
+                <>
+                  <td className="px-3 py-2 text-right font-mono text-violet-600">{Number(r.bonus) > 0 ? TRY_FMT(r.bonus) : '-'}</td>
+                  <td className="px-3 py-2 text-right font-mono text-violet-600">{Number(r.overtime) > 0 ? TRY_FMT(r.overtime) : '-'}</td>
+                  <td className="px-3 py-2 text-right font-mono text-emerald-600">{Number(r.otherEarnings) > 0 ? TRY_FMT(r.otherEarnings) : '-'}</td>
+                </>
+              )}
               <td className="px-3 py-2 text-right font-mono">{TRY_FMT(r.sgkEmployee)}</td>
               <td className="px-3 py-2 text-right font-mono">{TRY_FMT(r.incomeTax)}</td>
               <td className="px-3 py-2 text-right font-mono">{TRY_FMT(r.stampTax)}</td>
+              {hasExtras && (
+                <td className="px-3 py-2 text-right font-mono text-rose-500">{Number(r.otherDeductions) > 0 ? TRY_FMT(r.otherDeductions) : '-'}</td>
+              )}
               <td className="px-3 py-2 text-right font-mono">{TRY_FMT(r.totalDeductions)}</td>
               <td className="px-3 py-2 text-right font-mono font-medium text-[var(--text-1)]">{TRY_FMT(r.netSalary)}</td>
+              {editable && (
+                <td className="px-2 py-2">
+                  <button onClick={() => setEditingRecord(r)} className="p-1 rounded hover:bg-[var(--surface)]" title={tr ? 'Ek kalem duzenle' : 'Edit extras'}>
+                    <Pencil className="w-3 h-3 text-[var(--text-3)]" />
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
       </table>
     </div>
+
+      {editingRecord && (
+        <EditExtrasModal
+          record={editingRecord}
+          onClose={() => setEditingRecord(null)}
+          onSaved={() => { setEditingRecord(null); refetch() }}
+        />
+      )}
     </div>
+  )
+}
+
+function EditExtrasModal({ record, onClose, onSaved }: { record: PayrollRecord; onClose: () => void; onSaved: () => void }) {
+  const { lang } = useLanguage()
+  const tr = lang === 'tr'
+  const [bonus, setBonus] = useState(Number(record.bonus) || 0)
+  const [overtime, setOvertime] = useState(Number(record.overtime) || 0)
+  const [otherEarnings, setOtherEarnings] = useState(Number(record.otherEarnings) || 0)
+  const [otherDeductions, setOtherDeductions] = useState(Number(record.otherDeductions) || 0)
+  const [saving, setSaving] = useState(false)
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      await updatePayrollRecord(record.id, { bonus, overtime, otherEarnings, otherDeductions })
+      onSaved()
+    } catch (e: any) { alert(e.message) }
+    finally { setSaving(false) }
+  }
+
+  return (
+    <DraggableModal
+      title={tr ? 'Ek Kalemler' : 'Extra Items'}
+      subtitle={record.employee?.user.name}
+      onClose={onClose}
+      width={440}
+      footer={
+        <div className="flex gap-2 justify-end">
+          <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm text-[var(--text-2)] hover:bg-[var(--surface)]">{tr ? 'Iptal' : 'Cancel'}</button>
+          <button onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-lg bg-violet-500 text-white text-sm font-medium hover:bg-violet-600 disabled:opacity-50">
+            {saving ? (tr ? 'Kaydediliyor...' : 'Saving...') : (tr ? 'Kaydet ve Hesapla' : 'Save & Calculate')}
+          </button>
+        </div>
+      }
+    >
+      <div className="space-y-3 p-1">
+        <p className="text-xs text-[var(--text-3)]">
+          {tr
+            ? 'Ek kalemler girildiginde bordro otomatik yeniden hesaplanir. Prim ve fazla mesai brut matrah uzerinden SGK/vergi hesabina dahil edilir. Diger kazanc/kesinti net uzerinden eklenir/cikarilir.'
+            : 'When extras are entered, the payroll is automatically recalculated. Bonus and overtime are included in the SGK/tax base. Other earnings/deductions are added/subtracted from net.'}
+        </p>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Prim' : 'Bonus'}</label>
+            <input className="input w-full text-right font-mono" type="number" min={0} step={0.01} value={bonus || ''} onChange={e => setBonus(Number(e.target.value) || 0)} placeholder="0.00" />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-[var(--text-2)] mb-1 block">{tr ? 'Fazla Mesai' : 'Overtime'}</label>
+            <input className="input w-full text-right font-mono" type="number" min={0} step={0.01} value={overtime || ''} onChange={e => setOvertime(Number(e.target.value) || 0)} placeholder="0.00" />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-emerald-600 mb-1 block">{tr ? 'Diger Kazanc (+)' : 'Other Earnings (+)'}</label>
+            <input className="input w-full text-right font-mono" type="number" min={0} step={0.01} value={otherEarnings || ''} onChange={e => setOtherEarnings(Number(e.target.value) || 0)} placeholder="0.00" />
+            <p className="text-[10px] text-[var(--text-3)] mt-0.5">{tr ? 'Yemek, yol, ikramiye vb.' : 'Meal, transport, bonus, etc.'}</p>
+          </div>
+          <div>
+            <label className="text-xs font-medium text-rose-500 mb-1 block">{tr ? 'Diger Kesinti (-)' : 'Other Deductions (-)'}</label>
+            <input className="input w-full text-right font-mono" type="number" min={0} step={0.01} value={otherDeductions || ''} onChange={e => setOtherDeductions(Number(e.target.value) || 0)} placeholder="0.00" />
+            <p className="text-[10px] text-[var(--text-3)] mt-0.5">{tr ? 'Avans, icra, ceza vb.' : 'Advance, penalty, etc.'}</p>
+          </div>
+        </div>
+      </div>
+    </DraggableModal>
   )
 }

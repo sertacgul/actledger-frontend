@@ -589,6 +589,10 @@ export interface PayrollRecord {
   stampTax: number | string
   totalDeductions: number | string
   netSalary: number | string
+  bonus: number | string
+  overtime: number | string
+  otherEarnings: number | string
+  otherDeductions: number | string
   createdAt: string
   updatedAt: string
   employee?: {

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { Plus, Search, CheckSquare, Calendar, Tag, AlertCircle, Layers, Sparkles, FileSpreadsheet, Camera, MessageSquare, Zap, Loader2, X, Cpu } from 'lucide-react'
 import { api, API_BASE, tokenStore } from '../lib/api'
 import clsx from 'clsx'
@@ -407,9 +408,9 @@ JSON formatinda yanit ver:
           </div>
         )}
 
-        {/* Photo Preview + OperIQ Analysis Modal */}
-        {photoPreview && (
-          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => { setPhotoPreview(null); setPhotoAnalysis(null) }}>
+        {/* Photo Preview + OperIQ Analysis Modal — portaled to body to escape DraggableModal's transform containing block */}
+        {photoPreview && createPortal(
+          <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center p-4" onClick={() => { setPhotoPreview(null); setPhotoAnalysis(null) }}>
             <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
               <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
                 <p className="text-sm font-bold" style={{ color: 'var(--text-1)' }}>{photoPreview.originalName}</p>
@@ -432,13 +433,13 @@ JSON formatinda yanit ver:
                       reader.onload = async () => {
                         const base64 = (reader.result as string).split(',')[1]
                         const mimeType = blob.type || 'image/jpeg'
-                        const res = await api.post<any>('/gemini/analyze-image', { image: base64, mimeType, context: `G\u00f6rev: ${selectedTask?.title}. ${selectedTask?.description || ''}` })
+                        const res = await api.post<any>('/gemini/analyze-image', { image: base64, mimeType, context: `Görev: ${selectedTask?.title}. ${selectedTask?.description || ''}` })
                         setPhotoAnalysis(res?.analysis || res?.data?.analysis || JSON.stringify(res))
                         setPhotoAnalyzing(false)
                       }
                       reader.readAsDataURL(blob)
                     } catch (e: any) {
-                      setPhotoAnalysis(lang === 'tr' ? 'Analiz yap\u0131lamad\u0131: ' + e.message : 'Analysis failed: ' + e.message)
+                      setPhotoAnalysis(lang === 'tr' ? 'Analiz yapılamadı: ' + e.message : 'Analysis failed: ' + e.message)
                       setPhotoAnalyzing(false)
                     }
                   }}
@@ -450,7 +451,7 @@ JSON formatinda yanit ver:
                 </button>
                 <a href={`${API_BASE.replace('/api/v1', '')}${photoPreview.url}`} target="_blank" rel="noreferrer"
                   className="px-4 py-2 rounded-lg text-sm font-semibold border hover:bg-zinc-50" style={{ borderColor: 'var(--border)', color: 'var(--text-2)' }}>
-                  {lang === 'tr' ? 'Orijinal A\u00e7' : 'Open Original'}
+                  {lang === 'tr' ? 'Orijinal Aç' : 'Open Original'}
                 </a>
               </div>
               {photoAnalysis && (
@@ -464,7 +465,8 @@ JSON formatinda yanit ver:
                 </div>
               )}
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
         {/* Comments */}

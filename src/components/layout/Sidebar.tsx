@@ -78,7 +78,7 @@ export default function Sidebar({ open = false, collapsed = false, onClose }: Si
     {
       label: 'ERP',
       items: [
-        { to: '/satis',            icon: ShoppingCart, label: lang === 'tr' ? 'Satis' : 'Sales',             desc: lang === 'tr' ? 'Musteri, siparis ve POS yonetimi' : 'Customer, order and POS management', minLevel: 4, moduleCode: 'SALES' },
+        { to: '/satis',            icon: ShoppingCart, label: lang === 'tr' ? 'Satış' : 'Sales',             desc: lang === 'tr' ? 'Müşteri, sipariş ve POS yönetimi' : 'Customer, order and POS management', minLevel: 4, moduleCode: 'SALES' },
         { to: '/muhasebe',         icon: Calculator,   label: lang === 'tr' ? 'Muhasebe' : 'Accounting',      desc: lang === 'tr' ? 'Hesap plani, yevmiye, e-fatura' : 'Chart of accounts, journal, e-invoice', minLevel: 4, moduleCode: 'ACCOUNTING' },
         { to: '/insan-kaynaklari', icon: UserCog,      label: lang === 'tr' ? 'Insan Kaynaklari' : 'HR',      desc: lang === 'tr' ? 'Calisan, izin ve bordro yonetimi' : 'Employee, leave and payroll management', minLevel: 4, moduleCode: 'HR' },
       ],

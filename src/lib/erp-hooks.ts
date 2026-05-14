@@ -541,6 +541,13 @@ export function usePayrollRecords(periodId: string) {
   return { records: records as PayrollRecord[], loading, error, refetch }
 }
 
+export async function updatePayrollRecord(
+  recordId: string,
+  body: { bonus?: number; overtime?: number; otherEarnings?: number; otherDeductions?: number },
+): Promise<PayrollRecord> {
+  return api.patch<PayrollRecord>(`/hr/payroll/records/${recordId}`, body)
+}
+
 // ── Attendance ──────────────────────────────────────────────────────────────
 export function useAttendance(filter: { date?: string; employeeId?: string } = {}) {
   const params = new URLSearchParams({ pageSize: '100' })

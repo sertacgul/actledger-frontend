@@ -91,7 +91,7 @@ jobs:
       - name: Build & Archive with Fastlane
         working-directory: ios/App
         env:
-          TEAM_ID: ***REDACTED***
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           PP_UUID: ${{ env.PP_UUID }}
         run: |
           # Create Fastfile

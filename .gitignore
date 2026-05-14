@@ -4,3 +4,14 @@ dist/
 .env.local
 .env.development
 .env.production
+
+# Apple signing
+*.key
+*.pem
+*.p12
+*.csr
+*_b64.txt
+
+# Android signing
+android/app/google-services.json
+*.jks

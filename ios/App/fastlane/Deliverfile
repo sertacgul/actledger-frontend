@@ -2,7 +2,7 @@
 
 # App metadata
 app_identifier("com.ataolaitech.actledger")
-username("changeme@example.com")
+username(ENV["APPLE_ID"] || "changeme@example.com")
 
 # Metadata path
 metadata_path("./fastlane/metadata")

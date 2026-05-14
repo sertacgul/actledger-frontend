@@ -1,4 +1,4 @@
 app_identifier("com.ataolaitech.actledger")
-apple_id("changeme@example.com")
-itc_team_id("***REDACTED***")
-team_id("***REDACTED***")
+apple_id(ENV["APPLE_ID"] || "changeme@example.com")
+itc_team_id(ENV["ITC_TEAM_ID"] || "")
+team_id(ENV["TEAM_ID"] || "")

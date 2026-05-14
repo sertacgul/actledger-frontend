@@ -19,9 +19,9 @@ android {
     signingConfigs {
         release {
             storeFile file("../actledger-release.jks")
-            storePassword System.getenv("KEYSTORE_PASSWORD") ?: "***REDACTED***"
+            storePassword System.getenv("KEYSTORE_PASSWORD") ?: ""
             keyAlias "actledger"
-            keyPassword System.getenv("KEY_PASSWORD") ?: "***REDACTED***"
+            keyPassword System.getenv("KEY_PASSWORD") ?: ""
         }
     }
     buildTypes {

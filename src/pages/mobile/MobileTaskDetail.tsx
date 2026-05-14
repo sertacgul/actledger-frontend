@@ -46,16 +46,24 @@ export default function MobileTaskDetail() {
     setPhotos(prev => [...prev, ...Array.from(files)])
   }
 
+  const [uploadError, setUploadError] = useState<string | null>(null)
+
   const handleUploadPhotos = async () => {
     if (!id || photos.length === 0) return
     setUploading(true)
+    setUploadError(null)
+    let successCount = 0
     try {
       for (const photo of photos) {
-        // Compress image before upload (max 1200px, 0.7 quality)
         const compressed = await compressImage(photo, 1200, 0.7)
+        // Ensure the blob has a valid image MIME type
+        const safeBlob = (compressed.type && compressed.type.startsWith('image/'))
+          ? compressed
+          : new Blob([compressed], { type: 'image/jpeg' })
         const fd = new FormData()
-        fd.append('photo', compressed, photo.name || 'photo.jpg')
+        fd.append('photo', safeBlob, photo.name || 'photo.jpg')
         const token = tokenStore.get()
+        if (!token) { setUploadError(lang === 'tr' ? 'Oturum suresi dolmus, tekrar giris yapin' : 'Session expired, please log in again'); break }
         const controller = new AbortController()
         const timer = setTimeout(() => controller.abort(), 60000)
         try {
@@ -67,28 +75,39 @@ export default function MobileTaskDetail() {
             signal: controller.signal,
           })
           clearTimeout(timer)
-          // Silent success or log error - no alert to user
           if (!res.ok) {
-            console.warn('Photo upload response:', res.status)
+            const body = await res.text().catch(() => '')
+            setUploadError(lang === 'tr' ? `Yukleme basarisiz (${res.status})` : `Upload failed (${res.status})`)
+            console.warn('Photo upload failed:', res.status, body)
+          } else {
+            successCount++
           }
         } catch (err: any) {
           clearTimeout(timer)
+          setUploadError(lang === 'tr' ? `Baglanti hatasi: ${err.message}` : `Connection error: ${err.message}`)
           console.warn('Photo upload error:', err.message)
         }
       }
-      setPhotos([])
-      // Refetch attachments from server
-      api.get<any[]>(`/tasks/${id}/attachments`).then(setAttachments).catch(() => {})
-    } catch {} finally { setUploading(false) }
+      if (successCount > 0) {
+        setPhotos([])
+        // Wait briefly then refetch to ensure server has processed
+        await new Promise(r => setTimeout(r, 500))
+        api.get<any[]>(`/tasks/${id}/attachments`).then(setAttachments).catch(() => {})
+      }
+    } catch (e: any) {
+      setUploadError(e.message)
+    } finally { setUploading(false) }
   }
 
   // Compress image to reduce upload size (with fallback to original)
   function compressImage(file: File, maxSize: number, quality: number): Promise<Blob> {
-    // Skip compression for small files (<500KB) or non-image files
-    if (file.size < 500 * 1024 || !file.type.startsWith('image/')) return Promise.resolve(file)
+    // Skip compression for non-image files; always attempt compression for images
+    // (mobile cameras can produce large files even at low resolution)
+    if (!file.type || !file.type.startsWith('image/')) return Promise.resolve(file)
     return new Promise((resolve) => {
-      const timeout = setTimeout(() => resolve(file), 10000) // 10s fallback
+      const timeout = setTimeout(() => resolve(file), 15000) // 15s fallback for slow devices
       try {
+        const objectUrl = URL.createObjectURL(file)
         const img = new window.Image()
         img.onload = () => {
           try {
@@ -102,18 +121,27 @@ export default function MobileTaskDetail() {
             canvas.width = width
             canvas.height = height
             const ctx = canvas.getContext('2d')
-            if (!ctx) { clearTimeout(timeout); resolve(file); return }
+            if (!ctx) { clearTimeout(timeout); URL.revokeObjectURL(objectUrl); resolve(file); return }
             ctx.drawImage(img, 0, 0, width, height)
             canvas.toBlob(
-              blob => { clearTimeout(timeout); resolve(blob || file) },
+              blob => {
+                clearTimeout(timeout)
+                URL.revokeObjectURL(objectUrl)
+                // Ensure blob is valid and not empty
+                if (blob && blob.size > 0) resolve(blob)
+                else resolve(file)
+              },
               'image/jpeg',
               quality
             )
-          } catch { clearTimeout(timeout); resolve(file) }
-          finally { try { URL.revokeObjectURL(img.src) } catch {} }
+          } catch {
+            clearTimeout(timeout)
+            URL.revokeObjectURL(objectUrl)
+            resolve(file)
+          }
         }
-        img.onerror = () => { clearTimeout(timeout); resolve(file) }
-        img.src = URL.createObjectURL(file)
+        img.onerror = () => { clearTimeout(timeout); URL.revokeObjectURL(objectUrl); resolve(file) }
+        img.src = objectUrl
       } catch { clearTimeout(timeout); resolve(file) }
     })
   }
@@ -336,6 +364,9 @@ export default function MobileTaskDetail() {
               {uploading ? <Loader2 size={14} className="animate-spin inline mr-1" /> : null}
               {lang === 'tr' ? `${photos.length} Fotoğrafı Gönder` : `Send ${photos.length} Photo(s)`}
             </button>
+          )}
+          {uploadError && (
+            <p className="mt-2 text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2">{uploadError}</p>
           )}
         </div>
 

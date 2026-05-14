@@ -48,49 +48,49 @@ export default function MobileTaskDetail() {
 
   const [uploadError, setUploadError] = useState<string | null>(null)
 
+  // Use XMLHttpRequest for file uploads — iOS WKWebView's fetch() fails
+  // with "Load failed" when sending FormData containing Blobs
+  function uploadFile(url: string, fd: FormData, token: string): Promise<{ ok: boolean; status: number; body: string }> {
+    return new Promise((resolve) => {
+      const xhr = new XMLHttpRequest()
+      xhr.open('POST', url)
+      xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+      xhr.withCredentials = true
+      xhr.timeout = 60000
+      xhr.onload = () => resolve({ ok: xhr.status >= 200 && xhr.status < 300, status: xhr.status, body: xhr.responseText })
+      xhr.onerror = () => resolve({ ok: false, status: 0, body: 'Network error' })
+      xhr.ontimeout = () => resolve({ ok: false, status: 0, body: 'Timeout' })
+      xhr.send(fd)
+    })
+  }
+
   const handleUploadPhotos = async () => {
     if (!id || photos.length === 0) return
     setUploading(true)
     setUploadError(null)
     let successCount = 0
     try {
+      const token = tokenStore.get()
+      if (!token) { setUploadError(lang === 'tr' ? 'Oturum suresi dolmus, tekrar giris yapin' : 'Session expired, please log in again'); setUploading(false); return }
+
       for (const photo of photos) {
         const compressed = await compressImage(photo, 1200, 0.7)
-        // Ensure the blob has a valid image MIME type
         const safeBlob = (compressed.type && compressed.type.startsWith('image/'))
           ? compressed
           : new Blob([compressed], { type: 'image/jpeg' })
         const fd = new FormData()
         fd.append('photo', safeBlob, photo.name || 'photo.jpg')
-        const token = tokenStore.get()
-        if (!token) { setUploadError(lang === 'tr' ? 'Oturum suresi dolmus, tekrar giris yapin' : 'Session expired, please log in again'); break }
-        const controller = new AbortController()
-        const timer = setTimeout(() => controller.abort(), 60000)
-        try {
-          const res = await fetch(`${API_BASE}/tasks/${id}/attachments`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${token}` },
-            credentials: 'include',
-            body: fd,
-            signal: controller.signal,
-          })
-          clearTimeout(timer)
-          if (!res.ok) {
-            const body = await res.text().catch(() => '')
-            setUploadError(lang === 'tr' ? `Yukleme basarisiz (${res.status})` : `Upload failed (${res.status})`)
-            console.warn('Photo upload failed:', res.status, body)
-          } else {
-            successCount++
-          }
-        } catch (err: any) {
-          clearTimeout(timer)
-          setUploadError(lang === 'tr' ? `Baglanti hatasi: ${err.message}` : `Connection error: ${err.message}`)
-          console.warn('Photo upload error:', err.message)
+
+        const result = await uploadFile(`${API_BASE}/tasks/${id}/attachments`, fd, token)
+        if (result.ok) {
+          successCount++
+        } else {
+          setUploadError(lang === 'tr' ? `Yukleme basarisiz (${result.status || 'ag hatasi'})` : `Upload failed (${result.status || 'network error'})`)
+          console.warn('Photo upload failed:', result.status, result.body)
         }
       }
       if (successCount > 0) {
         setPhotos([])
-        // Wait briefly then refetch to ensure server has processed
         await new Promise(r => setTimeout(r, 500))
         api.get<any[]>(`/tasks/${id}/attachments`).then(setAttachments).catch(() => {})
       }

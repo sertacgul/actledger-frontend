@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import clsx from 'clsx'
+import { BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useAccountingReport } from '../../lib/erp-hooks'
 import { useLanguage } from '../../context/LanguageContext'
 import { TRY_FMT } from '../../types/erp'
+
+const CHART_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4']
 
 type ReportType = 'income-expense' | 'balance-sheet' | 'sales-summary' | 'einvoice-summary' | 'tax-summary' | 'cash-flow'
 
@@ -101,6 +104,37 @@ export default function ReportsTab() {
           <p className="text-xl font-mono font-bold text-[var(--text-1)]">{TRY_FMT(data.averageOrderValue)}</p>
         </div>
       </div>
+      {/* Trend chart */}
+      {data.trend?.length > 0 && (
+        <div className="card p-4">
+          <h3 className="font-semibold text-[var(--text-1)] mb-3">{tr ? 'Satis Trendi' : 'Sales Trend'}</h3>
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={data.trend}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="period" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Line type="monotone" dataKey="total" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+      {/* Payment method pie chart */}
+      {data.paymentBreakdown?.length > 0 && (
+        <div className="card p-4">
+          <h3 className="font-semibold text-[var(--text-1)] mb-3">{tr ? 'Odeme Dagilimi' : 'Payment Distribution'}</h3>
+          <ResponsiveContainer width="100%" height={220}>
+            <PieChart>
+              <Pie data={data.paymentBreakdown} dataKey="total" nameKey="method" cx="50%" cy="50%" outerRadius={80} label={{ fontSize: 11 }}>
+                {data.paymentBreakdown.map((_: any, i: number) => (
+                  <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      )}
       {/* Payment breakdown */}
       {data.paymentBreakdown?.length > 0 && (
         <div className="card p-4">
@@ -161,6 +195,22 @@ export default function ReportsTab() {
           <p className="text-xs text-[var(--text-3)] mt-1">{data.incoming?.count} {tr ? 'adet' : 'invoices'}</p>
         </div>
       </div>
+      {/* Monthly trend bar chart */}
+      {data.monthlyTrend?.length > 0 && (
+        <div className="card p-4">
+          <h3 className="font-semibold text-[var(--text-1)] mb-3">{tr ? 'Aylik Fatura Grafigi' : 'Monthly Invoice Chart'}</h3>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={data.monthlyTrend}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Bar dataKey="outCount" name={tr ? 'Giden' : 'Outgoing'} fill="#22c55e" />
+              <Bar dataKey="inCount" name={tr ? 'Gelen' : 'Incoming'} fill="#ef4444" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
       {/* Status breakdown */}
       {data.statusBreakdown?.length > 0 && (
         <div className="card p-4">
@@ -208,6 +258,23 @@ export default function ReportsTab() {
           <p className={clsx('text-xl font-mono font-bold', data.description === 'Odenecek KDV' ? 'text-red-600' : 'text-emerald-600')}>{TRY_FMT(data.netTax)}</p>
         </div>
       </div>
+      {/* Tax comparison bar chart */}
+      <div className="card p-4">
+        <h3 className="font-semibold text-[var(--text-1)] mb-3">{tr ? 'KDV Karsilastirmasi' : 'Tax Comparison'}</h3>
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={[{ name: tr ? 'Hesaplanan' : 'Collected', value: data.collectedTax ?? 0 }, { name: tr ? 'Indirilecek' : 'Paid', value: data.paidTax ?? 0 }, { name: tr ? 'Net' : 'Net', value: data.netTax ?? 0 }]} layout="vertical">
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis type="number" tick={{ fontSize: 11 }} />
+            <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={80} />
+            <Tooltip />
+            <Bar dataKey="value">
+              <Cell fill="#22c55e" />
+              <Cell fill="#ef4444" />
+              <Cell fill="#3b82f6" />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   )
 
@@ -232,6 +299,22 @@ export default function ReportsTab() {
           <p className="text-lg font-mono font-bold text-[var(--text-1)]">{TRY_FMT(data.closingBalance)}</p>
         </div>
       </div>
+      {/* Account inflow/outflow bar chart */}
+      {data.accounts?.length > 0 && (
+        <div className="card p-4">
+          <h3 className="font-semibold text-[var(--text-1)] mb-3">{tr ? 'Hesap Bazli Nakit Akisi' : 'Cash Flow by Account'}</h3>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={data.accounts.map((a: any) => ({ name: a.name, inflow: a.inflow ?? 0, outflow: a.outflow ?? 0 }))}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Bar dataKey="inflow" name={tr ? 'Giris' : 'Inflow'} fill="#22c55e" />
+              <Bar dataKey="outflow" name={tr ? 'Cikis' : 'Outflow'} fill="#ef4444" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
       {/* Account details */}
       {data.accounts?.length > 0 && (
         <div className="card p-4">

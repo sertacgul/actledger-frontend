@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Plus, Search, Eye, Check, X, Package, Trash2, FileSpreadsheet } from 'lucide-react'
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import clsx from 'clsx'
 import {
   useOrders, useCustomers, createOrder, approveOrder, completeOrder, cancelOrder, createPayment,
@@ -10,6 +11,8 @@ import DraggableModal from '../ui/DraggableModal'
 import type { SalesOrder, OrderStatus, PaymentMethod } from '../../types/erp'
 import { ORDER_STATUS_LABELS, ORDER_STATUS_STYLES, PAYMENT_METHOD_LABELS, TRY_FMT, DATE_FMT, DATE_CELL } from '../../types/erp'
 import { exportToExcel } from '../../lib/excelExport'
+
+const CHART_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#94a3b8']
 
 const MANAGER_ROLES = ['PLATFORM_ADMIN', 'SUPER_ADMIN', 'GENEL_MUDUR', 'GM_YARDIMCISI', 'DIREKTOR', 'MUDUR']
 
@@ -175,6 +178,44 @@ export default function OrdersTab() {
           </button>
         )}
       </div>
+
+      {orders.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="card p-4">
+            <h3 className="font-semibold text-[var(--text-1)] mb-3">{tr ? 'Siparis Durum Dagilimi' : 'Order Status Distribution'}</h3>
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart>
+                <Pie
+                  data={Object.entries(orders.reduce((acc, o) => { acc[o.status] = (acc[o.status] || 0) + 1; return acc }, {} as Record<string, number>)).map(([name, value]) => ({ name: ORDER_STATUS_LABELS[name as keyof typeof ORDER_STATUS_LABELS] || name, value }))}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  label
+                >
+                  {Object.keys(orders.reduce((acc, o) => { acc[o.status] = (acc[o.status] || 0) + 1; return acc }, {} as Record<string, number>)).map((_, i) => (
+                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="card p-4">
+            <h3 className="font-semibold text-[var(--text-1)] mb-3">{tr ? 'Aylik Siparis Toplami' : 'Monthly Order Totals'}</h3>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={Object.entries(orders.reduce((acc, o) => { const month = o.createdAt?.slice(0, 7) || 'N/A'; acc[month] = (acc[month] || 0) + (Number(o.totalAmount) || 0); return acc }, {} as Record<string, number>)).sort(([a], [b]) => a.localeCompare(b)).map(([month, total]) => ({ month, total }))}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => TRY_FMT(v)} />
+                <Tooltip formatter={(value: number) => TRY_FMT(value)} />
+                <Bar dataKey="total" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="text-center py-12 text-[var(--text-3)]">{tr ? 'Yukleniyor...' : 'Loading...'}</div>

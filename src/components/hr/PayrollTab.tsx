@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { Plus, Calculator, Check, ChevronDown, ChevronRight, FileSpreadsheet, Pencil } from 'lucide-react'
 import clsx from 'clsx'
 import { usePayrollPeriods, usePayrollRecords, createPayrollPeriod, calculatePayroll, approvePayroll, updatePayrollRecord } from '../../lib/erp-hooks'
@@ -64,6 +65,31 @@ export default function PayrollTab() {
         <div className="text-center py-12 text-[var(--text-3)]">{tr ? 'Bordro donemi bulunamadi' : 'No payroll periods found'}</div>
       ) : (
         <div className="space-y-3">
+          {periods.length > 0 && (() => {
+            const chartData = [...periods].reverse().map(p => ({
+              name: MONTH_LABELS[p.month - 1] + ' ' + p.year,
+              brut: p.totalGross,
+              vergi: p.totalTax,
+              net: p.totalNet,
+            }))
+            return (
+              <div className="card p-4">
+                <h3 className="font-semibold text-[var(--text-1)] mb-3">{tr ? 'Bordro Trendi' : 'Payroll Trend'}</h3>
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11 }} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="brut" name={tr ? 'Brüt' : 'Gross'} fill="#22c55e" />
+                    <Bar dataKey="vergi" name={tr ? 'Vergi' : 'Tax'} fill="#ef4444" />
+                    <Bar dataKey="net" name="Net" fill="#3b82f6" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )
+          })()}
           {periods.sort((a, b) => b.year - a.year || b.month - a.month).map(period => (
             <div key={period.id} className="card p-4">
               <div className="flex items-center gap-3">

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { Plus, Check, X, FileSpreadsheet } from 'lucide-react'
 import clsx from 'clsx'
 import { useLeaves, useEmployees, requestLeave, approveLeave, rejectLeave, cancelLeave } from '../../lib/erp-hooks'
@@ -100,6 +101,44 @@ export default function LeavesTab() {
       ) : leaves.length === 0 ? (
         <div className="text-center py-12 text-[var(--text-3)]">{tr ? 'Izin talebi bulunamadi' : 'No leave requests found'}</div>
       ) : (
+        <>
+        {leaves.length > 0 && (() => {
+          const CHART_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4']
+          const typeMap: Record<string, number> = {}
+          const statusMap: Record<string, number> = {}
+          leaves.forEach(l => {
+            typeMap[l.leaveType] = (typeMap[l.leaveType] || 0) + 1
+            statusMap[l.status] = (statusMap[l.status] || 0) + 1
+          })
+          const typeData = Object.entries(typeMap).map(([k, v]) => ({ name: LEAVE_TYPE_LABELS[k as keyof typeof LEAVE_TYPE_LABELS] ?? k, value: v }))
+          const statusData = Object.entries(statusMap).map(([k, v]) => ({ name: LEAVE_STATUS_LABELS[k as keyof typeof LEAVE_STATUS_LABELS] ?? k, value: v }))
+          return (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="card p-4">
+                <h3 className="font-semibold text-[var(--text-1)] mb-3">{tr ? 'Izin Turu Dagilimi' : 'Leave Type Distribution'}</h3>
+                <ResponsiveContainer width="100%" height={220}>
+                  <PieChart>
+                    <Pie data={typeData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+                      {typeData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="card p-4">
+                <h3 className="font-semibold text-[var(--text-1)] mb-3">{tr ? 'Izin Durum Dagilimi' : 'Leave Status Distribution'}</h3>
+                <ResponsiveContainer width="100%" height={220}>
+                  <PieChart>
+                    <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+                      {statusData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )
+        })()}
         <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
           <table className="w-full text-sm">
             <thead>
@@ -149,6 +188,7 @@ export default function LeavesTab() {
             </tbody>
           </table>
         </div>
+        </>
       )}
 
       {creating && (

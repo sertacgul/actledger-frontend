@@ -497,11 +497,11 @@ export default function FacilityMap() {
         @keyframes facilityPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); } 50% { box-shadow: 0 0 0 8px rgba(239,68,68,0); } }
         @keyframes facilityFadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         @keyframes markerBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-        @keyframes entityPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.5); } 50% { box-shadow: 0 0 0 6px rgba(59,130,246,0); } }
+        @keyframes entityPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); } 50% { box-shadow: 0 0 0 6px rgba(34,197,94,0); } }
         .facility-pulse { animation: facilityPulse 2s ease-in-out infinite; }
         .facility-fade-in { animation: facilityFadeIn 0.6s ease-out; }
         .marker-bounce { animation: markerBounce 2s ease-in-out infinite; }
-        .entity-pulse { animation: entityPulse 2s ease-in-out infinite; }
+        .entity-pulse { animation: entityPulse 1.5s ease-in-out infinite; }
         .map-canvas-3d {
           transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), perspective 0.8s ease;
         }
@@ -849,9 +849,9 @@ export default function FacilityMap() {
                           ? `translate(-50%, -50%) translateZ(${(entity.z ?? 0) * 4}px)`
                           : 'translate(-50%, -50%)',
                         borderRadius: '50%',
-                        background: '#3b82f6',
+                        background: '#22c55e',
                         border: '2px solid #fff',
-                        boxShadow: '0 2px 8px rgba(59,130,246,0.4)',
+                        boxShadow: '0 2px 8px rgba(34,197,94,0.4)',
                         zIndex: 25,
                       }}
                     >
@@ -860,7 +860,7 @@ export default function FacilityMap() {
                       </div>
                       {/* Name tooltip */}
                       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded-md text-[9px] font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-30"
-                        style={{ background: 'rgba(59,130,246,0.95)', color: '#fff' }}>
+                        style={{ background: 'rgba(34,197,94,0.95)', color: '#fff' }}>
                         {entity.name}{entity.department ? ` - ${entity.department}` : ''}
                       </div>
                     </div>

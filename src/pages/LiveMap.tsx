@@ -58,7 +58,7 @@ const FACILITY_TYPES = [
 ]
 
 const PRIORITY_COLORS: Record<string, string> = {
-  KRITIK: '#dc2626', YUKSEK: '#f97316', NORMAL: '#2563eb', DUSUK: '#64748b',
+  KRITIK: '#dc2626', YUKSEK: '#f97316', NORMAL: '#2563eb', DUSUK: '#22c55e',
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -276,6 +276,10 @@ export default function LiveMap() {
 
   return (
     <div className="space-y-4">
+      <style>{`
+        @keyframes onlinePulse { 0%, 100% { filter: drop-shadow(0 0 0 rgba(34,197,94,0.6)); } 50% { filter: drop-shadow(0 0 6px rgba(34,197,94,0.8)); } }
+        .online-signal { animation: onlinePulse 1.5s ease-in-out infinite; }
+      `}</style>
       {/* Page title + Tab switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
@@ -425,10 +429,10 @@ export default function LiveMap() {
             {/* Personnel: live task-based markers */}
             {showPersonnel && liveUsers.map(u => {
               const task = u.assignedTasks[0]
-              const pColor = task ? (PRIORITY_COLORS[task.priority] ?? '#2563eb') : '#64748b'
+              const pColor = task ? (PRIORITY_COLORS[task.priority] ?? '#2563eb') : '#22c55e'
               return (
                 <CircleMarker key={u.id} center={[u.liveLatitude, u.liveLongitude]} radius={9}
-                  pathOptions={{ fillColor: pColor, fillOpacity: 0.85, color: '#ffffff', weight: 2 }}>
+                  pathOptions={{ fillColor: pColor, fillOpacity: 0.85, color: '#ffffff', weight: 2, className: 'online-signal' }}>
                   <Popup>
                     <div className="text-xs min-w-[200px]">
                       <p className="font-bold text-sm text-slate-800 mb-1">{task?.title ?? 'Aktif Gorev'}</p>
@@ -570,7 +574,7 @@ export default function LiveMap() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
             {liveUsers.map(u => {
               const task = u.assignedTasks[0]
-              const pColor = task ? (PRIORITY_COLORS[task.priority] ?? '#2563eb') : '#64748b'
+              const pColor = task ? (PRIORITY_COLORS[task.priority] ?? '#2563eb') : '#22c55e'
               return (
                 <div key={u.id} className="flex items-center gap-2.5 p-2.5 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100">
                   <button type="button" onClick={() => { setMapCenter([u.liveLatitude, u.liveLongitude]); setMapZoom(16) }}

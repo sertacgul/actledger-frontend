@@ -426,19 +426,18 @@ export default function LiveMap() {
             <MapClickHandler onMapClick={handleMapClick} />
             <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-            {/* Personnel: live task-based markers */}
+            {/* Personnel: live (online) markers — always green */}
             {showPersonnel && liveUsers.map(u => {
               const task = u.assignedTasks[0]
-              const pColor = task ? (PRIORITY_COLORS[task.priority] ?? '#2563eb') : '#22c55e'
               return (
                 <CircleMarker key={u.id} center={[u.liveLatitude, u.liveLongitude]} radius={9}
-                  pathOptions={{ fillColor: pColor, fillOpacity: 0.85, color: '#ffffff', weight: 2, className: 'online-signal' }}>
+                  pathOptions={{ fillColor: '#22c55e', fillOpacity: 0.85, color: '#ffffff', weight: 2, className: 'online-signal' }}>
                   <Popup>
                     <div className="text-xs min-w-[200px]">
                       <p className="font-bold text-sm text-slate-800 mb-1">{task?.title ?? 'Aktif Gorev'}</p>
                       {task && (
                         <div className="flex items-center gap-1.5 mb-1.5">
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold text-white" style={{ background: pColor }}>{task.priority}</span>
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold text-white" style={{ background: PRIORITY_COLORS[task.priority] ?? '#2563eb' }}>{task.priority}</span>
                           <span className="text-slate-500 capitalize">{task.type.toLowerCase()}</span>
                         </div>
                       )}
@@ -457,10 +456,10 @@ export default function LiveMap() {
               )
             })}
 
-            {/* Personnel: static map entities */}
+            {/* Personnel: static (offline) map entities — grey */}
             {showPersonnel && mapEntities.personnel.map(e => (
               <CircleMarker key={`p-${e.id}`} center={[e.latitude, e.longitude]} radius={7}
-                pathOptions={{ fillColor: '#3b82f6', fillOpacity: 0.75, color: '#ffffff', weight: 2 }}>
+                pathOptions={{ fillColor: '#94a3b8', fillOpacity: 0.75, color: '#ffffff', weight: 2 }}>
                 <Popup>
                   <div className="text-xs min-w-[160px]">
                     <p className="font-bold text-sm text-slate-800">{e.name}</p>
@@ -574,12 +573,11 @@ export default function LiveMap() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
             {liveUsers.map(u => {
               const task = u.assignedTasks[0]
-              const pColor = task ? (PRIORITY_COLORS[task.priority] ?? '#2563eb') : '#22c55e'
               return (
                 <div key={u.id} className="flex items-center gap-2.5 p-2.5 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100">
                   <button type="button" onClick={() => { setMapCenter([u.liveLatitude, u.liveLongitude]); setMapZoom(16) }}
                     className="flex items-center gap-2.5 flex-1 min-w-0 text-left">
-                    <div className="w-2 h-8 rounded-full flex-shrink-0" style={{ background: pColor }} />
+                    <div className="w-2 h-8 rounded-full flex-shrink-0" style={{ background: '#22c55e' }} />
                     <div className="flex-1 min-w-0">
                       <p className="text-[11px] font-semibold text-slate-800 truncate">{task?.title ?? 'Aktif Gorev'}</p>
                       <p className="text-[10px] text-slate-500 truncate">{u.jobTitle ?? u.role} - {u.departments[0]?.name ?? '-'}</p>

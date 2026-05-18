@@ -77,7 +77,7 @@ export default function CompareWidget() {
   const [dateFrom2, setDateFrom2] = useState(thisYearStart)
   const [dateTo2, setDateTo2] = useState(thisYearEnd)
 
-  const [activeGroup, setActiveGroup] = useState<MetricGroup>('sales')
+  const [activeGroup, setActiveGroup] = useState<MetricGroup>('tasks')
 
   const { compare, loading } = useCompare(dateFrom1, dateTo1, dateFrom2, dateTo2, departmentId || undefined)
 
@@ -87,14 +87,16 @@ export default function CompareWidget() {
     setDateFrom2(p.f1); setDateTo2(p.t1) // Dönem 2 = yeni
   }
 
-  const GROUPS: { id: MetricGroup; icon: typeof ShoppingCart; labelTr: string; labelEn: string }[] = [
-    { id: 'sales', icon: ShoppingCart, labelTr: 'Satış', labelEn: 'Sales' },
+  const { hasModule } = useAuth()
+
+  const GROUPS: { id: MetricGroup; icon: typeof ShoppingCart; labelTr: string; labelEn: string; moduleCode?: string }[] = [
     { id: 'tasks', icon: CheckSquare, labelTr: 'Görevler', labelEn: 'Tasks' },
     { id: 'stock', icon: Package, labelTr: 'Stok', labelEn: 'Stock' },
-    { id: 'accounting', icon: Calculator, labelTr: 'Muhasebe', labelEn: 'Accounting' },
-    { id: 'hr', icon: Users, labelTr: 'İK', labelEn: 'HR' },
+    { id: 'sales', icon: ShoppingCart, labelTr: 'Satış', labelEn: 'Sales', moduleCode: 'SALES' },
+    { id: 'accounting', icon: Calculator, labelTr: 'Muhasebe', labelEn: 'Accounting', moduleCode: 'ACCOUNTING' },
+    { id: 'hr', icon: Users, labelTr: 'İK', labelEn: 'HR', moduleCode: 'HR' },
     { id: 'reports', icon: FileText, labelTr: 'Raporlar', labelEn: 'Reports' },
-  ]
+  ].filter(g => !g.moduleCode || hasModule(g.moduleCode)) as { id: MetricGroup; icon: typeof ShoppingCart; labelTr: string; labelEn: string }[]
 
   return (
     <div className="space-y-4">
@@ -149,13 +151,13 @@ export default function CompareWidget() {
         <div className="text-center py-8 text-[var(--text-3)] text-sm">{tr ? 'Tarih aralığı seçin' : 'Select date ranges'}</div>
       ) : (
         <>
-          {/* Summary cards */}
+          {/* Summary cards — only show ERP metrics if user has module access */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            <MetricCard label={tr ? 'Satış Tutarı' : 'Sales Total'} p1={compare.sales?.p1_total ?? 0} p2={compare.sales?.p2_total ?? 0} isCurrency />
-            <MetricCard label={tr ? 'Sipariş Sayısı' : 'Order Count'} p1={compare.sales?.p1_count ?? 0} p2={compare.sales?.p2_count ?? 0} />
+            {hasModule('SALES') && <MetricCard label={tr ? 'Satış Tutarı' : 'Sales Total'} p1={compare.sales?.p1_total ?? 0} p2={compare.sales?.p2_total ?? 0} isCurrency />}
+            {hasModule('SALES') && <MetricCard label={tr ? 'Sipariş Sayısı' : 'Order Count'} p1={compare.sales?.p1_count ?? 0} p2={compare.sales?.p2_count ?? 0} />}
             <MetricCard label={tr ? 'Tamamlanan Görev' : 'Tasks Done'} p1={compare.tasks?.p1_completed ?? 0} p2={compare.tasks?.p2_completed ?? 0} />
-            <MetricCard label={tr ? 'Gelir' : 'Income'} p1={compare.accounting?.p1_income ?? 0} p2={compare.accounting?.p2_income ?? 0} isCurrency />
-            <MetricCard label={tr ? 'Net Kâr' : 'Net Profit'} p1={compare.accounting?.p1_profit ?? 0} p2={compare.accounting?.p2_profit ?? 0} isCurrency />
+            {hasModule('ACCOUNTING') && <MetricCard label={tr ? 'Gelir' : 'Income'} p1={compare.accounting?.p1_income ?? 0} p2={compare.accounting?.p2_income ?? 0} isCurrency />}
+            {hasModule('ACCOUNTING') && <MetricCard label={tr ? 'Net Kâr' : 'Net Profit'} p1={compare.accounting?.p1_profit ?? 0} p2={compare.accounting?.p2_profit ?? 0} isCurrency />}
             <MetricCard label={tr ? 'Rapor Sayısı' : 'Reports'} p1={compare.reports?.p1_count ?? 0} p2={compare.reports?.p2_count ?? 0} />
           </div>
 

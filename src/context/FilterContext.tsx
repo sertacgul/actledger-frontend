@@ -1,4 +1,6 @@
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useContext, useState, useMemo, type ReactNode } from 'react'
+import { useAuth } from './AuthContext'
+import { ROLE_HIERARCHY } from '../types'
 
 export type DatePreset = 'today' | '7d' | '30d' | 'month' | 'custom'
 
@@ -30,6 +32,8 @@ interface FilterContextValue {
   /** Resolved ISO dateFrom based on preset (or custom value) */
   resolvedDateFrom: string
   resolvedDateTo:   string
+  /** True when the user's role is too low to see other departments */
+  departmentLocked: boolean
 }
 
 const FilterContext = createContext<FilterContextValue | null>(null)
@@ -61,28 +65,49 @@ function resolvePreset(preset: DatePreset, custom: { from: string; to: string })
 }
 
 export function FilterProvider({ children }: { children: ReactNode }) {
-  const [filter, setFilterState] = useState<DashboardFilterState>(DEFAULT)
+  const { user } = useAuth()
+  const userLevel = user ? (ROLE_HIERARCHY[user.role] ?? 1) : 1
+  // Users below Müdür (level 5) are locked to their own department
+  const departmentLocked = userLevel < 5
+  const lockedDeptId = departmentLocked ? (user?.departmentId ?? '') : ''
+
+  const [filter, setFilterState] = useState<DashboardFilterState>({
+    ...DEFAULT,
+    departmentId: lockedDeptId,
+  })
 
   const setFilter = (patch: Partial<DashboardFilterState>) =>
-    setFilterState(prev => ({ ...prev, ...patch }))
+    setFilterState(prev => ({
+      ...prev,
+      ...patch,
+      // Enforce department lock for low-level users
+      ...(departmentLocked ? { departmentId: lockedDeptId } : {}),
+    }))
 
-  const reset = () => setFilterState(DEFAULT)
+  const reset = () => setFilterState({ ...DEFAULT, departmentId: lockedDeptId })
+
+  // Effective filter: always apply department lock
+  const effectiveFilter = useMemo(() => ({
+    ...filter,
+    departmentId: departmentLocked ? lockedDeptId : filter.departmentId,
+  }), [filter, departmentLocked, lockedDeptId])
 
   const activeCount = [
-    filter.departmentId !== '',
-    filter.status       !== '',
-    filter.priority     !== '',
-    filter.groupId      !== '',
-    filter.datePreset   !== '30d',
+    effectiveFilter.departmentId !== '' && !departmentLocked,
+    effectiveFilter.status       !== '',
+    effectiveFilter.priority     !== '',
+    effectiveFilter.groupId      !== '',
+    effectiveFilter.datePreset   !== '30d',
   ].filter(Boolean).length
 
-  const { from, to } = resolvePreset(filter.datePreset, { from: filter.dateFrom, to: filter.dateTo })
+  const { from, to } = resolvePreset(effectiveFilter.datePreset, { from: effectiveFilter.dateFrom, to: effectiveFilter.dateTo })
 
   return (
     <FilterContext.Provider value={{
-      filter, setFilter, reset, activeCount,
+      filter: effectiveFilter, setFilter, reset, activeCount,
       resolvedDateFrom: from,
       resolvedDateTo:   to,
+      departmentLocked,
     }}>
       {children}
     </FilterContext.Provider>

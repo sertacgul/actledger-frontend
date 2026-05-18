@@ -16,7 +16,7 @@ const DATE_PRESETS: { key: DatePreset; label: string }[] = [
 ]
 
 export default function DashboardFilter() {
-  const { filter, setFilter, reset, activeCount } = useFilter()
+  const { filter, setFilter, reset, activeCount, departmentLocked } = useFilter()
   const { departments } = useDepartments()
   const { groups } = useTaskGroups()
   const [open, setOpen] = useState(false)
@@ -110,8 +110,10 @@ export default function DashboardFilter() {
               className="select text-[12px]"
               value={filter.departmentId}
               onChange={e => setFilter({ departmentId: e.target.value })}
+              disabled={departmentLocked}
+              title={departmentLocked ? 'Yalnızca kendi departmanınızı görebilirsiniz' : undefined}
             >
-              <option value="">Tümü</option>
+              {!departmentLocked && <option value="">Tümü</option>}
               {departments.map(d => (
                 <option key={d.id} value={d.id}>{d.name}</option>
               ))}

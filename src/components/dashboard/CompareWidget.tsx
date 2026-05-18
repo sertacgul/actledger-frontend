@@ -67,10 +67,12 @@ export default function CompareWidget() {
   const tr = lang === 'tr'
 
   const userLevel = user ? (ROLE_HIERARCHY[user.role] ?? 1) : 1
-  const canSeeDepts = userLevel >= 6 // Direktor+
+  const canSeeDepts = userLevel >= 8 // GM+
+  // Lock to own department for non-GM users
+  const lockedDeptId = !canSeeDepts ? (user?.departmentId ?? '') : ''
 
   const { departments } = useDepartments()
-  const [departmentId, setDepartmentId] = useState('')
+  const [departmentId, setDepartmentId] = useState(lockedDeptId)
 
   const [dateFrom1, setDateFrom1] = useState(lastYearStart)
   const [dateTo1, setDateTo1] = useState(lastYearEnd)
@@ -79,7 +81,9 @@ export default function CompareWidget() {
 
   const [activeGroup, setActiveGroup] = useState<MetricGroup>('tasks')
 
-  const { compare, loading } = useCompare(dateFrom1, dateTo1, dateFrom2, dateTo2, departmentId || undefined)
+  // Always enforce department scope for non-GM users
+  const effectiveDeptId = canSeeDepts ? (departmentId || undefined) : (lockedDeptId || undefined)
+  const { compare, loading } = useCompare(dateFrom1, dateTo1, dateFrom2, dateTo2, effectiveDeptId)
 
   const applyPreset = (idx: number) => {
     const p = PRESETS[idx].get()

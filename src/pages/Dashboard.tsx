@@ -1313,12 +1313,10 @@ function DashboardInner() {
       )}
 
       {/* ── Format Editor modal ── */}
-      {/* ── Dönem Karşılaştırma ── */}
-      {(user?.role && ['super_admin','platform_admin','genel_mudur','gm_yardimcisi','direktor','mudur','supervizor'].includes(user.role)) && (
-        <div className="mt-6">
-          <CompareWidget />
-        </div>
-      )}
+      {/* ── Dönem Karşılaştırma — dept-scoped, ERP tabs gated inside ── */}
+      <div className="mt-6">
+        <CompareWidget />
+      </div>
 
       {formatOpen && (
         <DossierFormatEditor

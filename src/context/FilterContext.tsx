@@ -67,8 +67,8 @@ function resolvePreset(preset: DatePreset, custom: { from: string; to: string })
 export function FilterProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
   const userLevel = user ? (ROLE_HIERARCHY[user.role] ?? 1) : 1
-  // Users below Müdür (level 5) are locked to their own department
-  const departmentLocked = userLevel < 5
+  // Only GM+ (level >= 8) can see all departments; everyone else is locked to their own
+  const departmentLocked = userLevel < 8
   const lockedDeptId = departmentLocked ? (user?.departmentId ?? '') : ''
 
   const [filter, setFilterState] = useState<DashboardFilterState>({

@@ -688,8 +688,9 @@ function AdminUserForm({ lang, departments, sectorId, onCreated, onCancel }: {
   const [form, setForm] = useState({
     name: '', surname: '', title: '', position: '',
     role: 'teknisyen' as UserRole, email: '', phone: '',
-    departmentId: '', notes: '',
+    departmentId: '', departmentIds: [] as string[], notes: '',
   })
+  const isMultiDeptRole = form.role === 'direktor' || form.role === 'gm_yardimcisi'
   const generatePassword = () => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
     const special = '!@#$%'
@@ -710,7 +711,8 @@ function AdminUserForm({ lang, departments, sectorId, onCreated, onCancel }: {
   const handleSubmit = async () => {
     const fullName = `${form.name} ${form.surname}`.trim()
     const deptRequired = form.role !== 'genel_mudur'
-    if (!form.name || !form.surname || !form.email || !password || (deptRequired && !form.departmentId)) {
+    const hasDept = isMultiDeptRole ? form.departmentIds.length > 0 : !!form.departmentId
+    if (!form.name || !form.surname || !form.email || !password || (deptRequired && !hasDept)) {
       setErr(lang === 'tr' ? 'Tum zorunlu alanlari doldurun' : 'Fill all required fields')
       return
     }
@@ -726,6 +728,7 @@ function AdminUserForm({ lang, departments, sectorId, onCreated, onCancel }: {
         password,
         role: form.role,
         departmentId: form.departmentId || '',
+        departmentIds: isMultiDeptRole ? form.departmentIds : undefined,
         phone: form.phone || undefined,
       })
       setSuccess(true)
@@ -807,8 +810,12 @@ function AdminUserForm({ lang, departments, sectorId, onCreated, onCancel }: {
             onClick={() => setDeptOpen(!deptOpen)}
             className="input text-[13px] w-full text-left flex items-center justify-between"
           >
-            <span style={{ color: selectedDept ? 'var(--text-1)' : 'var(--text-3)' }}>
-              {selectedDept ? (
+            <span style={{ color: (isMultiDeptRole ? form.departmentIds.length > 0 : selectedDept) ? 'var(--text-1)' : 'var(--text-3)' }}>
+              {isMultiDeptRole ? (
+                form.departmentIds.length > 0
+                  ? `${form.departmentIds.length} ${lang === 'tr' ? 'departman secili' : 'departments selected'}`
+                  : (lang === 'tr' ? 'Departman secin...' : 'Select departments...')
+              ) : selectedDept ? (
                 <span className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded" style={{ background: selectedDept.color }} />
                   {selectedDept.name} ({selectedDept.code})
@@ -819,14 +826,28 @@ function AdminUserForm({ lang, departments, sectorId, onCreated, onCancel }: {
           </button>
           {deptOpen && (
             <div className="absolute top-full left-0 right-0 mt-1 rounded-lg shadow-xl overflow-y-auto z-20" style={{ background: 'var(--surface)', border: '1px solid var(--border)', maxHeight: '240px' }}>
-              {departments.map(d => (
+              {departments.map(d => {
+                const isSelected = isMultiDeptRole
+                  ? form.departmentIds.includes(d.id)
+                  : form.departmentId === d.id
+                return (
                 <button
                   key={d.id}
                   type="button"
-                  onClick={() => { setForm({ ...form, departmentId: d.id }); setDeptOpen(false) }}
+                  onClick={() => {
+                    if (isMultiDeptRole) {
+                      const ids = form.departmentIds.includes(d.id)
+                        ? form.departmentIds.filter(id => id !== d.id)
+                        : [...form.departmentIds, d.id]
+                      setForm({ ...form, departmentIds: ids, departmentId: ids[0] ?? '' })
+                    } else {
+                      setForm({ ...form, departmentId: d.id })
+                      setDeptOpen(false)
+                    }
+                  }}
                   className={clsx(
                     'w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-[12px] transition-colors',
-                    form.departmentId === d.id ? 'font-bold' : ''
+                    isSelected ? 'font-bold' : ''
                   )}
                   style={{ color: 'var(--text-1)' }}
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--border-subtle)')}
@@ -837,12 +858,32 @@ function AdminUserForm({ lang, departments, sectorId, onCreated, onCancel }: {
                   </span>
                   <span>{d.name}</span>
                   <span className="text-[10px] ml-auto" style={{ color: 'var(--text-3)' }}>{d.code}</span>
-                  {form.departmentId === d.id && <CheckCircle size={12} className="text-emerald-500 ml-1" />}
+                  {isSelected && <CheckCircle size={12} className="text-emerald-500 ml-1" />}
                 </button>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
+        {/* Selected departments list for multi-dept roles */}
+        {isMultiDeptRole && form.departmentIds.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {form.departmentIds.map(id => {
+              const d = departments.find(dep => dep.id === id)
+              if (!d) return null
+              return (
+                <span key={id} className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-medium" style={{ background: d.color + '18', color: d.color, border: `1px solid ${d.color}33` }}>
+                  <span className="w-2.5 h-2.5 rounded" style={{ background: d.color }} />
+                  {d.name}
+                  <button type="button" onClick={() => {
+                    const ids = form.departmentIds.filter(i => i !== id)
+                    setForm({ ...form, departmentIds: ids, departmentId: ids[0] ?? '' })
+                  }} className="ml-0.5 hover:opacity-70">×</button>
+                </span>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* Email */}

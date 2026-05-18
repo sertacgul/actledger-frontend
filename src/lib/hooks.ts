@@ -638,14 +638,15 @@ export function useUsers(filter: UserFilter = {}) {
 
 export async function createUser(body: {
   name: string; email: string; password: string
-  role: string; departmentId: string; phone?: string
+  role: string; departmentId: string; departmentIds?: string[]; phone?: string
 }): Promise<User> {
+  const ids = body.departmentIds?.length ? body.departmentIds : body.departmentId ? [body.departmentId] : []
   const result = await api.post<any>('/users', {
     name:          body.name,
     email:         body.email,
     password:      body.password,
     role:          body.role.toUpperCase(),
-    departmentIds: body.departmentId ? [body.departmentId] : [],
+    departmentIds: ids,
     phone:         body.phone || undefined,
   })
   return mapUser(result)

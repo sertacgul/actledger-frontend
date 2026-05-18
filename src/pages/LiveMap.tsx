@@ -279,6 +279,7 @@ export default function LiveMap() {
       <style>{`
         @keyframes onlinePulse { 0%, 100% { filter: drop-shadow(0 0 0 rgba(34,197,94,0.6)); } 50% { filter: drop-shadow(0 0 6px rgba(34,197,94,0.8)); } }
         .online-signal { animation: onlinePulse 1.5s ease-in-out infinite; }
+        .task-marker { filter: drop-shadow(0 0 3px rgba(59,130,246,0.5)); }
       `}</style>
       {/* Page title + Tab switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -426,12 +427,17 @@ export default function LiveMap() {
             <MapClickHandler onMapClick={handleMapClick} />
             <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-            {/* Personnel: live (online) markers — always green */}
+            {/* Personnel: live markers — green (online <5min), blue (active task), grey (offline) */}
             {showPersonnel && liveUsers.map(u => {
               const task = u.assignedTasks[0]
+              const msSinceUpdate = Date.now() - new Date(u.locationUpdatedAt).getTime()
+              const isOnline = msSinceUpdate < 5 * 60 * 1000
+              const hasTask = u.assignedTasks.length > 0
+              const markerColor = hasTask ? '#3b82f6' : isOnline ? '#22c55e' : '#94a3b8'
+              const markerClass = hasTask ? 'task-marker' : isOnline ? 'online-signal' : ''
               return (
                 <CircleMarker key={u.id} center={[u.liveLatitude, u.liveLongitude]} radius={9}
-                  pathOptions={{ fillColor: '#22c55e', fillOpacity: 0.85, color: '#ffffff', weight: 2, className: 'online-signal' }}>
+                  pathOptions={{ fillColor: markerColor, fillOpacity: 0.85, color: '#ffffff', weight: 2, className: markerClass }}>
                   <Popup>
                     <div className="text-xs min-w-[200px]">
                       <p className="font-bold text-sm text-slate-800 mb-1">{task?.title ?? 'Aktif Gorev'}</p>
@@ -573,11 +579,14 @@ export default function LiveMap() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
             {liveUsers.map(u => {
               const task = u.assignedTasks[0]
+              const msSince = Date.now() - new Date(u.locationUpdatedAt).getTime()
+              const isOn = msSince < 5 * 60 * 1000
+              const barColor = u.assignedTasks.length > 0 ? '#3b82f6' : isOn ? '#22c55e' : '#94a3b8'
               return (
                 <div key={u.id} className="flex items-center gap-2.5 p-2.5 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100">
                   <button type="button" onClick={() => { setMapCenter([u.liveLatitude, u.liveLongitude]); setMapZoom(16) }}
                     className="flex items-center gap-2.5 flex-1 min-w-0 text-left">
-                    <div className="w-2 h-8 rounded-full flex-shrink-0" style={{ background: '#22c55e' }} />
+                    <div className="w-2 h-8 rounded-full flex-shrink-0" style={{ background: barColor }} />
                     <div className="flex-1 min-w-0">
                       <p className="text-[11px] font-semibold text-slate-800 truncate">{task?.title ?? 'Aktif Gorev'}</p>
                       <p className="text-[10px] text-slate-500 truncate">{u.jobTitle ?? u.role} - {u.departments[0]?.name ?? '-'}</p>

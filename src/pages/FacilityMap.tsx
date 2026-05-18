@@ -835,11 +835,17 @@ export default function FacilityMap() {
                     )
                   })}
 
-                  {/* Live personnel markers */}
-                  {visibleEntities.filter(e => e.type === 'personnel').map(entity => (
+                  {/* Live personnel markers — green (online <5min), grey (offline) */}
+                  {visibleEntities.filter(e => e.type === 'personnel').map(entity => {
+                    const msSince = entity.lastSeen ? Date.now() - new Date(entity.lastSeen).getTime() : Infinity
+                    const isOnline = msSince < 5 * 60 * 1000
+                    const pColor = isOnline ? '#22c55e' : '#94a3b8'
+                    const pRgba = isOnline ? 'rgba(34,197,94,0.4)' : 'rgba(148,163,184,0.3)'
+                    const tooltipBg = isOnline ? 'rgba(34,197,94,0.95)' : 'rgba(100,116,139,0.9)'
+                    return (
                     <div
                       key={`person-${entity.id}`}
-                      className="absolute entity-pulse cursor-pointer group"
+                      className={`absolute cursor-pointer group ${isOnline ? 'entity-pulse' : ''}`}
                       style={{
                         left: `${entity.x}%`,
                         top: `${entity.y}%`,
@@ -849,9 +855,9 @@ export default function FacilityMap() {
                           ? `translate(-50%, -50%) translateZ(${(entity.z ?? 0) * 4}px)`
                           : 'translate(-50%, -50%)',
                         borderRadius: '50%',
-                        background: '#22c55e',
+                        background: pColor,
                         border: '2px solid #fff',
-                        boxShadow: '0 2px 8px rgba(34,197,94,0.4)',
+                        boxShadow: `0 2px 8px ${pRgba}`,
                         zIndex: 25,
                       }}
                     >
@@ -860,11 +866,12 @@ export default function FacilityMap() {
                       </div>
                       {/* Name tooltip */}
                       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded-md text-[9px] font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-30"
-                        style={{ background: 'rgba(34,197,94,0.95)', color: '#fff' }}>
+                        style={{ background: tooltipBg, color: '#fff' }}>
                         {entity.name}{entity.department ? ` - ${entity.department}` : ''}
                       </div>
                     </div>
-                  ))}
+                    )
+                  })}
 
                   {/* Live equipment markers */}
                   {visibleEntities.filter(e => e.type === 'equipment').map(entity => (

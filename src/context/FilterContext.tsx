@@ -1,11 +1,11 @@
 import { createContext, useContext, useState, useMemo, type ReactNode } from 'react'
 import { useAuth } from './AuthContext'
-import { ROLE_HIERARCHY } from '../types'
+import { getDepartmentScope, type DepartmentScope } from '../lib/dept-scope'
 
 export type DatePreset = 'today' | '7d' | '30d' | 'month' | 'custom'
 
 export interface DashboardFilterState {
-  departmentId: string   // '' = tümü
+  departmentId: string   // '' = tümü (scoped to user's allowed depts)
   status:       string   // '' = tümü
   priority:     string   // '' = tümü
   groupId:      string   // '' = tümü
@@ -32,8 +32,12 @@ interface FilterContextValue {
   /** Resolved ISO dateFrom based on preset (or custom value) */
   resolvedDateFrom: string
   resolvedDateTo:   string
-  /** True when the user's role is too low to see other departments */
+  /** Three-tier department scope based on user role */
+  departmentScope: DepartmentScope
+  /** Backward compat — true when mode is 'single' */
   departmentLocked: boolean
+  /** Department IDs the user is allowed to see (empty = all) */
+  allowedDepartmentIds: string[]
 }
 
 const FilterContext = createContext<FilterContextValue | null>(null)
@@ -66,31 +70,44 @@ function resolvePreset(preset: DatePreset, custom: { from: string; to: string })
 
 export function FilterProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
-  const userLevel = user ? (ROLE_HIERARCHY[user.role] ?? 1) : 1
-  // Only GM+ (level >= 8) can see all departments; everyone else is locked to their own
-  const departmentLocked = userLevel < 8
-  const lockedDeptId = departmentLocked ? (user?.departmentId ?? '') : ''
+  const scope = getDepartmentScope(user)
+
+  // For 'single' mode, lock to the one dept; for 'multi', start with '' (all assigned); for 'all', start with ''
+  const initialDeptId = scope.mode === 'single' ? (scope.deptIds[0] ?? '') : ''
 
   const [filter, setFilterState] = useState<DashboardFilterState>({
     ...DEFAULT,
-    departmentId: lockedDeptId,
+    departmentId: initialDeptId,
   })
 
   const setFilter = (patch: Partial<DashboardFilterState>) =>
-    setFilterState(prev => ({
-      ...prev,
-      ...patch,
-      // Enforce department lock for low-level users
-      ...(departmentLocked ? { departmentId: lockedDeptId } : {}),
-    }))
+    setFilterState(prev => {
+      const next = { ...prev, ...patch }
+      // Enforce scope
+      if (scope.mode === 'single') {
+        next.departmentId = scope.deptIds[0] ?? ''
+      } else if (scope.mode === 'multi' && next.departmentId !== '') {
+        // Validate selected dept is within allowed list
+        if (!scope.deptIds.includes(next.departmentId)) {
+          next.departmentId = ''
+        }
+      }
+      return next
+    })
 
-  const reset = () => setFilterState({ ...DEFAULT, departmentId: lockedDeptId })
+  const reset = () => setFilterState({ ...DEFAULT, departmentId: initialDeptId })
 
-  // Effective filter: always apply department lock
-  const effectiveFilter = useMemo(() => ({
-    ...filter,
-    departmentId: departmentLocked ? lockedDeptId : filter.departmentId,
-  }), [filter, departmentLocked, lockedDeptId])
+  // Effective filter
+  const effectiveFilter = useMemo(() => {
+    const f = { ...filter }
+    if (scope.mode === 'single') f.departmentId = scope.deptIds[0] ?? ''
+    if (scope.mode === 'multi' && f.departmentId !== '' && !scope.deptIds.includes(f.departmentId)) {
+      f.departmentId = ''
+    }
+    return f
+  }, [filter, scope])
+
+  const departmentLocked = scope.mode === 'single'
 
   const activeCount = [
     effectiveFilter.departmentId !== '' && !departmentLocked,
@@ -107,7 +124,9 @@ export function FilterProvider({ children }: { children: ReactNode }) {
       filter: effectiveFilter, setFilter, reset, activeCount,
       resolvedDateFrom: from,
       resolvedDateTo:   to,
+      departmentScope: scope,
       departmentLocked,
+      allowedDepartmentIds: scope.deptIds,
     }}>
       {children}
     </FilterContext.Provider>

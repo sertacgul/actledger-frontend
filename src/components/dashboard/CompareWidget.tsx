@@ -6,7 +6,7 @@ import { useDepartments } from '../../lib/hooks'
 import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import { TRY_FMT } from '../../types/erp'
-import { ROLE_HIERARCHY } from '../../types'
+import { getDepartmentScope } from '../../lib/dept-scope'
 
 const now = new Date()
 const thisYearStart = `${now.getFullYear()}-01-01T00:00:00.000Z`
@@ -66,13 +66,11 @@ export default function CompareWidget() {
   const { user } = useAuth()
   const tr = lang === 'tr'
 
-  const userLevel = user ? (ROLE_HIERARCHY[user.role] ?? 1) : 1
-  const canSeeDepts = userLevel >= 8 // GM+
-  // Lock to own department for non-GM users
-  const lockedDeptId = !canSeeDepts ? (user?.departmentId ?? '') : ''
+  const scope = getDepartmentScope(user)
 
   const { departments } = useDepartments()
-  const [departmentId, setDepartmentId] = useState(lockedDeptId)
+  const initialDeptId = scope.mode === 'single' ? (scope.deptIds[0] ?? '') : ''
+  const [departmentId, setDepartmentId] = useState(initialDeptId)
 
   const [dateFrom1, setDateFrom1] = useState(lastYearStart)
   const [dateTo1, setDateTo1] = useState(lastYearEnd)
@@ -81,8 +79,12 @@ export default function CompareWidget() {
 
   const [activeGroup, setActiveGroup] = useState<MetricGroup>('tasks')
 
-  // Always enforce department scope for non-GM users
-  const effectiveDeptId = canSeeDepts ? (departmentId || undefined) : (lockedDeptId || undefined)
+  // Enforce department scope: single=locked, multi=within assigned, all=unrestricted
+  const effectiveDeptId = scope.mode === 'all'
+    ? (departmentId || undefined)
+    : scope.mode === 'single'
+      ? (scope.deptIds[0] || undefined)
+      : (departmentId || undefined) // multi: '' means all user's depts, backend scopes
   const { compare, loading } = useCompare(dateFrom1, dateTo1, dateFrom2, dateTo2, effectiveDeptId)
 
   const applyPreset = (idx: number) => {
@@ -138,12 +140,15 @@ export default function CompareWidget() {
           <label className="text-[10px] font-medium text-[var(--text-3)] mb-0.5 block">{tr ? 'Dönem 2 Bitiş' : 'Period 2 To'}</label>
           <input className="input text-xs" type="date" value={dateTo2.slice(0, 10)} onChange={e => setDateTo2(e.target.value + 'T23:59:59.999Z')} />
         </div>
-        {canSeeDepts && (
+        {scope.mode !== 'single' && (
           <div>
             <label className="text-[10px] font-medium text-[var(--text-3)] mb-0.5 block">{tr ? 'Departman' : 'Department'}</label>
             <select className="select text-xs" value={departmentId} onChange={e => setDepartmentId(e.target.value)}>
-              <option value="">{tr ? 'Tümü' : 'All'}</option>
-              {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+              <option value="">{scope.mode === 'multi' ? (tr ? 'Tüm Departmanlarım' : 'All My Departments') : (tr ? 'Tümü' : 'All')}</option>
+              {(scope.mode === 'multi'
+                ? departments.filter(d => scope.deptIds.includes(d.id))
+                : departments
+              ).map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
             </select>
           </div>
         )}

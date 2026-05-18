@@ -796,6 +796,11 @@ function AdminUserForm({ lang, departments, sectorId, onCreated, onCancel }: {
         <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text-3)' }}>
           {lang === 'tr' ? 'Departman' : 'Department'} {form.role !== 'genel_mudur' ? '*' : <span className="normal-case font-normal">(opsiyonel)</span>}
         </label>
+        {(form.role === 'direktor' || form.role === 'gm_yardimcisi') && (
+          <p className="text-[10px] mb-1.5 px-2 py-1 rounded bg-indigo-50 text-indigo-600 border border-indigo-100">
+            {lang === 'tr' ? 'Bu kullanici secili departmanlarin verilerini gorebilir' : 'This user can view data for the selected departments'}
+          </p>
+        )}
         <div className="relative">
           <button
             type="button"

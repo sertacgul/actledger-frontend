@@ -10,6 +10,7 @@ import { useDepartments } from '../../lib/hooks'
 import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import { SERVER_BASE } from '../../lib/api'
+import { getDepartmentScope } from '../../lib/dept-scope'
 import DraggableModal from '../ui/DraggableModal'
 
 const STATUS_LABELS: Record<string, string> = {
@@ -97,10 +98,22 @@ export default function DataExportTab() {
 
   return (
     <div className="space-y-5">
-      {/* New Request Form (KAM only) */}
-      {isKAM && (
+      {/* New Request Form (all users — dept-scoped) */}
+      {(() => {
+        const scope = getDepartmentScope(user)
+        const scopedDepts = scope.mode === 'multi'
+          ? departments.filter(d => scope.deptIds.includes(d.id))
+          : scope.mode === 'single'
+            ? departments.filter(d => d.id === scope.deptIds[0])
+            : departments
+        return (
         <div className="space-y-3">
           <h4 className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>{tr ? 'Yeni Export Talebi' : 'New Export Request'}</h4>
+          {scope.mode !== 'all' && (
+            <p className="text-[10px] px-2 py-1 rounded bg-indigo-50 text-indigo-600 border border-indigo-100">
+              {tr ? 'Yalnizca yetkiniz dahilindeki departman verilerini export edebilirsiniz' : 'You can only export data within your authorized departments'}
+            </p>
+          )}
           <div className="flex flex-wrap gap-3 items-end">
             <div>
               <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-2)' }}>{tr ? 'Baslangic' : 'From'}</label>
@@ -112,18 +125,20 @@ export default function DataExportTab() {
             </div>
             <div>
               <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-2)' }}>{tr ? 'Departman' : 'Department'}</label>
-              <select className="select" value={departmentId} onChange={e => setDepartmentId(e.target.value)}>
-                <option value="">{tr ? 'Tum Departmanlar' : 'All'}</option>
-                {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+              <select className="select" value={departmentId} onChange={e => setDepartmentId(e.target.value)} disabled={scope.mode === 'single'}>
+                {scope.mode === 'all' && <option value="">{tr ? 'Tum Departmanlar' : 'All'}</option>}
+                {scope.mode === 'multi' && <option value="">{tr ? 'Tum Departmanlarim' : 'All My Departments'}</option>}
+                {scopedDepts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
               </select>
             </div>
             <button onClick={handleRequest} disabled={submitting} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-600 text-white text-sm font-medium hover:bg-cyan-500 disabled:opacity-50">
               <Send className="w-4 h-4" />
-              {submitting ? (tr ? 'Gonderiliyor...' : 'Submitting...') : (tr ? 'Export Talep Et' : 'Request Export')}
+              {submitting ? (tr ? 'Gonderiliyor...' : 'Submitting...') : (scope.mode === 'all' && !departmentId ? (tr ? 'Export Talep Et (GM Onayi Gerekli)' : 'Request Export (GM Approval Required)') : (tr ? 'Export Olustur' : 'Generate Export'))}
             </button>
           </div>
         </div>
-      )}
+        )
+      })()}
 
       {/* Pending Approvals (GM only) */}
       {isGM && (
@@ -154,8 +169,8 @@ export default function DataExportTab() {
         </div>
       )}
 
-      {/* Request History (both KAM and GM) */}
-      {(isKAM || isGM) && (
+      {/* Request History (all users) */}
+      {(
         <div className="space-y-3">
           <h4 className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>{tr ? 'Gecmis Talepler' : 'Request History'}</h4>
           {myRequests.length === 0 ? (

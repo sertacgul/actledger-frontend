@@ -402,7 +402,7 @@ export default function Settings() {
     { key: 'company',       icon: Building2, label: 'Tercihler' },
     { key: 'security',      icon: Shield,    label: 'Güvenlik'     },
     { key: 'integrations',  icon: Globe,     label: 'Entegrasyonlar' },
-    ...(isGM ? [{ key: 'data-export' as SettingsTab, icon: Shield, label: 'Veri Export Onay' }] : []),
+    { key: 'data-export' as SettingsTab, icon: Shield, label: isGM ? 'Veri Export Onay' : 'Veri Export' },
   ]
 
   return (

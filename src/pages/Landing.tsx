@@ -8,6 +8,7 @@ import {
   Upload, Building2, Lock, Languages, FileSpreadsheet, Eye, EyeOff, X, Loader2,
   Map, Flame, Cpu, Package, Send, MinusCircle,
   Workflow, FolderOpen, Radio, ListChecks, Boxes, GitBranch, ScanLine,
+  ShoppingCart, Calculator, UserCog, TrendingUp,
 } from 'lucide-react'
 import BrandMark from '../components/ui/BrandMark'
 import { SECTORS } from '../data/sectors'
@@ -141,8 +142,21 @@ const T = {
     pf12Title: 'Sekt\u00f6re \u00d6zel \u015eablonlar (15 Sekt\u00f6r)',
     pf12Body: '\u00dcretimden sa\u011fl\u0131\u011fa, in\u015faattan perakendeye 15+ sekt\u00f6r i\u00e7in haz\u0131r yap\u0131land\u0131rma, terminoloji ve KPI setleri.',
     pf12Benefit: 'Hemen ba\u015flay\u0131n, s\u0131f\u0131rdan kurmay\u0131n',
+    // ERP modules
+    pf13Title: 'Satış Yönetimi',
+    pf13Body: 'Müşteri portföyü, teklif hazırlama, sipariş takibi ve POS entegrasyonu tek platformda. Şube ve kasa yönetimi, ödeme takibi ve satış raporları ile gelirinizi kontrol altına alın.',
+    pf13Benefit: 'Satış süreçlerini %50 hızlandırın',
+    pf14Title: 'Muhasebe & E-Fatura',
+    pf14Body: 'Hesap planı, yevmiye defteri, banka mutabakatı ve GİB uyumlu e-fatura yönetimi. Gelir-gider, KDV özeti ve nakit akışı raporları ile mali tablonuz her an güncel.',
+    pf14Benefit: 'Mali raporlama süresini %70 kısaltın',
+    pf15Title: 'İnsan Kaynakları & Bordro',
+    pf15Body: 'Çalışan kayıtları, izin yönetimi, bordro hesaplama ve performans değerlendirme. SGK, vergi ve net maaş hesaplamaları otomatik. Eğitim takibi ve devam kontrolü dahil.',
+    pf15Benefit: 'İK süreçlerini tamamen dijitalleştirin',
+    pf16Title: 'Geçmiş Dönem Kıyaslaması',
+    pf16Body: 'İki dönemi yan yana karşılaştırın: satış, görev, stok, muhasebe, İK ve raporlar. Departman bazlı filtreleme ile performans trendlerini anında görün. Büyümenizi verilerle kanıtlayın.',
+    pf16Benefit: 'Veriye dayalı stratejik kararlar alın',
     // New features
-    nf1Title: 'Canl\u0131 Operasyon & Tesis Haritas\u0131',
+    nf1Title: 'Canlı Operasyon & Tesis Haritası',
     nf1Body: 'D\u0131\u015f mekan GPS takibi ve i\u00e7 mekan tesis kat planlar\u0131 tek panelde. Personel konumunu canl\u0131 izleyin, tesis planlar\u0131n\u0131z\u0131 y\u00fckleyin, departman alanlar\u0131 ve IoT cihazlar\u0131 plan \u00fczerine yerle\u015ftirin. Acil durumlarda en yak\u0131n personele an\u0131nda g\u00f6rev atay\u0131n.',
     nf1Benefit: 'Operasyonunuzu d\u0131\u015far\u0131dan de\u011fil, i\u00e7eriden y\u00f6netin',
     nf2Title: 'Is\u0131 Haritas\u0131 Analiti\u011fi',
@@ -329,6 +343,19 @@ const T = {
     pf12Title: 'Sector-specific Templates (15 Sectors)',
     pf12Body: 'From manufacturing to healthcare, construction to retail - ready configurations, terminology, and KPI sets for 15+ sectors.',
     pf12Benefit: 'Start immediately, no setup from scratch',
+    // ERP modules
+    pf13Title: 'Sales Management',
+    pf13Body: 'Customer portfolio, quote preparation, order tracking, and POS integration in one platform. Branch and cash register management, payment tracking, and sales reports to control your revenue.',
+    pf13Benefit: 'Accelerate sales processes by 50%',
+    pf14Title: 'Accounting & E-Invoice',
+    pf14Body: 'Chart of accounts, journal, bank reconciliation, and government-compliant e-invoice management. Income-expense, VAT summary, and cash flow reports keep your financials always up to date.',
+    pf14Benefit: 'Cut financial reporting time by 70%',
+    pf15Title: 'Human Resources & Payroll',
+    pf15Body: 'Employee records, leave management, payroll calculation, and performance reviews. Social security, tax, and net salary calculations are automatic. Training tracking and attendance included.',
+    pf15Benefit: 'Fully digitize HR processes',
+    pf16Title: 'Historical Period Comparison',
+    pf16Body: 'Compare two periods side by side: sales, tasks, stock, accounting, HR, and reports. Department-level filtering to instantly see performance trends. Prove your growth with data.',
+    pf16Benefit: 'Make data-driven strategic decisions',
     // New features
     newFeaturesTitle: 'Next-Gen Operational Capabilities',
     newFeaturesSubtitle: 'Transform your operations with live maps, heatmaps, mobile AI, and smart inventory.',
@@ -2067,6 +2094,11 @@ export default function Landing() {
             /* Sektorel & dil */
             { title: t.pf12Title, body: t.pf12Body, benefit: t.pf12Benefit, img: '/images/Sector.jpg',      icon: FileSpreadsheet, color: '#0891b2' },
             { title: t.pf11Title, body: t.pf11Body, benefit: t.pf11Benefit, img: '/images/Language.jpg',    icon: Languages,     color: '#14b8a6' },
+            /* ERP modülleri */
+            { title: t.pf13Title, body: t.pf13Body, benefit: t.pf13Benefit, img: '/images/Satis.PNG',       icon: ShoppingCart,  color: '#0d9488' },
+            { title: t.pf14Title, body: t.pf14Body, benefit: t.pf14Benefit, img: '/images/Muhasebe.jpg',    icon: Calculator,    color: '#6366f1' },
+            { title: t.pf15Title, body: t.pf15Body, benefit: t.pf15Benefit, img: '/images/HR.PNG',          icon: UserCog,       color: '#8b5cf6' },
+            { title: t.pf16Title, body: t.pf16Body, benefit: t.pf16Benefit, img: '/images/VeriKiyasla.jpg', icon: TrendingUp,    color: '#0891b2' },
           ].map((feat, i) => {
             const imgLeft = i % 2 === 0
             return (
@@ -2885,8 +2917,12 @@ export default function Landing() {
                 ['Hiyerar\u015fik stok onay\u0131', 'Var (saha \u2192 m\u00fcd\u00fcr zinciri)', 'Yok'],
                 ['Sat\u0131n alma bildirimi', 'Otomatik (dept m\u00fcd\u00fcr\u00fc + sat\u0131n alma)', 'Manuel'],
                 ['IoT cihaz sorumlusu', 'Var (bildirim + rutin rapor)', 'Yok'],
-                ['Tesis plan\u0131 2D/3D', 'Var (rotate, zoom, IoT yerle\u015ftirme)', 'Yok'],
-                ['Mobil QR tarama & onay', 'Var (kamera + hiyerar\u015fik onay)', 'Yok'],
+                ['Tesis planı 2D/3D', 'Var (rotate, zoom, IoT yerleştirme)', 'Yok'],
+                ['Mobil QR tarama & onay', 'Var (kamera + hiyerarşik onay)', 'Yok'],
+                ['Satış yönetimi', 'Var (müşteri, teklif, sipariş, POS, şube/kasa)', 'Ayrı yazılım gerektirir'],
+                ['Muhasebe & e-fatura', 'Var (hesap planı, yevmiye, banka, GİB uyumlu e-fatura)', 'Ayrı muhasebe programı'],
+                ['İnsan kaynakları & bordro', 'Var (çalışan, izin, bordro, performans)', 'Ayrı İK yazılımı'],
+                ['Geçmiş dönem kıyaslaması', 'Var (tüm modüller arası dönemsel karşılaştırma)', 'Sınırlı veya yok'],
               ] : [
                 ['System type', 'Operational OS', 'Fragmented systems (ERP / maintenance / IT separate)'],
                 ['Field management', 'Powerful and real-time', 'Limited or none'],
@@ -2920,6 +2956,10 @@ export default function Landing() {
                 ['IoT device responsible', 'Yes (alerts + routine reports)', 'No'],
                 ['Facility plan 2D/3D', 'Yes (rotate, zoom, IoT placement)', 'No'],
                 ['Mobile QR scan & approval', 'Yes (camera + hierarchical approval)', 'No'],
+                ['Sales management', 'Yes (customer, quote, order, POS, branch/till)', 'Requires separate software'],
+                ['Accounting & e-invoice', 'Yes (chart of accounts, journal, bank, gov-compliant e-invoice)', 'Separate accounting software'],
+                ['Human resources & payroll', 'Yes (employee, leave, payroll, performance)', 'Separate HR software'],
+                ['Historical period comparison', 'Yes (cross-module period-over-period comparison)', 'Limited or none'],
               ]).map((row, i) => {
                 const isPrice = i === 22
                 const actHas = !['Sinirli', 'Yok', 'Limited', 'No', 'None'].some(w => row[1].startsWith(w))

@@ -2095,9 +2095,9 @@ export default function Landing() {
             { title: t.pf12Title, body: t.pf12Body, benefit: t.pf12Benefit, img: '/images/Sector.jpg',      icon: FileSpreadsheet, color: '#0891b2' },
             { title: t.pf11Title, body: t.pf11Body, benefit: t.pf11Benefit, img: '/images/Language.jpg',    icon: Languages,     color: '#14b8a6' },
             /* ERP modülleri */
-            { title: t.pf13Title, body: t.pf13Body, benefit: t.pf13Benefit, img: '/images/Satis.PNG',       icon: ShoppingCart,  color: '#0d9488' },
+            { title: t.pf13Title, body: t.pf13Body, benefit: t.pf13Benefit, img: '/images/Satis.jpg',       icon: ShoppingCart,  color: '#0d9488' },
             { title: t.pf14Title, body: t.pf14Body, benefit: t.pf14Benefit, img: '/images/Muhasebe.jpg',    icon: Calculator,    color: '#6366f1' },
-            { title: t.pf15Title, body: t.pf15Body, benefit: t.pf15Benefit, img: '/images/HR.PNG',          icon: UserCog,       color: '#8b5cf6' },
+            { title: t.pf15Title, body: t.pf15Body, benefit: t.pf15Benefit, img: '/images/HR.jpg',          icon: UserCog,       color: '#8b5cf6' },
             { title: t.pf16Title, body: t.pf16Body, benefit: t.pf16Benefit, img: '/images/VeriKiyasla.jpg', icon: TrendingUp,    color: '#0891b2' },
           ].map((feat, i) => {
             const imgLeft = i % 2 === 0
